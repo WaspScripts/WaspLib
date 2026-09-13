@@ -231,8 +231,6 @@ begin
   NPCsJSON.Setup(EMapJSON.NPCS);
   Profiles.Load();
 
-  ItemFinder.WaitUnzipping();
-
   Client.OnLogin := [@OnLogin];
   Client.IsLoggedIn();
   if Client.Mode = EMode.UNKNOWN then

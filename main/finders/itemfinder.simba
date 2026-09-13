@@ -22,8 +22,7 @@ type
     Database: TDatabase;
     CacheDir: String;
 
-    ImageReader: TResourceReader;
-    Timeout: TCountDown;
+    Archive: TArchive;
     Unzipping, IsSetup: Boolean;
   end;
 
@@ -117,42 +116,13 @@ begin
 end;
 
 
-procedure TItemFinder.SetupReader();
-begin
-  Self.ImageReader := new TResourceReader(Self.CacheDir + 'items.bin');
-  Self.IsSetup := True;
-end;
-
-procedure TItemFinder._UnzipFinished(constref result: TASyncUnzipResult);
-begin
-  if not result.Success then
-  begin
-    DirDelete(Self.CacheDir, True);
-    raise GetDebugLn('ItemFinder', 'Failed to unzip images.bin: '  + result.Exception);
-  end;
-
-  Self.SetupReader();
-  Self.Unzipping := False;
-end;
-
-procedure TItemFinder.WaitUnzipping();
-begin
-  while Self.Unzipping do
-  begin
-    Sleep(100);
-    if not Self.Timeout.IsFinished then
-      Continue;
-    DirDelete(Self.CacheDir, True);
-    raise GetDebugLn('ItemFinder', 'Timed out unzipping items.');
-  end;
-end;
-
 procedure TItemFinder.Setup();
 var
   path, tmp: String;
 begin
-  if Self.IsSetup then Exit;
-  Self.Version := WLAssets.JSON.Item['finders/items/items.zip'].AsString;
+  if Self.IsSetup then
+    Exit;
+  Self.Version := WLAssets.JSON.Item['finders/items/data/hash.txt'].AsString;
   Self.Database.Setup(
     'ItemFinder', ['id', 'item', 'hash'],
     WLEnv.AssetsDir + 'finders' + PATH_SEP + 'items' + PATH_SEP + 'data' + PATH_SEP,
@@ -165,7 +135,8 @@ begin
   for path in DirList(Self.CacheDir) do
   begin
     tmp := Copy(path, Length(path) - Length(Self.Version) + 1, Length(path));
-    if tmp = Self.Version then Continue;
+    if tmp = Self.Version then
+      Continue;
     DirDelete(path, False);
   end;
 
@@ -183,18 +154,10 @@ begin
   Self.ImageCompare.Align := @Self.Align;
   Self.ImageCompare.Clean := @Self.Clean;
 
-  if FileExists(Self.CacheDir + 'items.bin') then
-  begin
-    Self.SetupReader();
-    Exit;
-  end;
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  Self.Archive := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
 
-  Self.Unzipping := True;
-  Self.Timeout.Start(60 * SECOND);
-  Async.FileUnZip(
-    WLEnv.AssetsDir + 'finders' + PATH_SEP + 'items' + PATH_SEP + 'items.zip',
-    Self.CacheDir, @Self._UnzipFinished
-  );
+  Self.IsSetup := True;
 end;
 
 
@@ -240,14 +203,14 @@ end;
 
 function TItemFinder.GetImage(id: String): TImage;
 var
-  i: Integer;
+  sprite: TItemSprite;
 begin
   if not Self.ItemImages.Exists(id) or (Self.ItemImages.Value[id] = nil) then
   begin
-    i := Self.ImageReader.Find(id + '.png');
-    if i = -1 then
+    sprite := TItemSprite.Create(Self.Archive, StrToInt(id));
+    if not sprite.Valid then
       raise GetDebugLn('ItemFinder', 'Item ID ' + id + ' doesn''t exist.');
-    Self.ItemImages.Value[id] := Self.ImageReader.LoadImage(i);
+    Self.ItemImages.Value[id] := sprite.ToImage();
   end;
 
   Result := Self.ItemImages.Value[id];
@@ -255,14 +218,14 @@ end;
 
 function TItemFinder.GetMask(id: String): TImage;
 var
-  i: Integer;
+  sprite: TItemSprite;
 begin
   if not Self.MaskImages.Exists(id) or (Self.MaskImages.Value[id] = nil) then
   begin
-    i := Self.ImageReader.Find(id + '.bmp');
-    if i = -1 then
+    sprite := TItemSprite.Create(Self.Archive, StrToInt(id));
+    if not sprite.Valid then
       raise GetDebugLn('ItemFinder', 'Mask ID ' + id + ' doesn''t exist.');
-    Self.MaskImages.Value[id] := Self.ImageReader.LoadImage(i);
+    Self.MaskImages.Value[id] := sprite.MaskImage();
   end;
 
   Result := Self.MaskImages.Value[id];
