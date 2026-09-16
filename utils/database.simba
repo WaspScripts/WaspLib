@@ -2,8 +2,8 @@
 # Database
 `TDatabase` is used to create a extremely basic single table database.
 
-Despite being basic it's very effective and fast and you can this when you have
-a large set of data and need to retrieve values very fast.
+Despite being basic it's very effective and fast and you can use this when you
+have a large set of data and need to retrieve values very fast.
 
 To make this possible `TDatabase` creates several maps between the data and
 their respective row placement, so to use this you need to have your data
@@ -12,8 +12,10 @@ prepared, split into database columns saved in different files and each
 
 Credits: Torwent
 
-Let's use for example a little bit of what is used for the items database
-as an example:
+Your data has to be split into columns, each saved to its own file, with every
+row on the same line of each file.
+
+Let's use for example a little bit of what is used for the items database:
 
 ```
 +-------------------+-------+------------+
@@ -30,152 +32,77 @@ as an example:
 ```
 
 The data in this example should be saved to 3 files with the column name
-(items, id, hash).
+(item.txt, id.txt, hash.txt), and line `N` of each file belongs to row `N`.
 
-The data order has to match each row of the table it belongs to.
+`TDatabase` keeps every column in that original row order, so once you know a
+row number, reading any column at that row is a single array access.
 
-The order of the data is how the database knows which row the entry belongs to.
-
-When you use `TDatabase` to load this each of those columns, the data of each
-column is saved as 2 array, one with the data and another each row number.
-Imagine it as an extra column added to our table for each column we had,
-something like this:
+To find the row of a value, each column you search gets an index: a map from
+every distinct value in the column to the first row holding it, and for every
+row, the next row holding the same value (or `-1`). Using the table above:
 
 ```
-+-------------------+-------------+-------+----------+------------+------------+
-| items             | item rows   | id    | id rows  | hash       | hash rows  |
-+-------------------+-------------+-------+----------+------------+------------+
-| dwarf remains     | 0           | 0     | 0        | 069702cc6  | 0          |
-| toolkit           | 1           | 1     | 1        | ff026bd51  | 1          |
-| cannonball        | 2           | 2     | 2        | 0224ca70f  | 2          |
-| nulodion's notes  | 3           | 3     | 3        | 047160bd7  | 3          |
-| ammo mould        | 4           | 4     | 4        | f986eb373  | 4          |
-| ...               | ...         | ...   | ...      | ...        | ...        |
-| abyssal whip      | 3551        | 4151  | 3551     | 02f197ebf  | 3551       |
-+-------------------+-------------+-------+----------+------------+------------+
++-------------------+-----------+       +-------+-----------+
+| item index        | first row |       | row   | next row  |
++-------------------+-----------+       +-------+-----------+
+| abyssal whip      | 3551      |       | 0     | -1        |
+| ammo mould        | 4         |       | 1     | -1        |
+| cannonball        | 2         |       | ...   | ...       |
+| ...               | ...       |       | 3551  | -1        |
++-------------------+-----------+       +-------+-----------+
 ```
 
-Once the TDatabase has prepared your data like this it will sort each column
-arrays alphabetically by the data alphabetical order, our example above will
-become this internally:
+So to get the `abyssal whip` id:
+- Look `abyssal whip` up in the "item" index, which gives row `3551`.
+- Read the "id" column at row `3551`, which is `4151`.
 
-```
-+-------------------+-------------+-------+----------+------------+------------+
-| items             | item rows   | id    | id rows  | hash       | hash rows  |
-+-------------------+-------------+-------+----------+------------+------------+
-| abyssal whip      | 3551        | 0     | 0        | 0224ca70f  | 2          |
-| ammo mould        | 4           | 1     | 1        | 02f197ebf  | 3551       |
-| cannonball        | 2           | 2     | 2        | 047160bd7  | 3          |
-| dwarf remains     | 0           | 3     | 3        | 069702cc6  | 0          |
-| nulodion's notes  | 3           | 4     | 4        | f986eb373  | 4          |
-| ...               | ...         | ...   | ...      | ...        | ...        |
-| toolkit           | 1           | 4151  | 3551     | ff026bd51  | 1          |
-+-------------------+-------------+-------+----------+------------+------------+
-```
+Finding every row with a value just follows "next row" from the first one until
+it reaches `-1`, so rows always come back in ascending order.
 
-And at this point it might be easier to understand this imagining it as
-different tables for each of the columns we had which you know the new (rows)
-and original order:
-
-```
-+---------+-------------------+-------------+
-| order   | items             | item rows   |
-+---------+-------------------+-------------+
-| 0       | abyssal whip      | 3551        |
-| 1       | ammo mould        | 4           |
-| 2       | cannonball        | 2           |
-| 3       | dwarf remains     | 0           |
-| 4       | nulodion's notes  | 3           |
-| ...     | ...               | ...         |
-| 3551    | toolkit           | 1           |
-+---------+-------------------+-------------+
-
-+---------+-------+----------+
-| order   | id    | id rows  |
-+---------+-------+----------+
-| 0       | 0     | 0        |
-| 1       | 1     | 1        |
-| 2       | 2     | 2        |
-| 3       | 3     | 3        |
-| 4       | 4     | 4        |
-| ...     | ...   | ...      |
-| 3551    | 4151  | 3551     |
-+---------+-------+----------+
-
-+---------+------------+------------+
-| order   | hash       | hash rows  |
-+---------+------------+------------+
-| 0       | 0224ca70f  | 2          |
-| 1       | 02f197ebf  | 3551       |
-| 2       | 047160bd7  | 3          |
-| 3       | 069702cc6  | 0          |
-| 4       | f986eb373  | 4          |
-| ...     | ...        | ...        |
-| 3551    | ff026bd51  | 1          |
-+---------+------------+------------+
-```
-
-Now what happens when you want to look for data in your TDatabase is the
-following:
-- Find the data in the column you know
-- get it's row number
-- Go to the "table" of data you want to read and search for the row number on
-it's rows column.
-- Once you find it, check which "order" it is in your "table" and get the data from same "order"
-
-This is quite fast to do because the tables are alphabetically sorted. Finding the value you want is very fast.
-
-So with the examples above, if we want to get `abyssal whip` id:
-- Find `abyssal whip` in the "item" table
-- Get it's "order" which is `0`
-- Get the "item rows" at the "order" `0` which is `3551`
-- On the "id" table, search the "id rows" for `3551`
-- Get it's "order" which is `3551` (in this example the "order" is the same but as "id rows" it could be different)
-- Finally, get the "id" matching for that "order" which is `4151`.
-
-You successfully retrieved the abyssal whip ID.
+An index is only built the first time a column is searched, so columns you only
+read values from never pay for one.
 *)
 {$DEFINE WL_DATABASE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 type
+  TDatabaseIndex = record
+    FirstRow: TStringMap<Integer>;
+    NextRow: TIntegerArray;
+    IsBuilt: Boolean;
+  end;
+
   TDatabase = record
     Name: String;
     Columns: TStringArray;
     Data: TStringMap<TStringArray>;
-    Rows: TStringMap<TStringArray>;
-
+    Indices: array of TDatabaseIndex;
     DataDir, CacheDir: String;
   end;
-
-{%codetools off}
-function TDatabase._ValueWeight(str: String): Integer;
-var
-  i: Integer;
-begin
-  for i := 1 to Length(str) do
-    Result += Ord(str[i]);
-end;
-{%codetools on}
 
 (*
 ## TDatabase.Setup
 ```pascal
 procedure TDatabase.Setup(name: String; columns: TStringArray; path, version: String);
 ```
-Sets up a new `TDatabase`
+Sets up a new `TDatabase`, loading one `<column>.txt` file per column from
+`path`.
+
+If rows were saved with {ref}`Database.Insert`, the column files in the cache
+directory for this `version` are loaded instead. Cache directories of other
+versions are deleted.
+
+Every column must have the same number of rows.
 *)
 procedure TDatabase.Setup(name: String; columns: TStringArray; path, version: String);
 var
   i: Integer;
-  dir, tmp, column: String;
-  data, rows: TStringArray;
-  weights: TIntegerArray;
+  dir, tmp, column, fileName: String;
+  data: TStringArray;
 begin
   Self.Name := name + '.database';
   Self.CacheDir := WLEnv.CacheDir + 'databases' + PATH_SEP + name + PATH_SEP;
 
-  //Delete old cache files if they exist
   for dir in DirList(Self.CacheDir) do
   begin
     tmp := Copy(dir, Length(dir)-Length(version)+1, Length(dir));
@@ -189,75 +116,106 @@ begin
     raise GetDebugLn(Self.Name, 'Failed to create cache directory: ' + Self.CacheDir);
 
   Self.DataDir := path;
+  Self.Columns := Copy(columns);
+  Self.Data.Clear();
+  SetLength(Self.Indices, 0);
+  SetLength(Self.Indices, Length(columns));
 
-  for column in columns do
+  for i := 0 to High(columns) do
   begin
-    Self.Columns += column;
+    column := columns[i];
 
-    //use cached files that are already sorted if they exist
-    if FileExists(Self.CacheDir + column + '.txt') then
-    begin
-      Self.Data.Value[column] := FileReadLines(Self.CacheDir + column + '.txt');
-      Self.Rows.Value[column] := FileReadLines(Self.CacheDir + column + '.rows');
-      Continue;
-    end;
+    fileName := Self.CacheDir + column + '.data';
+    if not FileExists(fileName) then
+      fileName := Self.DataDir + column + '.txt';
 
-    //no cache files found, we need to setup the column from scratch
-    //check if column data file exists
-    if not FileExists(Self.DataDir + column + '.txt') then
-      raise GetDebugLn(Self.Name, 'Failed to find data file: ' + Self.DataDir + column + '.txt');
+    if not FileExists(fileName) then
+      raise GetDebugLn(Self.Name, 'Failed to find data file: ' + fileName);
 
-    //load the file data
-    data := FileReadLines(Self.DataDir + column + '.txt');
+    data := FileReadLines(fileName);
 
-    //create rows data, basically just the index of each line of the data file
-    //to save time, we measure the weight of each data row for sorting later
-    for i := 0 to High(data) do
-    begin
-      weights += Self._ValueWeight(data[i]);
-      rows += ToStr(i);
-    end;
+    if (i > 0) and (Length(data) <> Length(Self.Data.Value[columns[0]])) then
+      raise GetDebugLn(Self.Name, 'Column "' + column + '" has ' + ToStr(Length(data)) +
+                                  ' rows but column "' + columns[0] + '" has ' +
+                                  ToStr(Length(Self.Data.Value[columns[0]])));
 
-    //sort both the data and the rows by the data weights
-    data.Sort(weights, True);
-    rows.Sort(weights, True);
-
-
-    //set the column data and rows
     Self.Data.Value[column] := data;
-    Self.Rows.Value[column] := rows;
-
-    //at this point, our database column is setup.
-    //when you want to look for something it works as follows:
-    //- You look for the value you know on the column you know and find it's index
-    //- You then retrieve row that matches that index because the Data and Rows
-    //  were both sorted with the same weights, their indices match and the row you get back is the original row
-    //  your value was at before sorting.
-    //- After you have the original row value, you can look the column you want to get a value from
-    //  search that columns rows for the matching original row number you have and save it's index
-    //- You then go to your Data at that index and you have the matching data you are looking for.
-
-    //Cache files so we don't have to sort stuff everytime
-
-    if not FileWrite(Self.CacheDir + column + '.txt', data.Join(LINE_SEP)) then
-      raise GetDebugLn(Self.Name, 'Failed to create cache file: ' + Self.CacheDir + column + '.txt');
-    if not FileWrite(Self.CacheDir + column + '.rows', rows.Join(LINE_SEP)) then
-      raise GetDebugLn(Self.Name, 'Failed to create cache file: ' + Self.CacheDir + column + '.rows');
-
-    //reset variables.
-    SetLength(weights, 0);
-    SetLength(data, 0);
-    SetLength(rows, 0);
   end;
+end;
+
+(*
+## TDatabase._ColumnIndex
+```pascal
+function TDatabase._ColumnIndex(column: String): Integer;
+```
+Returns the position of `column` in `TDatabase.Columns`, raising if the database
+has no such column.
+*)
+function TDatabase._ColumnIndex(column: String): Integer;
+begin
+  Result := Self.Columns.IndexOf(column);
+  if Result = -1 then
+    raise GetDebugLn(Self.Name, 'Unknown column: ' + column);
+end;
+
+(*
+## TDatabase._BuildIndex
+```pascal
+procedure TDatabase._BuildIndex(columnIndex: Integer);
+```
+Builds the index of the column at `columnIndex` if it was not built yet.
+
+Rows are walked from last to first so that every value ends up pointing at its
+lowest row and each "next row" chain is in ascending order.
+*)
+procedure TDatabase._BuildIndex(columnIndex: Integer);
+var
+  row: Integer;
+  data: TStringArray;
+  index: TDatabaseIndex;
+begin
+  if Self.Indices[columnIndex].IsBuilt then
+    Exit;
+
+  data := Self.Data.Value[Self.Columns[columnIndex]];
+
+  index.FirstRow.CaseSens := True;
+  index.FirstRow.InvalidVal := -1;
+  SetLength(index.NextRow, Length(data));
+
+  for row := High(data) downto 0 do
+  begin
+    index.NextRow[row] := index.FirstRow.Value[data[row]];
+    index.FirstRow.Value[data[row]] := row;
+  end;
+
+  index.IsBuilt := True;
+  Self.Indices[columnIndex] := index;
+end;
+
+(*
+## TDatabase._FirstRow
+```pascal
+function TDatabase._FirstRow(value, column: String): Integer;
+```
+Returns the lowest row where `column` holds `value`, or `-1` if no row does.
+*)
+function TDatabase._FirstRow(value, column: String): Integer;
+var
+  columnIndex: Integer;
+begin
+  columnIndex := Self._ColumnIndex(column);
+  Self._BuildIndex(columnIndex);
+  Result := Self.Indices[columnIndex].FirstRow.Value[value];
 end;
 
 (*
 ## Querying Data
 A database is only useful if you can query data from it.
 Below in this page you will see several examples of how to use `TDatabase` and
-this examples will be accompanied with a `SQL` equivalent.
+these examples will be accompanied with a `SQL` equivalent.
 
-One thing to note is that `TDatabase` is a "single table" datase.
+One thing to note is that `TDatabase` is a "single table" database.
 This is also not a thing in real databases so in the following SQL examples we
 will be using `TDatabaseTable` as our imaginary table.
 *)
@@ -267,8 +225,7 @@ will be using `TDatabaseTable` as our imaginary table.
 ```pascal
 function TDatabase.Contains(value, column: String): Boolean;
 ```
-Returns the true/dalse if the specified `value` exists on the specified
-`column`.
+Returns true/false if the specified `value` exists on the specified `column`.
 
 Example:
 ```pascal
@@ -285,7 +242,7 @@ SELECT EXISTS (
 *)
 function TDatabase.Contains(value, column: String): Boolean;
 begin
-  Result := Self.Data.Value[column].Contains(value);
+  Result := Self._FirstRow(value, column) > -1;
 end;
 
 
@@ -294,8 +251,9 @@ end;
 ```pascal
 function TDatabase.Get(value, column_name, result_column: String): String;
 ```
-Returns the data at `result_column` that where the `column_name` column has the
-specified `value`.
+Returns the data at `result_column` where the `column_name` column has the
+specified `value`. If several rows match, the lowest one is used. If none does,
+an empty string is returned.
 
 Example:
 ```pascal
@@ -311,17 +269,14 @@ LIMIT 1;
 *)
 function TDatabase.Get(value, column_name, result_column: String): String;
 var
-  idx: Integer;
-  rows, data: TStringArray;
+  row: Integer;
 begin
-  idx := Self.Data.Value[column_name].IndexOf(value);
-  if idx = -1 then Exit;
+  Self._ColumnIndex(result_column);
 
-  rows := Self.Rows.Value[column_name];
-  data := Self.Data.Value[result_column];
+  row := Self._FirstRow(value, column_name);
+  if row = -1 then Exit;
 
-  idx := Self.Rows.Value[result_column].IndexOf(rows[idx]);
-  Result := data[idx];
+  Result := Self.Data.Value[result_column][row];
 end;
 
 (*
@@ -329,7 +284,8 @@ end;
 ```pascal
 function TDatabase.GetAll(value, column_name, result_column: String): TStringArray;
 ```
-Same as {ref}`Database.Get` but will return all existing values isntead of just one.
+Same as {ref}`Database.Get` but will return all existing values instead of just
+one, in row order.
 
 Example:
 ```pascal
@@ -345,20 +301,21 @@ Basically the same as {ref}`Database.Get` SQL example without the `LIMIT`.
 *)
 function TDatabase.GetAll(value, column_name, result_column: String): TStringArray;
 var
-  indices: TIntegerArray;
-  idx: Integer;
-  rows, data: TStringArray;
+  row, columnIndex: Integer;
+  data: TStringArray;
 begin
-  indices := Self.Data.Value[column_name].IndicesOf(value);
-  if indices = [] then Exit;
+  Self._ColumnIndex(result_column);
 
-  rows := Self.Rows.Value[column_name];
+  row := Self._FirstRow(value, column_name);
+  if row = -1 then Exit;
+
+  columnIndex := Self.Columns.IndexOf(column_name);
   data := Self.Data.Value[result_column];
 
-  for idx in indices do
+  while row <> -1 do
   begin
-    idx := Self.Rows.Value[result_column].IndexOf(rows[idx]);
-    Result += data[idx];
+    Result += data[row];
+    row := Self.Indices[columnIndex].NextRow[row];
   end;
 end;
 
@@ -367,11 +324,12 @@ end;
 ```pascal
 procedure TDatabase.Insert(values: TStringArray; saveCache: Boolean = False);
 ```
-Inserts a row of data. `values` must has a value for each `TDatabase.Columns` if
-you want to insert data.
+Inserts a row of data. `values` must have a value for each of
+`TDatabase.Columns`, in the same order.
 
 By default, this data insertion only stays in memory, if you want to save it to
-disk, you need to set `saveCache` to `True`.
+disk, you need to set `saveCache` to `True`. Saved rows are loaded by
+{ref}`TDatabase.Setup` until the database version changes.
 
 Example:
 ```pascal
@@ -380,15 +338,14 @@ database.Insert(['Custom Item', '99999', 'abcdef']);
 The SQL equivalent would be something like this:
 ```sql
 INSERT INTO "TDatabaseTable" (item, id, hash)
-VALUES ('abyssal whip', '99999', 'abcdef');
+VALUES ('Custom Item', '99999', 'abcdef');
 ```
 *)
 procedure TDatabase.Insert(values: TStringArray; saveCache: Boolean = False);
 var
-  i, idx: Integer;
-  value, column: String;
-  data, rows: TStringArray;
-  weights: TIntegerArray;
+  i, row, last: Integer;
+  column: String;
+  data: TStringArray;
 begin
   if Length(values) <> Length(Self.Columns) then
     raise GetDebugLn(Self.Name, 'The values being added are not the same length as the existing columns.');
@@ -396,27 +353,30 @@ begin
   for i := 0 to High(values) do
   begin
     column := Self.Columns[i];
-    value := values[i];
-    idx := Self.Data.Value[column].Length;
-
-    Self.Data.Value[column].Insert(value, idx);
-    Self.Rows.Value[column].Insert(value, idx);
 
     data := Self.Data.Value[column];
-    rows := Self.Rows.Value[column];
+    row := Length(data);
+    data += values[i];
+    Self.Data.Value[column] := data;
 
-    for idx to High(data) do
-      weights += Self._ValueWeight(data[idx]);
+    if Self.Indices[i].IsBuilt then
+    begin
+      SetLength(Self.Indices[i].NextRow, row + 1);
+      Self.Indices[i].NextRow[row] := -1;
 
-    Self.Data.Value[column].Sort(weights, True);
-    Self.Rows.Value[column].Sort(weights, True);
+      last := Self.Indices[i].FirstRow.Value[values[i]];
+      if last = -1 then
+        Self.Indices[i].FirstRow.Value[values[i]] := row
+      else
+      begin
+        while Self.Indices[i].NextRow[last] <> -1 do
+          last := Self.Indices[i].NextRow[last];
+        Self.Indices[i].NextRow[last] := row;
+      end;
+    end;
 
     if saveCache then
-    begin
-      if not FileWrite(Self.CacheDir + column, Self.Data.Value[column].Join(LINE_SEP)) then
-        raise GetDebugLn(Self.Name, 'Failed to create cache file: ' + Self.CacheDir + column);
-      if not FileWrite(Self.CacheDir + column + '.rows', Self.rows.Value[column].Join(LINE_SEP)) then
-        raise GetDebugLn(Self.Name, 'Failed to create cache file: ' + Self.CacheDir + column + '.rows');
-    end;
+      if not FileWrite(Self.CacheDir + column + '.data', data.Join(LINE_SEP)) then
+        raise GetDebugLn(Self.Name, 'Failed to create cache file: ' + Self.CacheDir + column + '.data');
   end;
 end;
