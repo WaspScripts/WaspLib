@@ -31,7 +31,8 @@ function TItemFinder._AlignHelper(img: TImage; tBorder, border: TPointArray; out
 var
   pt: TPoint;
 begin
-  if border = [] then Exit;
+  if border = [] then
+    Exit;
 
   align := tBorder.Last - border.Last;
   border := border.Offset(align);
