@@ -15,6 +15,7 @@ type
   TItemFinder = record
     ItemImages: TStringMap<TImage>;
     MaskImages: TStringMap<TImage>;
+    MaskPoints: TStringMap<TPointArray>;
     Filters: array of TItemFinderFilter;
     Version: String;
     Similarity: Single;
@@ -220,6 +221,15 @@ begin
   Result := Self.MaskImages.Value[id];
 end;
 
+//where the mask says the item is, cached because every hash needs it
+function TItemFinder.GetMaskPoints(id: String): TPointArray;
+begin
+  if not Self.MaskPoints.Exists(id) then
+    Self.MaskPoints.Value[id] := Self.GetMask(id).FindColor(Colors.WHITE, 0);
+
+  Result := Self.MaskPoints.Value[id];
+end;
+
 
 function TItemFinder.GetImages(item: String): TImageArray;
 var
@@ -404,12 +414,10 @@ function TItemFinder.GetHash(img: TImage): UInt32;
 const
   TOP = 9; //stack numbers are drawn above this
 var
-  border: TPointArray;
+  border, points: TPointArray;
+  colors: TColorArray;
   id: String;
-  mask: TImage;
   offset: TPoint;
-  ptr: PColorBGRA;
-  x, y, mx, my: Integer;
 begin
   img := img.Copy();
 
@@ -428,31 +436,19 @@ begin
   if id = '' then
     Exit;
 
-  mask := Self.GetMask(id);
+  points := Self.GetMaskPoints(id);
 
-  //items sharing a border hash can sit at different offsets, line the mask up with ours
-  offset := border.Bounds().TopLeft - Self.GetImage(id).FindColor($010000, 0, [0, TOP, mask.Width - 1, mask.Height - 1]).Bounds().TopLeft;
+  //that id can be a different item drawn elsewhere on the canvas, line its mask up with ours
+  offset := border.Bounds().TopLeft - Self.GetImage(id).FindColor($010000, 0, [0, TOP, img.Width - 1, img.Height - 1]).Bounds().TopLeft;
+  if (offset.X <> 0) or (offset.Y <> 0) then
+    points := points.Offset(offset).ExtractBox([0, 0, img.Width - 1, img.Height - 1]);
 
-  //match TItemSprite.ToImage: background fully zeroed, item and outline opaque
-  ptr := img.Data;
-  for y := 0 to img.Height - 1 do
-    for x := 0 to img.Width - 1 do
-    begin
-      mx := x - offset.X;
-      my := y - offset.Y;
-
-      if (mx < 0) or (my < 0) or (mx >= mask.Width) or (my >= mask.Height) or (mask.Pixel[mx, my] = 0) then
-      begin
-        ptr^.B := 0;
-        ptr^.G := 0;
-        ptr^.R := 0;
-        ptr^.A := 0;
-      end
-      else
-        ptr^.A := $FF;
-
-      Inc(ptr);
-    end;
+  //rebuild the icon the way TItemSprite.ToImage holds it: the item opaque, everything else zeroed
+  colors := img.GetColors(points);
+  img.Fill(0);
+  img.FillWithAlpha(0);
+  img.SetPixels(points, colors);
+  img.SetAlphas(points, $FF);
 
   Result := TItemSprite.GetCRC(img, TOP);
 end;
