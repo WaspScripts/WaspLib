@@ -60,13 +60,13 @@ end;
 
 type
 (*
-## ERSMap
+## EMap
 ```pascal
-ERSMap = enum(NORMAL, HEIGHT, COLLISION);
+EMap = enum(NORMAL, HEIGHT, COLLISION);
 Enum representing the types of map files available in TMap and TMapLoader.
 ```
 *)
-  ERSMap = enum(NORMAL, HEIGHT, COLLISION);
+  EMap = enum(NORMAL, HEIGHT, COLLISION);
 
 (*
 ## TMapLoader
@@ -89,7 +89,7 @@ This is an internal type. Don't use it if you don't know what you are doing.
 
     Unzipping: Boolean;
     Timeout: TCountDown;
-    MapReader: array [ERSMap] of TResourceReader;
+    MapReader: array [EMap] of TResourceReader;
     const ZIP: String = WLEnv.AssetsDir + 'map' + PATH_SEP + 'mapdata.zip';
     const BINS: TStringArray = ['map.bin', 'heightmap.bin', 'collision.bin'];
   end;
@@ -324,7 +324,7 @@ end;
 procedure TMapLoader.Setup(downscale: UInt32);
 var
   timer: TCountDown;
-  emap: ERSMap;
+  emap: EMap;
 begin
   Self.Downscale := downscale;
   AddOnTerminate(@Self.Free);
@@ -346,7 +346,7 @@ begin
     end;
   end;
 
-  for emap := Low(ERSMap) to High(ERSMap) do
+  for emap := Low(EMap) to High(EMap) do
     Self.MapReader[emap] := new TResourceReader(Self.CacheDir + Self.BINS[emap]);
 end;
 
@@ -378,28 +378,35 @@ end;
 (*
 ## MapLoader.GetFile
 ```pascal
-function TMapLoader.GetFile(chunk: T3DPoint; map: ERSMap): TImage;
+function TMapLoader.GetFile(chunk: T3DPoint; map: EMap): TImage;
 ```
 Internal method that returns a chunk image.
 
-`ERSMap.NORMAL` chunks are rendered from the game cache with {ref}`TMapChunkLoader.GetChunkImage`.
-A chunk the cache has no region for comes back as a blank image, which is what an unmapped chunk
-looked like when these were read from a file.
+`EMap.NORMAL` and `EMap.COLLISION` chunks are rendered from the game cache with
+{ref}`TMapChunkLoader.GetChunkImage` and {ref}`TMapChunkLoader.GetChunkCollisionImage`.
+A chunk the cache has no region for comes back as a blank image.
 
-`ERSMap.HEIGHT` and `ERSMap.COLLISION` are still read from the unzipped map assets.
+`EMap.HEIGHT` is still read from the unzipped map assets.
 *)
-function TMapLoader.GetFile(chunk: T3DPoint; map: ERSMap): TImage;
+function TMapLoader.GetFile(chunk: T3DPoint; map: EMap): TImage;
 var
   filename: String;
   idx: Integer;
 begin
-  if (map = ERSMap.COLLISION) and WebGraphGenerator.BlockedChunks.Contains(chunk) then
+  if (map = EMap.COLLISION) and WebGraphGenerator.BlockedChunks.Contains(chunk) then
     Exit(new TImage(RSTranslator.MAP_CHUNK_SIZE, RSTranslator.MAP_CHUNK_SIZE));
 
-  if map = ERSMap.NORMAL then
-  begin
-    Self.SetupChunkLoader();
-    Exit(Self.ChunkLoader.GetChunkImage(chunk.X, chunk.Y, chunk.Z));
+  case map of
+    EMap.NORMAL:
+      begin
+        Self.SetupChunkLoader();
+        Exit(Self.ChunkLoader.GetChunkImage(chunk.X, chunk.Y, chunk.Z));
+      end;
+    EMap.COLLISION:
+      begin
+        Self.SetupChunkLoader();
+        Exit(Self.ChunkLoader.GetChunkCollisionImage(chunk.X, chunk.Y, chunk.Z));
+      end;
   end;
 
   filename := Format('%d-%d-%d.png', [chunk.Z, chunk.X, chunk.Y]);
@@ -414,11 +421,11 @@ end;
 (*
 ## MapLoader.GetMap
 ```pascal
-function TMapLoader.GetMap(chunks: TPointArray; plane: Integer; map: ERSMap): TImage;
+function TMapLoader.GetMap(chunks: TPointArray; plane: Integer; map: EMap): TImage;
 ```
 Internal method that returns a `TImage` of all the `chunks` you pass into it.
 *)
-function TMapLoader.GetMap(chunks: TPointArray; plane: Integer; map: ERSMap): TImage;
+function TMapLoader.GetMap(chunks: TPointArray; plane: Integer; map: EMap): TImage;
 var
   i, x, y, n: Integer;
   lo, hi: TPoint;
@@ -645,9 +652,9 @@ begin
     idx := i-regionCount;
     region := Self.Regions[i];
 
-    maps[idx] := Self.GetMap(region.Chunks, region.Plane, ERSMap.NORMAL);
-    heightmaps[idx] := Self.GetMap(region.Chunks, region.Plane, ERSMap.HEIGHT);
-    collisionmaps[idx] := Self.GetMap(region.Chunks, region.Plane, ERSMap.COLLISION);
+    maps[idx] := Self.GetMap(region.Chunks, region.Plane, EMap.NORMAL);
+    heightmaps[idx] := Self.GetMap(region.Chunks, region.Plane, EMap.HEIGHT);
+    collisionmaps[idx] := Self.GetMap(region.Chunks, region.Plane, EMap.COLLISION);
 
     if not WebGraphGenerator.Disabled then
       Self.Regions[i].Graph := Self.GetGraph(region, collisionmaps[idx]);
