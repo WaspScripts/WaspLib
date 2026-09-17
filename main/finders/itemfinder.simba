@@ -20,7 +20,6 @@ type
     Similarity: Single;
     ImageCompare: TImageCompareUtils;
     Database: TDatabase;
-    CacheDir: String;
 
     Archive: TArchive;
     Unzipping, IsSetup: Boolean;
@@ -118,33 +117,17 @@ end;
 
 
 procedure TItemFinder.Setup();
-var
-  path, tmp: String;
 begin
   if Self.IsSetup then
     Exit;
+
   Self.Version := WLAssets.JSON.Item['finders/items/data/hash.txt'].AsString;
+
   Self.Database.Setup(
-    'ItemFinder', ['id', 'item', 'hash'],
-    WLEnv.AssetsDir + 'finders' + PATH_SEP + 'items' + PATH_SEP + 'data' + PATH_SEP,
+    'items', ['id', 'item', 'hash', 'border'],
+    SimbaEnv.DataPath + 'items-db' + PATH_SEP,
     Self.Version
   );
-
-  Self.CacheDir := WLEnv.CacheDir + 'itemfinder' + PATH_SEP;
-
-  //Delete old cache files if they exist
-  for path in DirList(Self.CacheDir) do
-  begin
-    tmp := Copy(path, Length(path) - Length(Self.Version) + 1, Length(path));
-    if tmp = Self.Version then
-      Continue;
-    DirDelete(path, False);
-  end;
-
-  Self.CacheDir += Self.Version + PATH_SEP;
-
-  if not DirCreate(Self.CacheDir) then
-    raise GetDebugLn('ItemFinder', 'Failed to create cache directory: ' + Self.CacheDir);
 
   //only set similarity if the user didn't set it already
   if Self.Similarity = 0 then
@@ -170,6 +153,11 @@ end;
 function TItemFinder.GetHashItems(hash: UInt32): TItemArray;
 begin
   Result := Self.Database.GetAll(ToStr(hash), 'hash', 'item');
+end;
+
+function TItemFinder.GetHashIDs(hash: UInt32): TStringArray;
+begin
+  Result := Self.Database.GetAll(ToStr(hash), 'hash', 'id');
 end;
 
 procedure TItemFinder.MapItem(item, id: String);
@@ -412,41 +400,61 @@ begin
   display.Show();
 end;
 
-function TItemFinder.GetBorderHash(img: TImage): UInt32;
-var
-  tpa: TPointArray;
-  border: TImage;
-begin
-  tpa := img.FindColor(ITEM_BORDER, 0, [0, 9, 35, 31]);
-  if tpa = [] then Exit;
-  border := new TImage(36, 32);
-  border.DrawColor := $FFFFFF;
-  border.DrawTPA(tpa);
-  Result := CrcData(border.Data, 4608); //h*w*4=4608
-end;
-
 function TItemFinder.GetHash(img: TImage): UInt32;
+const
+  TOP = 9; //stack numbers are drawn above this
 var
-  hash: UInt32;
-  bg: TPointArray;
+  border: TPointArray;
+  id: String;
+  mask: TImage;
+  offset: TPoint;
+  ptr: PColorBGRA;
+  x, y, mx, my: Integer;
 begin
-  hash := Self.GetBorderHash(img);
-  if hash = 0 then
+  img := img.Copy();
+
+  border := img.FindColor(ITEM_BORDER, 0, [0, TOP, img.Width - 1, img.Height - 1]);
+  if border = [] then
     Exit;
 
-  bg := Self.GetMask(ToStr(hash)).FindColor(Colors.BLACK, 0);
-
+  //the cache draws the outline as $010000
   if ITEM_BORDER <> $010000 then
   begin
     img.DrawColor := $010000;
-    img.DrawAlpha := $FF;
-    img.DrawTPA(img.FindColor(ITEM_BORDER, 0));
+    img.DrawTPA(border);
   end;
 
-  img.DrawColor := Colors.BLACK;
-  img.DrawTPA(bg);
+  id := Self.Database.Get(ToStr(TItemSprite.GetBorderCRC(img, TOP)), 'border', 'id');
+  if id = '' then
+    Exit;
 
-  Result := CrcData(img.Data, 4608); //h*w*4=4608
+  mask := Self.GetMask(id);
+
+  //items sharing a border hash can sit at different offsets, line the mask up with ours
+  offset := border.Bounds().TopLeft - Self.GetImage(id).FindColor($010000, 0, [0, TOP, mask.Width - 1, mask.Height - 1]).Bounds().TopLeft;
+
+  //match TItemSprite.ToImage: background fully zeroed, item and outline opaque
+  ptr := img.Data;
+  for y := 0 to img.Height - 1 do
+    for x := 0 to img.Width - 1 do
+    begin
+      mx := x - offset.X;
+      my := y - offset.Y;
+
+      if (mx < 0) or (my < 0) or (mx >= mask.Width) or (my >= mask.Height) or (mask.Pixel[mx, my] = 0) then
+      begin
+        ptr^.B := 0;
+        ptr^.G := 0;
+        ptr^.R := 0;
+        ptr^.A := 0;
+      end
+      else
+        ptr^.A := $FF;
+
+      Inc(ptr);
+    end;
+
+  Result := TItemSprite.GetCRC(img, TOP);
 end;
 
 var

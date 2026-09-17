@@ -493,7 +493,7 @@ begin
   b.X2 := b.X1 + 35;
   b.Y2 := b.Y1 + 31;
 
-  Result := ItemFinder.GetBorderHash(Target.GetImage(b));
+  Result := TItemSprite.GetBorderCRC(Target.GetImage(b));
 end;
 
 (*

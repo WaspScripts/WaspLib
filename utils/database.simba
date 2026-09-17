@@ -97,7 +97,7 @@ Every column must have the same number of rows.
 procedure TDatabase.Setup(name: String; columns: TStringArray; path, version: String);
 var
   i: Integer;
-  dir, tmp, column, fileName: String;
+  dir, tmp, column, filename: String;
   data: TStringArray;
 begin
   Self.Name := name + '.database';
@@ -125,14 +125,14 @@ begin
   begin
     column := columns[i];
 
-    fileName := Self.CacheDir + column + '.data';
-    if not FileExists(fileName) then
+    filename := Self.CacheDir + column + '.data';
+    if not FileExists(filename) then
       fileName := Self.DataDir + column + '.txt';
 
-    if not FileExists(fileName) then
-      raise GetDebugLn(Self.Name, 'Failed to find data file: ' + fileName);
+    if not FileExists(filename) then
+      raise GetDebugLn(Self.Name, 'Failed to find data file: ' + filename);
 
-    data := FileReadLines(fileName);
+    data := FileReadLines(filename);
 
     if (i > 0) and (Length(data) <> Length(Self.Data.Value[columns[0]])) then
       raise GetDebugLn(Self.Name, 'Column "' + column + '" has ' + ToStr(Length(data)) +
