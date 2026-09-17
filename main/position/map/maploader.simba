@@ -39,8 +39,7 @@ This is an internal type. Don't use it if you don't know what you are doing.
 *)
   TMapRegion = record
     Chunks: TPointArray;
-    Original: TBox;
-    Region: TBox;
+    Original, Region: TBox;
     Plane: Integer;
     Offset: TPoint;
     Graph: TWebGraph;
@@ -77,13 +76,16 @@ This is an internal type. Don't use it if you don't know what you are doing.
 ```
 *)
   TMapLoader = record
-    Version, CacheDir: String;
+    Version, CacheDir, GraphsDir: String;
     Map, Heightmap, Collision, HalfMap: TImage;
     DownscaledMatrix: TIntegerMatrix;
     MapBox: TBox;
     Graph: TWebGraph;
     Regions: array of TMapRegion;
     Padding, Downscale: Integer;
+
+    ChunkLoader: TMapChunkLoader;
+    ChunkLoaderReady: Boolean;
 
     Unzipping: Boolean;
     Timeout: TCountDown;
@@ -262,6 +264,8 @@ begin
   Self.Collision := nil;
   Self.Heightmap := nil;   
   Self.HalfMap := nil;
+  Self.ChunkLoader := Default(TMapChunkLoader);
+  Self.ChunkLoaderReady := False;
   Self.DownscaledMatrix := [];
   Self.MapBox := [];
   Self.Graph := [];
@@ -291,6 +295,8 @@ var
 begin
   Self.Version := WLAssets.JSON.Item['map/mapdata.zip'].AsString;
   Self.CacheDir := WLEnv.CacheDir + 'map' + PATH_SEP + 'mapdata' + PATH_SEP;
+  //graphs are generated here, not shipped, so they don't belong to the assets version
+  Self.GraphsDir := WLEnv.CacheDir + 'map' + PATH_SEP + 'graphs' + PATH_SEP;
 
   //Delete old cache files if they exist
   for path in DirList(Self.CacheDir) do
@@ -346,13 +352,41 @@ end;
 
 
 (*
+## MapLoader.SetupChunkLoader
+```pascal
+procedure TMapLoader.SetupChunkLoader();
+```
+Prepares the {ref}`TMapChunkLoader` that renders map chunks out of the game cache.
+
+Caching the map index and loading the definitions the renderer needs takes close to a second, so
+it's done the first time a chunk is asked for rather than on every script that includes WaspLib.
+
+```{note}
+This is an internal method. Don't use it if you don't know what you are doing.
+```
+*)
+procedure TMapLoader.SetupChunkLoader();
+begin
+  if Self.ChunkLoaderReady then
+    Exit;
+
+  CacheReader.Indices[ECacheIndex.MAPS].Cache();
+  Self.ChunkLoader.MapData.Load();
+  Self.ChunkLoaderReady := True;
+end;
+
+(*
 ## MapLoader.GetFile
 ```pascal
-function TMapLoader.GetFile(chunk: TPoint; plane: Integer; map: ERSMap): TImage;
+function TMapLoader.GetFile(chunk: T3DPoint; map: ERSMap): TImage;
 ```
 Internal method that returns a chunk image.
-If possible, it will be loaded from a cached .bmp file.
-If no .bmp file exists, the .png file is loaded instead, it's saved as .bmp for future uses and the .png file is deleted.
+
+`ERSMap.NORMAL` chunks are rendered from the game cache with {ref}`TMapChunkLoader.GetChunkImage`.
+A chunk the cache has no region for comes back as a blank image, which is what an unmapped chunk
+looked like when these were read from a file.
+
+`ERSMap.HEIGHT` and `ERSMap.COLLISION` are still read from the unzipped map assets.
 *)
 function TMapLoader.GetFile(chunk: T3DPoint; map: ERSMap): TImage;
 var
@@ -361,6 +395,12 @@ var
 begin
   if (map = ERSMap.COLLISION) and WebGraphGenerator.BlockedChunks.Contains(chunk) then
     Exit(new TImage(RSTranslator.MAP_CHUNK_SIZE, RSTranslator.MAP_CHUNK_SIZE));
+
+  if map = ERSMap.NORMAL then
+  begin
+    Self.SetupChunkLoader();
+    Exit(Self.ChunkLoader.GetChunkImage(chunk.X, chunk.Y, chunk.Z));
+  end;
 
   filename := Format('%d-%d-%d.png', [chunk.Z, chunk.X, chunk.Y]);
 
@@ -503,7 +543,7 @@ begin
   Exit(WebGraphGenerator.BuildGraph(name, map));
   {$ENDIF}
   plane := ToStr(region.Plane);
-  path := Self.CacheDir + 'graphs' + PATH_SEP + plane + PATH_SEP + name + '-' +
+  path := Self.GraphsDir + plane + PATH_SEP + name + '-' +
           ToStr(WebGraphGenerator.CRC) + PATH_SEP;
 
   if
@@ -677,7 +717,7 @@ begin
   if WebGraphGenerator.Disabled then
     Exit;
 
-  graphPath := Self.CacheDir + 'graphs' + PATH_SEP + 'trees' + PATH_SEP;
+  graphPath := Self.GraphsDir + 'trees' + PATH_SEP;
   if not DirCreate(graphPath) then
     raise GetDebugLn('MapLoader', 'Failed to create path: ' + graphPath);
 
