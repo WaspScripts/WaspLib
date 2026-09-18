@@ -10,66 +10,190 @@ type
   ESpell = enum(
     UNKNOWN,
     //Standard
-    LUMBRIDGE_HOME_TELEPORT, WIND_STRIKE, CONFUSE, ENCHANT_CROSSBOW_BOLT, WATER_STRIKE, JEWELLERY_ENCHANTMENTS, BACK, LVL1_ENCHANT, LVL2_ENCHANT, LVL3_ENCHANT, LVL4_ENCHANT, LVL5_ENCHANT, LVL6_ENCHANT, LVL7_ENCHANT, EARTH_STRIKE, WEAKEN, FIRE_STRIKE, BONES_TO_BANANAS, WIND_BOLT, CURSE, BIND, LOW_LEVEL_ALCHEMY, WATER_BOLT, VARROCK_TELEPORT, EARTH_BOLT, LUMBRIDGE_TELEPORT, TELEKINETIC_GRAB, FIRE_BOLT, FALADOR_TELEPORT, CRUMBLE_UNDEAD, TELEPORT_TO_HOUSE, WIND_BLAST, SUPERHEAT_ITEM, CAMELOT_TELEPORT, WATER_BLAST, IBAN_BLAST, SNARE, MAGIC_DART, ARDOUGNE_TELEPORT, EARTH_BLAST, CIVITAS_ILLA_FORTIS_TELEPORT, HIGH_LEVEL_ALCHEMY, CHARGE_WATER_ORB, WATCHTOWER_TELEPORT, FIRE_BLAST, CHARGE_EARTH_ORB, BONES_TO_PEACHES, SARADOMIN_STRIKE, CLAWS_OF_GUTHIX, FLAMES_OF_ZAMORAK, TROLLHEIM_TELEPORT, WIND_WAVE, CHARGE_FIRE_ORB, APE_ATOLL_TELEPORT, WATER_WAVE, CHARGE_AIR_ORB, VULNERABILITY, TELEPORT_TO_KOUREND, EARTH_WAVE, ENFEEBLE, TELEOTHER_LUMBRIDGE, FIRE_WAVE, ENTANGLE, STUN, CHARGE, WIND_SURGE, TELEOTHER_FALADOR, WATER_SURGE, TELE_BLOCK, STANDARD_TARGET_TELEPORT, TELEOTHER_CAMELOT, EARTH_SURGE, FIRE_SURGE,
+    LUMBRIDGE_HOME_TELEPORT, WIND_STRIKE, CONFUSE, CROSSBOW_BOLT_ENCHANTMENTS, WATER_STRIKE, JEWELLERY_ENCHANTMENTS, BACK, LVL1_ENCHANT, LVL2_ENCHANT, LVL3_ENCHANT, LVL4_ENCHANT, LVL5_ENCHANT, LVL6_ENCHANT, LVL7_ENCHANT, EARTH_STRIKE, WEAKEN, FIRE_STRIKE, BONES_TO_BANANAS, WIND_BOLT, CURSE, BIND, LOW_LEVEL_ALCHEMY, WATER_BOLT, VARROCK_TELEPORT, EARTH_BOLT, LUMBRIDGE_TELEPORT, TELEKINETIC_GRAB, FIRE_BOLT, FALADOR_TELEPORT, CRUMBLE_UNDEAD, TELEPORT_TO_HOUSE, WIND_BLAST, SUPERHEAT_ITEM, CAMELOT_TELEPORT, WATER_BLAST, IBAN_BLAST, SNARE, MAGIC_DART, ARDOUGNE_TELEPORT, EARTH_BLAST, CIVITAS_ILLA_FORTIS_TELEPORT, HIGH_LEVEL_ALCHEMY, CHARGE_WATER_ORB, WATCHTOWER_TELEPORT, FIRE_BLAST, CHARGE_EARTH_ORB, BONES_TO_PEACHES, SARADOMIN_STRIKE, CLAWS_OF_GUTHIX, FLAMES_OF_ZAMORAK, TROLLHEIM_TELEPORT, WIND_WAVE, CHARGE_FIRE_ORB, APE_ATOLL_TELEPORT, WATER_WAVE, CHARGE_AIR_ORB, VULNERABILITY, KOUREND_CASTLE_TELEPORT, EARTH_WAVE, ENFEEBLE, TELEOTHER_LUMBRIDGE, FIRE_WAVE, ENTANGLE, STUN, CHARGE, WIND_SURGE, TELEOTHER_FALADOR, WATER_SURGE, TELE_BLOCK, STANDARD_TARGET_TELEPORT, TELEOTHER_CAMELOT, EARTH_SURGE, FIRE_SURGE,
     //Ancient
-    EDGEVILLE_HOME_TELEPORT, SMOKE_RUSH, SHADOW_RUSH, PADDEWWA_TELEPORT, BLOOD_RUSH, ICE_RUSH, SENNTISTEN_TELEPORT, SMOKE_BURST, SHADOW_BURST, KHARYRLL_TELEPORT, BLOOD_BURST, ICE_BURST, LASSAR_TELEPORT, SMOKE_BLITZ, SHADOW_BLITZ, DAREEYAK_TELEPORT, BLOOD_BLITZ, ICE_BLITZ, CARRALLANGAR_TELEPORT, ANCIENT_TARGET_TELEPORT, SMOKE_BARRAGE, SHADOW_BARRAGE, ANNAKARL_TELEPORT, BLOOD_BARRAGE, ICE_BARRAGE, GHORROCK_TELEPORT,
+    EDGEVILLE_HOME_TELEPORT, SMOKE_RUSH, SHADOW_RUSH, PADDEWWA_TELEPORT, BLOOD_RUSH, ICE_RUSH, SENNTISTEN_TELEPORT, SMOKE_BURST, SHADOW_BURST, KHARYRLL_TELEPORT, BLOOD_BURST, ICE_BURST, LASSAR_TELEPORT, SMOKE_BLITZ, SHADOW_BLITZ, DAREEYAK_TELEPORT, BLOOD_BLITZ, ICE_BLITZ, CARRALLANGER_TELEPORT, ANCIENT_TARGET_TELEPORT, SMOKE_BARRAGE, SHADOW_BARRAGE, ANNAKARL_TELEPORT, BLOOD_BARRAGE, ICE_BARRAGE, GHORROCK_TELEPORT,
     //Lunar
-    LUNAR_HOME_TELEPORT, BAKE_PIE, GEOMANCY, CURE_PLANT, MONSTER_EXAMINE, NPC_CONTACT, CURE_OTHER, HUMIDIFY, MOONCLAN_TELEPORT, TELE_GROUP_MOONCLAN, CURE_ME, OURANIA_TELEPORT, HUNTER_KIT, WATERBIRTH_TELEPORT, TELE_GROUP_WATERBIRTH, CURE_GROUP, STAT_SPY, BARBARIAN_TELEPORT, TELE_GROUP_BARBARIAN, SPIN_FLAX, SUPERGLASS_MAKE, TAN_LEATHER, KHAZARD_TELEPORT, TELE_GROUP_KHAZARD, DREAM, STRING_JEWELLERY, STAT_RESTORE_POT_SHARE, MAGIC_IMBUE, FERTILE_SOIL, BOOST_POTION_SHARE, FISHING_GUILD_TELEPORT, BOUNTY_TELEPORT, TELE_GROUP_FISHING_GUILD, PLANK_MAKE, CATHERBY_TELEPORT, TELE_GROUP_CATHERBY, RECHARGE_DRAGONSTONE, ICE_PLATEU_TELEPORT, TELE_GROUP_ICE_PLATEU, ENERGY_TRANSFER, HEAL_OTHER, VENGEANCE_OTHER, VENGEANCE, HEAL_GROUP, SPELLBOOK_SWAP,
+    LUNAR_HOME_TELEPORT, BAKE_PIE, GEOMANCY, CURE_PLANT, MONSTER_EXAMINE, ASTRAL_CONTACT, CURE_OTHER, HUMIDIFY, MOONCLAN_TELEPORT, TELE_GROUP_MOONCLAN, CURE_ME, OURANIA_TELEPORT, HUNTER_KIT, WATERBIRTH_TELEPORT, TELE_GROUP_WATERBIRTH, CURE_GROUP, STAT_SPY, BARBARIAN_TELEPORT, TELE_GROUP_BARBARIAN, SPIN_FLAX, SUPERGLASS_MAKE, TAN_LEATHER, KHAZARD_TELEPORT, TELE_GROUP_KHAZARD, DREAM, STRING_JEWELLERY, STAT_RESTORE_POT_SHARE, MAGIC_IMBUE, FERTILE_SOIL, BOOST_POTION_SHARE, FISHING_GUILD_TELEPORT, BOUNTY_TELEPORT, TELE_GROUP_FISHING_GUILD, PLANK_MAKE, CATHERBY_TELEPORT, TELE_GROUP_CATHERBY, RECHARGE_DRAGONSTONE, ICE_PLATEAU_TELEPORT, TELE_GROUP_ICE_PLATEAU, ENERGY_TRANSFER, HEAL_OTHER, VENGEANCE_OTHER, VENGEANCE, HEAL_GROUP, SPELLBOOK_SWAP,
     //Arceuus
     ARCEUUS_HOME_TELEPORT, ARCEUUS_LIBRARY_TELEPORT, BASIC_REANIMATION, DRAYNOR_MANOR_TELEPORT, BATTLEFRONT_TELEPORT, MIND_ALTAR_TELEPORT, RESPAWN_TELEPORT, GHOSTLY_GRASP, RESURRECT_LESSER_GHOST, RESURRECT_LESSER_SKELETON, RESURRECT_LESSER_ZOMBIE, SALVE_GRAVEYARD_TELEPORT, ADEPT_REANIMATION, INFERIOR_DEMONBANE, SHADOW_VEIL, FENKENSTRAINS_CASTLE_TELEPORT, DARK_LURE, SKELETAL_GRASP, RESURRECT_SUPERIOR_GHOST, RESURRECT_SUPERIOR_SKELETON, RESURRECT_SUPERIOR_ZOMBIE, MARK_OF_DARKNESS, WEST_ARDOUGNE_TELEPORT, SUPERIOR_DEMONBANE, LESSER_CORRUPTION, HARMONY_ISLAND_TELEPORT, VILE_VIGOUR, DEGRIME, CEMETERY_TELEPORT, EXPERT_REANIMATION, WARD_OF_ARCEUUS, RESURRECT_GREATER_GHOST, RESURRECT_GREATER_SKELETON, RESURRECT_GREATER_ZOMBIE, RESURRECT_CROPS, UNDEAD_GRASP, DEATH_CHARGE, DARK_DEMONBANE, BARROWS_TELEPORT, DEMONIC_OFFERING, GREATER_CORRUPTION, MASTER_REANIMATION, APE_ATOLL_DUNGEON_TELEPORT, SINISTER_OFFERING
   );
 
   TSpellFinder = record
     SpellImages: array [ESpell] of array [0..1] of TImage;
+    SpriteIDs: array [ESpell] of array [0..1] of Integer;
     Similarity: Single;
     ImageCompare: TImageCompareUtils;
-    Version, CacheDir: String;
+    Enums, Items: TArchive;
+    IsSetup, IsResolved: Boolean;
   end;
+
+const
+(*
+## SpellFinder constants
+The spell icons come straight from the game cache.
+Every spellbook is an enum listing one item per spell, and each of those items carries the spell's name and
+icons as params:
+- `SPELLBOOK_ENUMS` are the enums of the standard, ancient, lunar and arceuus spellbooks.
+- `JEWELLERY_ENCHANT_ENUM` is the standard spellbook's jewellery enchantment menu, with the
+  `Lvl-1` to `Lvl-7 Enchant` spells and its `Back` button.
+- `SPELL_NAME_PARAM` is the param holding the spell's name.
+- `SPELL_SPRITE_PARAMS` are the params holding the large and the small castable icon.
+*)
+  SPELLBOOK_ENUMS: array [0..3] of Integer = [1982, 1983, 1984, 1985];
+  JEWELLERY_ENCHANT_ENUM: Integer = 5285;
+  SPELL_NAME_PARAM: Integer = 601;
+  SPELL_SPRITE_PARAMS: array [0..1] of Integer = [599, 597];
+
+(*
+## ESpell.Spellbook
+```pascal
+function ESpell.Spellbook(): Integer;
+```
+Index of the spellbook `spell` belongs to in `SPELLBOOK_ENUMS`: `0` standard, `1` ancient,
+`2` lunar and `3` arceuus. `ESpell.UNKNOWN` gives `-1`.
+*)
+function ESpell.Spellbook(): Integer;
+begin
+  case Self of
+    ESpell.LUMBRIDGE_HOME_TELEPORT..ESpell.FIRE_SURGE:        Result := 0;
+    ESpell.EDGEVILLE_HOME_TELEPORT..ESpell.GHORROCK_TELEPORT: Result := 1;
+    ESpell.LUNAR_HOME_TELEPORT..ESpell.SPELLBOOK_SWAP:        Result := 2;
+    ESpell.ARCEUUS_HOME_TELEPORT..ESpell.SINISTER_OFFERING:   Result := 3;
+    else Result := -1;
+  end;
+end;
+
+(*
+## ESpell.CacheName
+```pascal
+function ESpell.CacheName(): String;
+```
+The spell's name the way the game cache has it, lowercased and without apostrophes or dashes so
+`Fenkenstrain's` and `Lvl-1` compare to `FENKENSTRAINS` and `LVL1`.
+*)
+function ESpell.CacheName(): String;
+begin
+  case Self of
+    ESpell.APE_ATOLL_DUNGEON_TELEPORT: Result := 'ape atoll teleport';
+    ESpell.STANDARD_TARGET_TELEPORT,
+    ESpell.ANCIENT_TARGET_TELEPORT:    Result := 'teleport to target';
+    else                               Result := ToStr(Self).After('.').Replace('_', ' ').ToLower();
+  end;
+end;
 
 procedure TSpellFinder.Setup();
-var
-  path, tmp: String;
 begin
-  Self.Version := WLAssets.JSON.Item['finders/spells.zip'].AsString;
-  Self.CacheDir := WLEnv.CacheDir + 'spellfinder' + PATH_SEP;
-
-  //Delete old cache files if they exist
-  for path in DirList(Self.CacheDir) do
-  begin
-    tmp := Copy(path, Length(path) - Length(Self.Version) + 1, Length(path));
-    if tmp = Self.Version then Continue;
-    DirDelete(path, False);
-  end;
-
-  Self.CacheDir += Self.Version + PATH_SEP;
-
-  if not DirCreate(Self.CacheDir) then
-    raise GetDebugLn('SpellFinder', 'Failed to create cache directory: ' + Self.CacheDir);
+  if Self.IsSetup then
+    Exit;
 
   //only set similarity if the user didn't set it already
   if Self.Similarity = 0 then
     Self.Similarity := 0.85;
+
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  Self.Enums := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ENUMS];
+  Self.Items := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
+
+  Self.IsSetup := True;
 end;
 
-function TSpellFinder.GetImages(spell: ESpell): array [0..1] of TImage;
-const
-  SIZES: TStringArray = ['_large.png', '_small.png'];
+(*
+## SpellFinder.Resolve
+```pascal
+procedure TSpellFinder.Resolve();
+```
+Internal method that reads every spellbook enum out of the cache and fills `SpriteIDs` with the
+icons of each {ref}`ESpell`, matched by name within its own spellbook. The ape atoll teleports of
+the standard and arceuus spellbooks share a name, which is why the spellbook matters.
+
+A spell the cache no longer has, like the removed `BOUNTY_TELEPORT`, is left at `-1`.
+It runs once, the first time a spell image is needed.
+*)
+procedure TSpellFinder.Resolve();
 var
-  name, path: String;
+  book, i, j, id: Integer;
+  enumIds: TIntegerArray;
+  enumDef: TEnumDefinition;
+  itemDef: TItemDefinition;
+  name: String;
+  sprites: array [0..1] of Integer;
+  spell: ESpell;
+begin
+  for spell in ESpell do
+    Self.SpriteIDs[spell] := [-1, -1];
+
+  for book := 0 to High(SPELLBOOK_ENUMS) do
+  begin
+    enumIds := [SPELLBOOK_ENUMS[book]];
+    if book = 0 then
+      enumIds += JEWELLERY_ENCHANT_ENUM;
+
+    for id in enumIds do
+    begin
+      enumDef := TEnumDefinition.Create(id, Self.Enums.Files.Value[id].Data);
+
+      for i := 0 to High(enumDef.IntVals) do
+      begin
+        itemDef := TItemDefinition.Create(enumDef.IntVals[i], Self.Items.Files.Value[enumDef.IntVals[i]].Data);
+
+        name := '';
+        sprites := [-1, -1];
+        for j := 0 to High(itemDef.Params) do
+          if itemDef.Params[j].Key = SPELL_NAME_PARAM then
+            name := itemDef.Params[j].StrValue
+          else if itemDef.Params[j].Key = SPELL_SPRITE_PARAMS[0] then
+            sprites[0] := itemDef.Params[j].IntValue
+          else if itemDef.Params[j].Key = SPELL_SPRITE_PARAMS[1] then
+            sprites[1] := itemDef.Params[j].IntValue;
+
+        name := LowerCase(name.Replace(#39, '').Replace('-', ''));
+        if name = '' then
+          Continue;
+
+        for spell in ESpell do
+          if (spell.Spellbook() = book) and (spell.CacheName() = name) then
+            Self.SpriteIDs[spell] := sprites;
+      end;
+    end;
+  end;
+
+  Self.IsResolved := True;
+end;
+
+(*
+## SpellFinder.GetImages
+```pascal
+function TSpellFinder.GetImages(spell: ESpell): array [0..1] of TImage;
+```
+The large and the small icon of `spell`, as the magic tab draws them when the spell can be cast.
+They are read from the game cache the first time they are asked for and kept in memory after that.
+
+A spell the cache has no icons for gives `nil` images, which {ref}`SpellFinder.Find` skips.
+*)
+function TSpellFinder.GetImages(spell: ESpell): array [0..1] of TImage;
+var
   i: Integer;
+  index: TCacheIndex;
+  sector: TArchiveSector;
 begin
   if Self.SpellImages[spell][0] <> nil then
     Exit(Self.SpellImages[spell]);
 
+  if not Self.IsResolved then
+    Self.Resolve();
+
+  index := CacheReader.Indices[ECacheIndex.SPRITES];
   for i := 0 to 1 do
   begin
-    name := LowerCase(ToStr(spell).After('.')) + SIZES[i];
-    path := Self.CacheDir + name;
+    if Self.SpriteIDs[spell][i] = -1 then
+      Continue;
 
-    if not FileExists(path) then
-      ZipExtract(WLEnv.AssetsDir + 'finders' + PATH_SEP + 'spells.zip', Self.CacheDir, [name]);
+    sector := index.ReadArchiveSector(Self.SpriteIDs[spell][i], index.ID, index.IndexData);
+    if sector.Data = [] then
+      Continue;
 
-    Self.SpellImages[spell][i] := new TImage(path);
+    Self.SpellImages[spell][i] := TSpriteDefinition.Create(Self.SpriteIDs[spell][i], sector.Decompress())[0].ToImage();
   end;
 
   Result := Self.SpellImages[spell];
@@ -85,6 +209,9 @@ begin
   for spell in spells do
     for img in Self.GetImages(spell) do
     begin
+      if img = nil then
+        Continue;
+
       match.Match := Self.Similarity;
       if Self.ImageCompare.FindMatch(img, bounds, match) then
       begin
@@ -103,6 +230,9 @@ begin
   for spell in spells do
     for img in Self.GetImages(spell) do
     begin
+      if img = nil then
+        Continue;
+
       match.Match := Self.Similarity;
       if Self.ImageCompare.FindMatch(img, bounds, match) then
         Exit(True);

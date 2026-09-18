@@ -41,7 +41,7 @@ type
     MIND_ALTAR,
     WATCHTOWER,
     YANILLE,
-    ICE_PLATEU,
+    ICE_PLATEAU,
     LUNAR_HOME,
     FENKENSTRAINS_CASTLE,
     SALVE_GRAVEYARD,
@@ -52,7 +52,7 @@ type
     FISHING_GUILD,
     LUMBRIDGE_HOME,
     WEST_ARDOUGNE,
-    CARRALLANGAR,
+    CARRALLANGER,
     ARCEUUS_HOME,
     WATERBIRTH,
     SENNTISTEN
@@ -93,7 +93,7 @@ const
     [], //MIND_ALTAR
     [], //WATCHTOWER
     [], //YANILLE
-    [], //ICE_PLATEU
+    [], //ICE_PLATEAU
     [], //LUNAR_HOME
     [], //FENKENSTRAINS_CASTLE
     [], //SALVE_GRAVEYARD
@@ -104,7 +104,7 @@ const
     [], //FISHING_GUILD
     [], //LUMBRIDGE_HOME
     [], //WEST_ARDOUGNE
-    [], //CARRALLANGAR
+    [], //CARRALLANGER
     [], //ARCEUUS_HOME
     [], //WATERBIRTH
     [] //SENNTISTEN
@@ -143,7 +143,7 @@ begin
   case spell of
     ESpellTeleport.HOUSE_INSIDE, ESpellTeleport.HOUSE_OUTSIDE:
       magicSpell := ESpell.TELEPORT_TO_HOUSE;
-    ESpellTeleport.KOUREND: magicSpell := ESpell.TELEPORT_TO_KOUREND;
+    ESpellTeleport.KOUREND: magicSpell := ESpell.KOUREND_CASTLE_TELEPORT;
     ESpellTeleport.LASSAR: magicSpell := ESpell.LASSAR_TELEPORT;
     ESpellTeleport.OURANIA: magicSpell := ESpell.OURANIA_TELEPORT;
     ESpellTeleport.RESPAWN: magicSpell := ESpell.RESPAWN_TELEPORT;
@@ -171,7 +171,7 @@ begin
     ESpellTeleport.MIND_ALTAR: magicSpell := ESpell.MIND_ALTAR_TELEPORT;
     ESpellTeleport.WATCHTOWER, ESpellTeleport.YANILLE:
       magicSpell := ESpell.WATCHTOWER_TELEPORT;
-    ESpellTeleport.ICE_PLATEU: magicSpell := ESpell.ICE_PLATEU_TELEPORT;
+    ESpellTeleport.ICE_PLATEAU: magicSpell := ESpell.ICE_PLATEAU_TELEPORT;
     ESpellTeleport.LUNAR_HOME: magicSpell := ESpell.LUNAR_HOME_TELEPORT;
     ESpellTeleport.FENKENSTRAINS_CASTLE:
       magicSpell := ESpell.FENKENSTRAINS_CASTLE_TELEPORT;
@@ -188,7 +188,7 @@ begin
     ESpellTeleport.LUMBRIDGE_HOME:
       magicSpell := ESpell.LUMBRIDGE_HOME_TELEPORT;
     ESpellTeleport.WEST_ARDOUGNE: magicSpell := ESpell.WEST_ARDOUGNE_TELEPORT;
-    ESpellTeleport.CARRALLANGAR: magicSpell := ESpell.CARRALLANGAR_TELEPORT;
+    ESpellTeleport.CARRALLANGER: magicSpell := ESpell.CARRALLANGER_TELEPORT;
     ESpellTeleport.ARCEUUS_HOME: magicSpell := ESpell.ARCEUUS_HOME_TELEPORT;
     ESpellTeleport.WATERBIRTH: magicSpell := ESpell.WATERBIRTH_TELEPORT;
     ESpellTeleport.SENNTISTEN: magicSpell := ESpell.SENNTISTEN_TELEPORT;

@@ -88,21 +88,24 @@ var
   container: TImage;
   matrix: TSingleMatrix;
   similarity: Single;
+  best: TPoint;
 begin
   container := Target.GetImage(bounds);
-  matrix := MatchTemplate(container.ToMatrix(), img.ToMatrix(), ETMFormula.TM_CCOEFF_NORMED);
+  matrix := MatchTemplateMask(container.ToMatrix(), img.ToMatrix(), ETMFormula.TM_CCOEFF_NORMED);
+  best := matrix.ArgMax();
 
-  with matrix.ArgMax() do
-  begin
-    similarity := matrix[Y][X];
-    if similarity < match.Match then Exit;
+  similarity := matrix[best.Y][best.X];
+  if similarity < match.Match then
+    Exit;
 
-    bounds.X1 += X;
-    bounds.Y1 += Y;
-    bounds.X2 := bounds.X1 + img.Width;
-    bounds.Y2 := bounds.Y1 + img.Height;
+  match.Index := 0;
 
-    match := [0, bounds, similarity];
-    Result := True;
-  end;
+  match.Box.X1 := bounds.X1 + best.X;
+  match.Box.Y1 := bounds.Y1 + best.Y;
+  match.Box.X2 := match.Box.X1 + img.Width;
+  match.Box.Y2 := match.Box.Y1 + img.Height;
+
+  match.Match := similarity;
+
+  Result := True;
 end;

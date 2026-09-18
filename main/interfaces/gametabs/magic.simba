@@ -30,7 +30,7 @@ const
 
   INSTANT_THROW_SPELLS = TSpellSet([
     ESpell.TELEPORT_TO_HOUSE,
-    ESpell.TELEPORT_TO_KOUREND,
+    ESpell.KOUREND_CASTLE_TELEPORT,
     ESpell.APE_ATOLL_TELEPORT,
     ESpell.BOUNTY_TELEPORT,
     ESpell.LASSAR_TELEPORT,
@@ -55,7 +55,7 @@ const
     ESpell.TROLLHEIM_TELEPORT,
     ESpell.MIND_ALTAR_TELEPORT,
     ESpell.WATCHTOWER_TELEPORT,
-    ESpell.ICE_PLATEU_TELEPORT,
+    ESpell.ICE_PLATEAU_TELEPORT,
     ESpell.LUNAR_HOME_TELEPORT,
     ESpell.FENKENSTRAINS_CASTLE_TELEPORT,
     ESpell.SALVE_GRAVEYARD_TELEPORT,
@@ -68,11 +68,11 @@ const
     ESpell.FISHING_GUILD_TELEPORT,
     ESpell.LUMBRIDGE_HOME_TELEPORT,
     ESpell.WEST_ARDOUGNE_TELEPORT,
-    ESpell.CARRALLANGAR_TELEPORT,
+    ESpell.CARRALLANGER_TELEPORT,
     ESpell.ARCEUUS_HOME_TELEPORT,
     ESpell.WATERBIRTH_TELEPORT,
     ESpell.SENNTISTEN_TELEPORT,
-    ESpell.NPC_CONTACT
+    ESpell.ASTRAL_CONTACT
   ]);
 
 type
@@ -239,9 +239,11 @@ function TMagic.FindSpell(spell: ESpell; out b: TBox; attempts: Int32 = 2): Bool
 var
   match: TImageMatch;
 begin
-  if not Self.IsOpen() then Exit;
+  if not Self.IsOpen() then
+    Exit;
 
   Result := SpellFinder.Find([spell], GameTab.Bounds, match);
+
   if Result then
   begin
     b := match.Box.Expand(-1);
@@ -369,7 +371,8 @@ Magic.Interact(ESpell.HIGH_LEVEL_ALCHEMY);
 *)
 function TMagic.Interact(spell: ESpell; option: String = ''): Boolean;
 begin
-  if not Self.Hover(spell) then Exit;
+  if not Self.Hover(spell) then
+    Exit;
 
   if (option <> '') and not MainScreen.IsUpText(option) then
     Exit(ChooseOption.Select(option));
@@ -538,7 +541,8 @@ function TMagic.Cast(spell: ESpell; option: String = ''): Boolean;
 var
   selected: TPointArray;
 begin
-  if not Self.Open() then Exit;
+  if not Self.Open() then
+    Exit;
 
   if Self.FindSelected(selected) then
   begin
