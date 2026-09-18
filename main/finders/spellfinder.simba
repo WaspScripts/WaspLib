@@ -200,43 +200,39 @@ begin
 end;
 
 
-function TSpellFinder.FindAll(spells: array of ESpell; bounds: TBox; maxToFind: Integer = 0): TImageMatchArray;
+function TSpellFinder.FindAll(spells: array of ESpell; bounds: TBox; maxToFind: Integer = $FFFFFF): TImageMatchArray;
 var
   spell: ESpell;
-  img: TImage;
+  img, container: TImage;
+  offset: TPoint;
   match: TImageMatch;
 begin
+  container := Target.GetImage(bounds);
+  offset := bounds.TopLeft;
+
   for spell in spells do
     for img in Self.GetImages(spell) do
-    begin
-      if img = nil then
-        Continue;
-
-      match.Match := Self.Similarity;
-      if Self.ImageCompare.FindMatch(img, bounds, match) then
+      if Self.ImageCompare.FindExact(img, container, offset, match) then
       begin
         Result += match;
-        if (maxToFind > 0) and (Length(Result) > maxToFind) then
+        if Length(Result) > maxToFind then
           Exit;
       end;
-    end;
 end;
 
 function TSpellFinder.Find(spells: array of ESpell; bounds: TBox; out match: TImageMatch): Boolean;
 var
   spell: ESpell;
-  img: TImage;
+  img, container: TImage;
+  offset: TPoint;
 begin
+  container := Target.GetImage(bounds);
+  offset := bounds.TopLeft;
+
   for spell in spells do
     for img in Self.GetImages(spell) do
-    begin
-      if img = nil then
-        Continue;
-
-      match.Match := Self.Similarity;
-      if Self.ImageCompare.FindMatch(img, bounds, match) then
+      if Self.ImageCompare.FindExact(img, container, offset, match) then
         Exit(True);
-    end;
 end;
 
 var

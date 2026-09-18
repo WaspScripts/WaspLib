@@ -244,21 +244,27 @@ begin
 end;
 
 
-function TItemFinder.FindAll(items: TItemArray; boxes: TBoxArray; maxToFind: Integer = 0): TImageMatchArray;
+function TItemFinder.FindAll(items: TItemArray; boxes: TBoxArray; maxToFind: Integer = $FFFFFF): TImageMatchArray;
 var
+  img: TImage;
+  trgt: TTarget;
+  skip: TBooleanArray;
+  slots: TImageArray;
   item: TItem;
   spread: TItemArray;
-  img: TImage;
   i: Integer;
-  skip: TBooleanArray;
+  b: TBox;
   match: Single;
 begin
-  SetLength(skip, Length(boxes));
+  img := Target.GetImage();
+  trgt := new TTarget();
+  trgt.SetImage(img); //separate target is better for threading
+
+  Setlength(skip, Length(boxes));
+  Setlength(slots, Length(boxes));
 
   for item in items do
     spread += item.Spread();
-
-  Target.FreezeImage();
 
   for item in spread do
   begin
@@ -270,42 +276,69 @@ begin
       begin
         if skip[i] then
           Continue;
-        if not TItem.InBounds(boxes[i]) then
+
+        b := boxes[i];
+        if not TItem.InBounds(b, 8.5, trgt) then
         begin
           skip[i] := True;
           Continue;
         end;
 
+        if b.Width < 37 then
+          b.X2 := b.X1 + 36;
+
+        if slots[i] = nil then
+          slots[i] := trgt.GetImage(b);
+
         match := Self.Similarity;
-        if Self.ImageCompare.Compare(img, boxes[i], match) then
+        if Self.ImageCompare.Compare(img, slots[i], match) then
         begin
           Result += [i, boxes[i], match];
-          if (maxToFind > 0) and (Length(Result) >= maxToFind) then
+          if Length(Result) >= maxToFind then
             Break(3);
           skip[i] := True;
         end;
       end;
   end;
-
-  Target.UnFreezeImage();
 end;
 
 function TItemFinder.FindAll(items: TItemArray; boxes: TBoxArray; out matches: TImageMatchArray): Boolean; overload;
 var
+  img: TImage;
+  trgt: TTarget;
+  skip: TBooleanArray;
+  slots: TImageArray;
   item: TItem;
   spread: TItemArray;
-  results: TImageMatchArray;
   i: Integer;
-  img: TImage;
+  b: TBox;
+  results: TImageMatchArray;
   match: Single;
-  skip: TBooleanArray;
 begin
+  img := Target.GetImage();
+  trgt := new TTarget();
+  trgt.SetImage(img); //separate target is better for threading
+
   SetLength(skip, Length(boxes));
+  Setlength(slots, Length(boxes));
 
   for item in items do
     spread += item.Spread();
 
-  Target.FreezeImage();
+  for i := 0 to High(boxes) do
+  begin
+    b := boxes[i];
+    if not TItem.InBounds(b, 8.5, trgt) then
+    begin
+      skip[i] := True;
+      Continue;
+    end;
+
+    if b.Width < 37 then
+      b.X2 := b.X1 + 36;
+
+    slots[i] := trgt.GetImage(b);
+  end;
 
   for item in spread do
   begin
@@ -313,49 +346,47 @@ begin
     Self.ImageCompare.Filter := @Self.GetFilter(item);
 
     for img in Self.GetImages(item) do
-      for i := 0 to High(boxes) do
+      for i := 0 to High(slots) do
       begin
-        if skip[i] then Continue;
-        if not TItem.InBounds(boxes[i]) then
-        begin
-          skip[i] := True;
+        if skip[i] then
           Continue;
-        end;
 
         match := Self.Similarity;
-        if Self.ImageCompare.Compare(img, boxes[i], match) then
+        if Self.ImageCompare.Compare(img, slots[i], match) then
         begin
           results += [i, boxes[i], match];
           skip[i] := True;
         end;
       end;
 
-    if results = [] then
-    begin
-      Target.UnFreezeImage();
+    if results.IsEmpty then
       Exit;
-    end;
 
     matches += results;
     results := [];
   end;
-
-  Target.UnFreezeImage();
 
   Result := True;
 end;
 
 function TItemFinder.Find(items: TItemArray; boxes: TBoxArray; out match: TImageMatch): Boolean;
 var
+  img: TImage;
+  trgt: TTarget;
+  skip: TBooleanArray;
+  slots: TImageArray;
   item: TItem;
   spread: TItemArray;
-  img: TImage;
   i: Integer;
+  b: TBox;
   similarity: Single;
-  skip: TBooleanArray;
 begin
+  img := Target.GetImage();
+  trgt := new TTarget();
+  trgt.SetImage(img); //separate target is better for threading
+
   SetLength(skip, Length(boxes));
-  Target.FreezeImage();
+  Setlength(slots, Length(boxes));
 
   for item in items do
     spread += item.Spread();
@@ -369,25 +400,31 @@ begin
     begin
       for i := 0 to High(boxes) do
       begin
-        if skip[i] then Continue;
-        if not TItem.InBounds(boxes[i]) then
+        if skip[i] then
+          Continue;
+
+        b := boxes[i];
+        if not TItem.InBounds(b, 8.5, trgt) then
         begin
           skip[i] := True;
           Continue;
         end;
 
+        if b.Width < 37 then
+          b.X2 := b.X1 + 36;
+
+        if slots[i] = nil then
+          slots[i] := trgt.GetImage(b);
+
         similarity := Self.Similarity;
-        if Self.ImageCompare.Compare(img, boxes[i], similarity) then
+        if Self.ImageCompare.Compare(img, slots[i], similarity) then
         begin
           match := [i, boxes[i], similarity];
-          Target.UnFreezeImage();
           Exit(True);
         end;
       end;
     end;
   end;
-
-  Target.UnFreezeImage();
 end;
 
 

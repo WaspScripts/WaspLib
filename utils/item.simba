@@ -219,7 +219,7 @@ Array type of `TItem`.
 (*
 ## TItem.InBounds
 ```pascal
-function TItem.InBounds(bounds: TBox; fadeTolerance: Single = 8.5): Boolean; static;
+function TItem.InBounds(bounds: TBox; fadeTolerance: Single = 8.5; trgt: TTarget = Target): Boolean; static;
 ```
 Checks if the specified `bounds` has an item in it.
 
@@ -228,10 +228,10 @@ Example:
 WriteLn TItem.InBounds(Inventory.Slots.Box(0));
 ```
 *)
-function TItem.InBounds(bounds: TBox; fadeTolerance: Single = 8.5): Boolean; static;
+function TItem.InBounds(bounds: TBox; fadeTolerance: Single = 8.5; trgt: TTarget = Target): Boolean; static;
 begin
-  Result := Target.HasColor(ITEM_BORDER, fadeTolerance, 1, bounds) or
-            Target.HasColor(ITEM_BORDER_WHITE, 0, 1, bounds);
+  Result := trgt.HasColor(ITEM_BORDER, fadeTolerance, 1, bounds) or
+            trgt.HasColor(ITEM_BORDER_WHITE, 0, 1, bounds);
 end;
 
 

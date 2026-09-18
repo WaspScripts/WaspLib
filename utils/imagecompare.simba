@@ -36,7 +36,7 @@ function TImageCompareUtils.Compare(image, template: TImage; var similarity: Sin
 ```
 Compares two images and returns True if similarity threshold is met.
 *)
-function TImageCompareUtils.Compare(image, template: TImage; var similarity: Single): Boolean;
+function TImageCompareUtils.Compare(image, template: TImage; out similarity: Single): Boolean;
 var
   match: Single;
   tmp: TImage;
@@ -79,19 +79,17 @@ end;
 (*
 ## TImageCompareUtils.FindMatch
 ```pascal
-function TImageCompareUtils.FindMatch(img: TImage; bounds: TBox; out match: TImageMatch): Boolean;
+function TImageCompareUtils.FindMatch(img, container: TImage; offset: TPoint; out match: TImageMatch): Boolean;
 ```
-Finds the best match for an image within specified bounds using template matching.
+Finds the best match for an image within specified container using template matching.
 *)
-function TImageCompareUtils.FindMatch(img: TImage; bounds: TBox; out match: TImageMatch): Boolean;
+function TImageCompareUtils.FindMatch(img: TImage; container: TIntegerMatrix; offset: TPoint; out match: TImageMatch): Boolean;
 var
-  container: TImage;
   matrix: TSingleMatrix;
   similarity: Single;
   best: TPoint;
 begin
-  container := Target.GetImage(bounds);
-  matrix := MatchTemplateMask(container.ToMatrix(), img.ToMatrix(), ETMFormula.TM_CCOEFF_NORMED);
+  matrix := MatchTemplateMask(container, img.ToMatrix(), ETMFormula.TM_CCOEFF_NORMED);
   best := matrix.ArgMax();
 
   similarity := matrix[best.Y][best.X];
@@ -100,12 +98,38 @@ begin
 
   match.Index := 0;
 
-  match.Box.X1 := bounds.X1 + best.X;
-  match.Box.Y1 := bounds.Y1 + best.Y;
+  match.Box.X1 := offset.X + best.X;
+  match.Box.Y1 := offset.Y + best.Y;
   match.Box.X2 := match.Box.X1 + img.Width;
   match.Box.Y2 := match.Box.Y1 + img.Height;
 
   match.Match := similarity;
+
+  Result := True;
+end;
+
+(*
+## TImageCompareUtils.FindExact
+```pascal
+function TImageCompareUtils.FindExact(img, container: TImage; offset: TPoint; out match: TImageMatch): Boolean;
+```
+Finds and exact match for an image within specified container.
+*)
+function TImageCompareUtils.FindExact(img, container: TImage; offset: TPoint; out match: TImageMatch): Boolean;
+var
+  pt: TPoint;
+begin
+  pt := container.FindImage(img, 0);
+  if pt = [-1,-1] then
+    Exit;
+
+  match.Index := 0;
+  match.Box.X1 := offset.X + pt.X;
+  match.Box.Y1 := offset.Y + pt.Y;
+  match.Box.X2 := match.Box.X1 + img.Width;
+  match.Box.Y2 := match.Box.Y1 + img.Height;
+
+  match.Match := 1;
 
   Result := True;
 end;
