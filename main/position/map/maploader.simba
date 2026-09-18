@@ -399,13 +399,21 @@ function TMapLoader.GetHeight(local: TPoint): Single; overload;
 The terrain height at a {ref}`Local point`, in the units scripts have always used: the raw cache
 height divided by 32, counted upwards.
 
-The heights are stored per tile, so the point is turned into a tile of the region it falls in.
+The cache stores one height per tile, and it is the height of that tile's south-west corner.
+The ground between corners is interpolated from the four corners around the point, the same way
+the game client does it. A point on a tile's edge or corner therefore gives the same height from
+whichever tile it is read, so neighbouring tiles line up.
+
+A tile is `TILE_SIZE` pixels wide with its corners on multiples of it, so a tile's centre is
+`TILE_SIZE div 2` pixels past its north-west corner.
+Corners past the last row or column of a region reuse the edge ones.
 A point outside every region, or in a region's padding, has no tile behind it and gives `0`.
 *)
 function TMapLoader.GetHeight(regionIdx: Integer; local: TPoint): Single;
 var
   region: TMapRegion;
-  x, y: Integer;
+  x, y, tx, ty, w, h, west, east, north, south: Integer;
+  top, bottom: Integer;
 begin
   region := Self.Regions[regionIdx];
   if region.Heights = [] then
@@ -415,17 +423,29 @@ begin
   x := local.X - region.Region.X1 - Self.Padding;
   y := local.Y - region.Region.Y1 - Self.Padding;
 
+  w := Length(region.Heights);
+  h := Length(region.Heights[0]);
+
   //a point in the padding is off the map, and div would round it up into tile 0
-  if (x < 0) or (y < 0) then
+  if (x < 0) or (y < 0) or (x > w * TMapLoader.TILE_SIZE) or (y > h * TMapLoader.TILE_SIZE) then
     Exit;
 
+  //how far the point is past the tile's north west corner
+  tx := x mod TMapLoader.TILE_SIZE;
+  ty := y mod TMapLoader.TILE_SIZE;
   x := x div TMapLoader.TILE_SIZE;
   y := y div TMapLoader.TILE_SIZE;
 
-  if (x > High(region.Heights)) or (y > High(region.Heights[x])) then
-    Exit;
+  //a tile's height is its south west corner, so its north corners belong to the tile above it
+  west  := Min(x, w - 1);
+  east  := Min(x + 1, w - 1);
+  north := EnsureRange(y - 1, 0, h - 1);
+  south := Min(y, h - 1);
 
-  Result := -region.Heights[x, y] / 32;
+  top    := region.Heights[west, north] * (TMapLoader.TILE_SIZE - tx) + region.Heights[east, north] * tx;
+  bottom := region.Heights[west, south] * (TMapLoader.TILE_SIZE - tx) + region.Heights[east, south] * tx;
+
+  Result := -(top * (TMapLoader.TILE_SIZE - ty) + bottom * ty) / (Sqr(TMapLoader.TILE_SIZE) * 32);
 end;
 
 function TMapLoader.GetHeight(local: TPoint): Single; overload;

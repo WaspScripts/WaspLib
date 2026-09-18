@@ -432,9 +432,6 @@ WriteLn Map.Height();
 ```
 *)
 function TMap.Height(pt: TPoint = Default(TPoint); global: Boolean = True): Single;
-var
-  neighbours: TPointArray;
-  p: TPoint;
 begin
   if Self.DisableHeightmap or Self.Loader.Regions.IsEmpty then
     Exit(0.0);
@@ -449,19 +446,8 @@ begin
   if global then
     pt := Self.Loader.GetLocal(Self.RegionIndex, pt);
 
-  neighbours := [
-    pt, pt.Offset(-1,-1), pt.Offset(1,-1), pt.Offset(-1,1),  pt.Offset(1,1)
-  ];
-
-  for p in neighbours do
-  begin
-    if p in Self.Loader.MapBox then
-      Result += Self.Loader.GetHeight(p)
-    else if pt in Self.Loader.MapBox then
-      Result += Self.Loader.GetHeight(pt);
-  end;
-
-  Result := Result/Length(neighbours);
+  if pt in Self.Loader.MapBox then
+    Result := Self.Loader.GetHeight(pt);
 end;
 
 
@@ -488,10 +474,10 @@ begin
   currLoc := me + vector.ToPoint() - Minimap.Center;
 
   corners := [
-    [vector.X-2, vector.Y-2, Self.Height(currLoc + [-1,-1], False) - h],
-    [vector.X+2, vector.Y-2, Self.Height(currLoc + [1,-1],  False) - h],
-    [vector.X+2, vector.Y+2, Self.Height(currLoc + [1,1],   False) - h],
-    [vector.X-2, vector.Y+2, Self.Height(currLoc + [-1,1],  False) - h]
+    [vector.X-2, vector.Y-2, Self.Height(currLoc + [-2,-2], False) - h],
+    [vector.X+2, vector.Y-2, Self.Height(currLoc + [2,-2],  False) - h],
+    [vector.X+2, vector.Y+2, Self.Height(currLoc + [2,2],   False) - h],
+    [vector.X-2, vector.Y+2, Self.Height(currLoc + [-2,2],  False) - h]
   ];
 
   arr := Projection.Run(corners, angle);
@@ -623,7 +609,8 @@ end;
 procedure TMap.DebugHeight(img: TImage; dots: EDots);
 procedure TMap.DebugHeight(dots: EDots = [EDot.PLAYER..EDot.ITEM]); overload;
 ```
-Debugs the heightmap with {ref}`MM2MS`.
+Debugs the heightmap by projecting the outline of every tile around the player onto the
+{ref}`MainScreen`.
 
 Example:
 ```pascal
@@ -680,10 +667,10 @@ begin
       currLoc := loc + Point(x,y) - Minimap.Center;
 
       corners := [
-        [vector.X-2, vector.Y-2, Self.Height(currLoc + [-1,-1], False) - h],
-        [vector.X+2, vector.Y-2, Self.Height(currLoc + [1,-1],  False) - h],
-        [vector.X+2, vector.Y+2, Self.Height(currLoc + [1,1],   False) - h],
-        [vector.X-2, vector.Y+2, Self.Height(currLoc + [-1,1],  False) - h]
+        [vector.X-2, vector.Y-2, Self.Height(currLoc + [-2,-2], False) - h],
+        [vector.X+2, vector.Y-2, Self.Height(currLoc + [2,-2],  False) - h],
+        [vector.X+2, vector.Y+2, Self.Height(currLoc + [2,2],   False) - h],
+        [vector.X-2, vector.Y+2, Self.Height(currLoc + [-2,2],  False) - h]
       ];
 
       arr := Projection.Run(corners, angle);
