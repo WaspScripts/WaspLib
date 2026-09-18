@@ -438,7 +438,7 @@ end;
 procedure TDepositBox._SetupMapObjects();
 begin
   Self.DepositBoxes := TObjectArray.Create(
-    Map.Walker, ObjectsJSON.GetByAction('Bank Deposit Box')
+    Map.Walker, MapObjects.GetByAction('Bank Deposit Box')
   );
 end;
 

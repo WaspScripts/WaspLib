@@ -140,6 +140,7 @@ Summary: It includes this file until the current file is reached.
 {$IFNDEF WL_IMAGEMAP_INCLUDED}              {$INCLUDE_ONCE main/position/imagemap.simba}
 {$IFNDEF WL_MAPLOADER_INCLUDED}             {$INCLUDE_ONCE main/position/map/maploader.simba}
 {$IFNDEF WL_MAP_INCLUDED}                   {$INCLUDE_ONCE main/position/map/map.simba}
+{$IFNDEF WL_MAPOBJECTS_INCLUDED}            {$INCLUDE_ONCE main/position/map/mapobjects.simba}
 {$IFNDEF WL_OBJECTS_INCLUDED}               {$INCLUDE_ONCE main/position/map/objects.simba}
 {$IFNDEF WL_ENTITIES_INCLUDED}              {$INCLUDE_ONCE main/position/map/entities.simba}
 {$IFNDEF WL_MAPDEBUGGER_INCLUDED}           {$INCLUDE_ONCE main/position/map/mapdebugger.simba}
@@ -194,7 +195,7 @@ Summary: It includes this file until the current file is reached.
 {$IFNDEF WL_INTERFACE_DEBUGGING_INCLUDED}   {$INCLUDE_ONCE main/interfaces/debugging.simba}
 {$IFNDEF WL_OVERRIDES_INCLUDED}             {$INCLUDE_ONCE main/overrides.simba}
 
-{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
+{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
 {$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
 {$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
 {$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}

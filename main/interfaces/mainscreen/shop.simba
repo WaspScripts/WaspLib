@@ -343,7 +343,7 @@ end;
 procedure TShop._SetupMapObjects();
 begin
   Self.Shops := TObjectArray.Create(
-    Map.Walker, ObjectsJSON.GetByAction('Buy-food')
+    Map.Walker, MapObjects.GetByAction('Buy-food')
   );
 
   Self.Merchants := TEntityArray.Create(

@@ -225,7 +225,7 @@ var
 begin
   with Self.Bounds do
     tpa := Target.FindColor($232B2E, 1, [X1+6, Y2-43, X2-6, Y2-6]);
-  if tpa = [] then
+  if tpa.IsEmpty then
     Exit;
   atpa := tpa.Cluster(1.5).ExtractDimensions(0, 0, 4, 30);
   if Length(atpa) <> 3 then
@@ -384,7 +384,8 @@ var
   stack: EStack;
 begin
   final := Target.FindColor(ITEM_BORDER, 1, Self.SlotsArea);
-  if final = [] then Exit;
+  if final.IsEmpty then
+    Exit;
 
   for stack := Low(EStack) to High(EStack) do
   begin
@@ -442,7 +443,7 @@ begin
 
   if Result then
   begin
-    if tpa = [] then
+    if tpa.IsEmpty then
     begin
       if not Self.HasJagexAccountAd() then Exit;
       if not Self.CloseJagexAccountAd() then Exit;
@@ -877,9 +878,11 @@ function TBank._FindTabText(tpa: TPointArray; out bounds: TBox): Boolean;
 var
   atpa: T2DPointArray;
 begin
-  if tpa = [] then Exit;
+  if tpa.IsEmpty then
+    Exit;
   atpa := tpa.Cluster(6).ExcludeDimensions(24, 8, 26, 8);
-  if atpa = [] then Exit;
+  if atpa.IsEmpty then
+    Exit;
 
   atpa := atpa.SortByY(False)[0].Cluster(1.5);
   bounds := atpa.SortByX(False)[0].Bounds();
@@ -1305,7 +1308,8 @@ var
   slot, hash: Integer;
 begin
   slots := Inventory.Items.FindDifferent(items);
-  if slots = [] then Exit(True);
+  if slots.IsEmpty then
+    Exit(True);
 
   for slot in slots do
   begin
@@ -1391,10 +1395,10 @@ end;
 procedure TBank._SetupMapObjects();
 begin
   Self.Banks := TObjectArray.Create(
-                  Map.Walker, ObjectsJSON.GetByAction('Bank')
+                  Map.Walker, MapObjects.GetByAction('Bank')
                 ) +
                 TObjectArray.Create(
-                  Map.Walker, ObjectsJSON.GetByAllActions(['Use', 'Collect'])
+                  Map.Walker, MapObjects.GetByAllActions(['Use', 'Collect'])
                 );
   Self.Bankers := TEntityArray.Create(Map.Walker, NPCsJSON.GetByAction('Bank'));
 end;
@@ -1437,7 +1441,7 @@ var
   npc: PRSEntity;
   me: TPoint;
 begin
-  if (Self.Banks = []) or (Self.Bankers = []) then
+  if Self.Banks.IsEmpty or Self.Bankers.IsEmpty then
     Self._SetupMapObjects();
 
   me := Map.Position();
@@ -1521,7 +1525,7 @@ begin
     MSInterface.Close(True);
   end;
 
-  if (Self.Banks = []) or (Self.Bankers = []) then
+  if Self.Banks.IsEmpty or Self.Bankers.IsEmpty then
     Self._SetupMapObjects();
 
   me := Map.Position();

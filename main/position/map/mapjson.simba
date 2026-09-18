@@ -1,12 +1,15 @@
 (*
 # Map JSONs
 Utilities to help load and parse json files related to {ref}`Map`.
+
+Only NPCs still come from json, since their positions are crowdsourced. Objects are read from the
+game cache by {ref}`Map Objects`.
 *)
 {$DEFINE WL_MAPJSON_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-  EMapJSON = enum(OBJECTS, NPCS);
+  EMapJSON = enum(NPCS);
 
   TMapJSON = record
     Data: TJSONArray;
@@ -38,12 +41,6 @@ var
 begin
   Self.Typ := typ;
   case Self.Typ of
-    EMapJSON.OBJECTS:
-    begin
-      Self.Version := WLAssets.JSON.Item['map/objects.zip'].AsString;
-      Self.CacheDir := WLEnv.CacheDir + 'map' + PATH_SEP + 'objects' + PATH_SEP;
-      filename := Self.ZIP + 'objects.zip';
-    end;
     EMapJSON.NPCS:
     begin
       Self.Version := WLAssets.JSON.Item['map/npcs.zip'].AsString;
@@ -78,7 +75,7 @@ end;
 ```pascal
 function MapJSON.GetFile(cachedir: String; chunk: TPoint; plane: Integer): TJSONArray;
 ```
-Internal function to return a `JSONArray` of objects or npcs associated with the
+Internal function to return a `JSONArray` of npcs associated with the
 specified `chunk` and `plane`.
 *)
 function TMapJSON.GetFile(cacheDir: String; chunk: TPoint; plane: Integer): TJSONArray;
@@ -100,7 +97,7 @@ end;
 ```pascal
 procedure TMapJSON.Load(regions: array of TMapRegion = []);
 ```
-Internal method to load all objects or npcs JSON data associated with the
+Internal method to load all npcs JSON data associated with the
 specified `regions` merged into a single `TJSONArray`.
 *)
 procedure TMapJSON.Load(regions: array of TMapRegion = []);
@@ -128,7 +125,7 @@ end;
 ```pascal
 function TMapJSON.GetByName(name: String; amount: Integer = 0): TJSONArray;
 ```
-Returns a `TJSONArray` of `JSONObjects` of a map object or npc that matches the
+Returns a `TJSONArray` of `JSONObjects` of an npc that matches the
 specified `name`.
 
 By default you get all entries that match the `name`, however, if you want you
@@ -173,7 +170,7 @@ end;
 ```pascal
 function TMapJSON.GetByID(id: Integer): TJSONObject;
 ```
-Returns a `TJSONObject` of a map object that matches the specified `id`.
+Returns a `TJSONObject` of an npc that matches the specified `id`.
 *)
 function TMapJSON.GetByID(id: Integer): TJSONObject;
 var
@@ -211,7 +208,7 @@ end;
 ```pascal
 function TMapJSON.GetByAction(action: String; amount: Integer = 0): TJSONArray;
 ```
-Returns a `TJSONArray` of `JSONObjects` of a map object or npc that has an
+Returns a `TJSONArray` of `JSONObjects` of an npc that has an
 action that matches the specified `action`.
 
 By default you get all entries that match the `action`, however, if you want
@@ -258,7 +255,7 @@ end;
 ```pascal
 function TMapJSON.GetByAllActions(actions: TStringArray; amount: Integer = 0): TJSONArray;
 ```
-Returns a `TJSONArray` of `JSONObjects` of a map object or npc that has all the specified
+Returns a `TJSONArray` of `JSONObjects` of an npc that has all the specified
 `actions`.
 
 By default you get all entries that match the `actions`, however, if you want
@@ -321,4 +318,4 @@ begin
 end;
 
 var
-  ObjectsJSON, NPCsJSON: TMapJSON;
+  NPCsJSON: TMapJSON;

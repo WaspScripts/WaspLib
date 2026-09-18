@@ -1,0 +1,435 @@
+(*
+# Map Objects
+The game objects of the loaded map, read straight out of the game cache: where each one stands,
+what it's called, what it can be clicked for, and what it looks like.
+
+Everything comes from the same cache the map itself is drawn from, so it's always in step with
+the game, and the objects of a region are only read once that region is part of the map.
+
+Example:
+```pascal
+{$I WaspLib/main.simba}
+var
+  booths: TObjectArray;
+begin
+  Map.Setup([EChunk.VARROCK]);
+  booths := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
+end.
+```
+*)
+{$DEFINE WL_MAPOBJECTS_INCLUDED}
+{$INCLUDE_ONCE WaspLib/main.simba}
+
+type
+(*
+## TMapObjectData
+One kind of object and every place it stands on the loaded map.
+- `ID`, `Name`, `Category` and `Actions` come from the object's definition. `Actions` are the
+  ones its right-click menu shows, in menu order.
+- `Typ` is the shape it's placed as: `10` is an ordinary object, `0` to `3` walls, `4` to `8`
+  wall decorations and `22` ground decorations.
+- `Coordinates` and `Rotations` are where it stands, as {ref}`Global points`, and which way each
+  of those copies is turned, `0` to `3`.
+- `Size` is its footprint in tiles and `Height` how tall it is, in the game's units: a tile is
+  `128`.
+- `Colors` are the colours it is drawn in, most common first.
+
+`Height` and `Colors` come from the object's models, which are only built when the object is
+asked for - see {ref}`MapObjects.Build`.
+*)
+  TMapObjectData = record
+    ID, Typ, Category, Height: Integer;
+    Name: String;
+    Actions: TStringArray;
+    Coordinates: TPointArray;
+    Rotations: TIntegerArray;
+    Size: TPoint;
+    Colors: TColorArray;
+    IsBuilt: Boolean;
+  end;
+
+  TMapObjectDataArray = array of TMapObjectData;
+
+(*
+## TMapObjects
+Record holding the {ref}`TMapObjectData` of every object on the loaded map.
+- `Definitions` are the definitions of `Data`, in the same order, for building their models.
+- `Lookup` turns an object id into its place in `Data`, stored one higher so `0` means none.
+- `Loaded` holds the chunks already read, as `x, y` with the plane packed in with them.
+*)
+  TMapObjects = record
+    Data: TMapObjectDataArray;
+    Definitions: TObjectDefinitionArray;
+    Lookup: TIntegerArray;
+    Loaded: TIntegerArray;
+    const COVERAGE: Single = 0.9;
+  end;
+
+(*
+## MapObjects.Coordinate
+```pascal
+function TMapObjects.Coordinate(tile: TPoint; size: TPoint; plane: Integer): TPoint; static;
+```
+The {ref}`Global point` an object whose south west tile is `tile`, and which covers `size` tiles
+once turned, is stored at.
+
+Vertically it is the middle of the object. Horizontally it is half a tile west of the middle,
+which is where the object data WaspLib used to download put it. It is kept that way so objects
+line up exactly where they always have.
+*)
+function TMapObjects.Coordinate(tile: TPoint; size: TPoint; plane: Integer): TPoint; static;
+var
+  top: Integer;
+begin
+  //the global y of the top edge of the map's northernmost row of tiles
+  top := ((RSTranslator.RSMap.Scope.Y2 + 1) * RSTranslator.RSMap.ChunkSide - 1) * RSTranslator.TILE_SIZE;
+
+  Result.X := tile.X * RSTranslator.TILE_SIZE + 2 * (size.X - 1) + RSTranslator.MapWidth * plane;
+  Result.Y := top - tile.Y * RSTranslator.TILE_SIZE + 2 - 2 * (size.Y - 1);
+end;
+
+(*
+## MapObjects.Resolve
+```pascal
+function TMapObjects.Resolve(constref objects: TObjectDefinitionArray; id: Integer; out def: TObjectDefinition): Boolean; static;
+```
+The definition object `id` is shown as, if it's one a script can interact with.
+
+Some objects change with the player's progress and are placed as a stand-in whose definition only
+lists what it can turn into. Those are shown as the first of their forms that has a name. Objects
+without a name, or that can't be interacted with, like most decorations, are left out.
+*)
+function TMapObjects.Resolve(constref objects: TObjectDefinitionArray; id: Integer; out def: TObjectDefinition): Boolean; static;
+var
+  child: Integer;
+begin
+  if objects.IndexOf(id) = -1 then
+    Exit;
+
+  def := objects[id];
+
+  if def.ConfigChangeDest <> [] then
+  begin
+    for child in def.ConfigChangeDest do
+      if (objects.IndexOf(child) <> -1) and (objects[child].Name <> 'null') then
+      begin
+        def := objects[child];
+        Break;
+      end;
+  end;
+
+  Result := (def.Name <> 'null') and (def.InteractType <> 0);
+end;
+
+(*
+## MapObjects.Actions
+```pascal
+function TMapObjects.Actions(constref def: TObjectDefinition): TStringArray; static;
+```
+The actions `def`'s right-click menu shows, in the order it shows them.
+*)
+function TMapObjects.Actions(constref def: TObjectDefinition): TStringArray; static;
+var
+  i, j: Integer;
+begin
+  for i := 0 to 4 do
+    for j := 0 to High(def.Ops.Ops) do
+      if def.Ops.Ops[j].Index = i then
+        Result += def.Ops.Ops[j].Text;
+end;
+
+(*
+## MapObjects.Add
+```pascal
+procedure TMapObjects.Add(constref def: TObjectDefinition; locType, rotation: Integer; coordinate: TPoint);
+```
+Internal method that records one placement of `def`, adding the object if it's the first one.
+*)
+procedure TMapObjects.Add(constref def: TObjectDefinition; locType, rotation: Integer; coordinate: TPoint);
+var
+  idx: Integer;
+begin
+  if def.ID >= Length(Self.Lookup) then
+    SetLength(Self.Lookup, def.ID + 1);
+
+  idx := Self.Lookup[def.ID] - 1;
+  if idx = -1 then
+  begin
+    idx := Length(Self.Data);
+    SetLength(Self.Data, idx + 1);
+    Self.Definitions += def;
+    Self.Lookup[def.ID] := idx + 1;
+
+    Self.Data[idx].ID := def.ID;
+    Self.Data[idx].Name := def.Name;
+    Self.Data[idx].Typ := locType;
+    Self.Data[idx].Category := def.Category;
+    Self.Data[idx].Actions := TMapObjects.Actions(def);
+    Self.Data[idx].Size := [def.SizeX, def.SizeY];
+  end;
+
+  Self.Data[idx].Coordinates += coordinate;
+  Self.Data[idx].Rotations += rotation;
+end;
+
+(*
+## MapObjects.DrawnPlane
+```pascal
+function TMapObjects.DrawnPlane(constref region: TRegion; constref loc: TWorldLocation): Integer; static;
+```
+The plane `loc` is drawn on, and so the one it's seen and clicked on, which isn't always the one
+it's stored on. The same rule the client uses:
+- A tile flagged to be drawn on the ground has everything on it drawn on plane `0`, like the
+  walls of a building that are stored upstairs but stand on the ground.
+- Under a bridge, what's stored on a plane is drawn on the plane below it.
+*)
+function TMapObjects.DrawnPlane(constref region: TRegion; constref loc: TWorldLocation): Integer; static;
+var
+  x, y: Integer;
+begin
+  x := loc.X - region.BaseX;
+  y := loc.Y - region.BaseY;
+
+  if (region.TileSettings[loc.Z, x, y] and 8) <> 0 then
+    Exit(0);
+
+  Result := loc.Z;
+  if (Result > 0) and ((region.TileSettings[1, x, y] and 2) <> 0) then
+    Dec(Result);
+end;
+
+(*
+## MapObjects.Load
+```pascal
+procedure TMapObjects.Load(var loader: TMapLoader);
+procedure TMapObjects.Load(); overload;
+```
+Reads the objects of every chunk `loader` has loaded that hasn't been read yet. Without a loader
+it reads {ref}`Map`'s. The getters below call this, so it rarely needs calling directly.
+
+An object belongs to the plane it's drawn on - see {ref}`MapObjects.DrawnPlane`.
+*)
+procedure TMapObjects.Load(var loader: TMapLoader);
+var
+  region: TMapRegion;
+  cacheRegion: TRegion;
+  loc: TWorldLocation;
+  def: TObjectDefinition;
+  chunk: TPoint;
+  key, id, plane: Integer;
+  size: TPoint;
+begin
+  if loader.Regions = [] then
+    Exit;
+
+  loader.SetupChunkLoader();
+
+  for region in loader.Regions do
+    for chunk in region.Chunks do
+    begin
+      key := (region.Plane shl 16) or (chunk.X shl 8) or chunk.Y;
+      if key in Self.Loaded then
+        Continue;
+      Self.Loaded += key;
+
+      if not loader.ChunkLoader.RegionLoader.LoadRegionAndNeighbors(chunk.X, chunk.Y) then
+        Continue;
+
+      id := loader.ChunkLoader.RegionLoader.Lookup[(chunk.X shl 8) or chunk.Y];
+      cacheRegion := loader.ChunkLoader.RegionLoader.Regions[id];
+
+      for loc in cacheRegion.Locations do
+      begin
+        plane := TMapObjects.DrawnPlane(cacheRegion, loc);
+
+        if plane <> region.Plane then
+          Continue;
+
+        if not TMapObjects.Resolve(loader.ChunkLoader.MapData.Objects, loc.ID, def) then
+          Continue;
+
+        //a turned object covers its footprint the other way around
+        if loc.Orientation and 1 = 0 then
+          size := [def.SizeX, def.SizeY]
+        else
+          size := [def.SizeY, def.SizeX];
+
+        Self.Add(def, loc.LocType, loc.Orientation, TMapObjects.Coordinate([loc.X, loc.Y], size, plane));
+      end;
+    end;
+end;
+
+procedure TMapObjects.Load(); overload;
+begin
+  Self.Load(Map.Loader);
+end;
+
+(*
+## MapObjects.Build
+```pascal
+procedure TMapObjects.Build(idx: Integer);
+```
+Internal method that builds the models of `Data[idx]` with {ref}`TObjectModel` to fill in its
+`Height` and `Colors`.
+
+Only the colours that cover most of the object make it into `Colors`: the most common ones, until
+`COVERAGE` of its faces are accounted for. The rest are slivers and rarely lit corners that would
+only widen what a colour finder looks for.
+*)
+procedure TMapObjects.Build(idx: Integer);
+var
+  model: TObjectModel;
+  i, total, covered: Integer;
+begin
+  if Self.Data[idx].IsBuilt then
+    Exit;
+  Self.Data[idx].IsBuilt := True;
+
+  model := TObjectModel.Create(Self.Definitions[idx], Self.Data[idx].Typ);
+  if not model.Valid then
+    Exit;
+
+  Self.Data[idx].Height := model.Height;
+
+  for i := 0 to High(model.Counts) do
+    total += model.Counts[i];
+
+  for i := 0 to High(model.Colors) do
+  begin
+    Self.Data[idx].Colors += model.Colors[i];
+    covered += model.Counts[i];
+    if covered >= total * TMapObjects.COVERAGE then
+      Break;
+  end;
+end;
+
+(*
+## MapObjects.GetByName
+```pascal
+function TMapObjects.GetByName(name: String; amount: Integer = 0): TMapObjectDataArray;
+```
+Every object called `name`. Pass `amount` to stop after that many objects.
+
+Example:
+```pascal
+WriteLn MapObjects.GetByName('Bank booth');
+```
+*)
+function TMapObjects.GetByName(name: String; amount: Integer = 0): TMapObjectDataArray;
+var
+  i: Integer;
+begin
+  Self.Load();
+
+  for i := 0 to High(Self.Data) do
+    if Self.Data[i].Name = name then
+    begin
+      Self.Build(i);
+      Result += Self.Data[i];
+      if Length(Result) = amount then
+        Exit;
+    end;
+end;
+
+(*
+## MapObjects.GetByID
+```pascal
+function TMapObjects.GetByID(id: Integer): TMapObjectData;
+```
+The object with the id `id`. It has no `Coordinates` if there is no such object on the map.
+*)
+function TMapObjects.GetByID(id: Integer): TMapObjectData;
+var
+  idx: Integer;
+begin
+  Self.Load();
+
+  if not InRange(id, 0, High(Self.Lookup)) then
+    Exit;
+
+  idx := Self.Lookup[id] - 1;
+  if idx = -1 then
+    Exit;
+
+  Self.Build(idx);
+  Result := Self.Data[idx];
+end;
+
+(*
+## MapObjects.GetByAction
+```pascal
+function TMapObjects.GetByAction(action: String; amount: Integer = 0): TMapObjectDataArray;
+```
+Every object with `action` in its right-click menu. Pass `amount` to stop after that many
+objects.
+
+Example:
+```pascal
+WriteLn MapObjects.GetByAction('Bank');
+```
+*)
+function TMapObjects.GetByAction(action: String; amount: Integer = 0): TMapObjectDataArray;
+var
+  i: Integer;
+begin
+  Self.Load();
+
+  for i := 0 to High(Self.Data) do
+    if action in Self.Data[i].Actions then
+    begin
+      Self.Build(i);
+      Result += Self.Data[i];
+      if Length(Result) = amount then
+        Exit;
+    end;
+end;
+
+(*
+## MapObjects.GetByAllActions
+```pascal
+function TMapObjects.GetByAllActions(actions: TStringArray; amount: Integer = 0): TMapObjectDataArray;
+```
+Every object with all of `actions` in its right-click menu. Pass `amount` to stop after that many
+objects.
+*)
+function TMapObjects.GetByAllActions(actions: TStringArray; amount: Integer = 0): TMapObjectDataArray;
+var
+  i: Integer;
+  action: String;
+begin
+  Self.Load();
+
+  for i := 0 to High(Self.Data) do
+  begin
+    for action in actions do
+      if not (action in Self.Data[i].Actions) then
+        Continue(2);
+
+    Self.Build(i);
+    Result += Self.Data[i];
+    if Length(Result) = amount then
+      Exit;
+  end;
+end;
+
+(*
+## MapObjects.Clear
+```pascal
+procedure TMapObjects.Clear();
+```
+Forgets every object read so far, so the next getter reads the map again from scratch.
+*)
+procedure TMapObjects.Clear();
+begin
+  Self.Data := [];
+  Self.Definitions := [];
+  Self.Lookup := [];
+  Self.Loaded := [];
+end;
+
+var
+(*
+## MapObjects variable
+Global {ref}`TMapObjects` variable, holding the objects of {ref}`Map`.
+*)
+  MapObjects: TMapObjects;

@@ -16,8 +16,6 @@ end;
 {$ENDIF}
 
 type
-  EObjectData = enum(ID, NAME, TYP, CATEGORY, ACTIONS, COORDINATES, SIZE, ROTATIONS, COLORS);
-
 (*
 ## TObject
 Main type to handle {ref}`Objects`.
@@ -46,7 +44,7 @@ Array of {ref}`TObject`.
 ## TObject.Create
 ```pascal
 function TObject.Create(var walker: TWalker; size: TVector3; coordinates: TPointArray; uptext: TStringArray = []): TObject; static;
-function TObject.Create(var walker: TWalker; json: TJSONObject): TObject; static; overload;
+function TObject.Create(var walker: TWalker; data: TMapObjectData): TObject; static; overload;
 ```
 Create function to create your {ref}`TObject`.
 
@@ -65,16 +63,14 @@ begin
 end;
 ```
 
-The `json` version of the function expects a specific json structure which is
-the one that {ref}`Map JSONs` provide:
+The `data` version builds the object from one of the {ref}`Map Objects`, finder included:
 ```pascal
 {$I WaspLib/main.simba}
 var
   obj: TObject;
 begin
   Map.Setup([EChunk.VARROCK]);
-  //Item[0] because this returns a JSON array. For more info read Map JSONs documentation.
-  obj := TObject.Create(Map.Walker, ObjectsJSON.GetByName('bank', 1).Item[0]);
+  obj := TObject.Create(Map.Walker, MapObjects.GetByName('Bank booth', 1)[0]);
 end;
 ```
 *)
@@ -89,60 +85,41 @@ begin
   Result.MinDistance := 32;
 end;
 
-function TObject.Create(var walker: TWalker; json: TJSONObject): TObject; static; overload;
+function TObject.Create(var walker: TWalker; data: TMapObjectData): TObject; static; overload;
 var
   i, j, l: Integer;
   unique: array of TColorArray;
   color: TColor;
   best: TBestColor;
 begin
-  if json = nil then
-    raise GetDebugLn('TObject', 'JSON is nil.');
+  Result.UpText := [data.Name];
+  Result.Coordinates := data.Coordinates;
+  Result.Rotations := data.Rotations;
+  SetLength(Result.Rotations, Length(Result.Coordinates));
 
-  if json.Typ <> EJSONType.OBJ then
-    raise GetDebugLn('TObject', 'JSON Object expected, got ' + ToStr(json.Typ) + '.');
-
-  with json.Item[Ord(EObjectData.NAME)] do
-    if AsString <> 'null' then
-      Result.UpText := [AsString];
-
-  with json.Item[Ord(EObjectData.COORDINATES)] do
-    for i := 0 to Count-1 do
-      Result.Coordinates += [Item[i].Item[0].AsInt, Item[i].Item[1].AsInt];
-
-  with json.Item[Ord(EObjectData.SIZE)] do
-  begin
-    Result.Size.X := Item[0].AsInt * 0.8;
-    Result.Size.Y := Item[1].AsInt * 0.8;
-    Result.Size.Z := Item[2].AsInt / 128;
-  end;
+  Result.Size.X := data.Size.X * 0.8;
+  Result.Size.Y := data.Size.Y * 0.8;
+  Result.Size.Z := data.Height / 128;
 
   if Abs(Result.Size.Z) < 0.05 then
     Result.Size.Z := 3.0;
 
-  with json.Item[Ord(EObjectData.ROTATIONS)] do
-    for i := 0 to Count-1 do
-      Result.Rotations += Item[i].AsInt;
+  for i := 0 to High(data.Colors) do
+  begin
+    color := data.Colors[i];
 
-  SetLength(Result.Rotations, Length(Result.Coordinates));
-
-  with json.Item[Ord(EObjectData.COLORS)] do
-    for i := 0 to Count-1 do
+    for j := 0 to High(unique) do
     begin
-      color := Item[i].AsInt;
-
-      for j := 0 to High(unique) do
-      begin
-        for l := 0 to High(unique[j]) do
-          if ColorDistance(color, unique[j, l], EColorSpace.HSL, [1.5, 1.5, 1.5]) < 15 then
-          begin
-            unique[j] += color;
-            Continue(3);
-          end;
-      end;
-
-      unique += [color];
+      for l := 0 to High(unique[j]) do
+        if ColorDistance(color, unique[j, l], EColorSpace.HSL, [1.5, 1.5, 1.5]) < 15 then
+        begin
+          unique[j] += color;
+          Continue(3);
+        end;
     end;
+
+    unique += [color];
+  end;
 
   for i := 0 to High(unique) do
   begin
@@ -157,12 +134,11 @@ end;
 (*
 ## TObjectArray.Create
 ```pascal
-function TObjectArray.Create(var walker: TWalker; json: TJSONArray): TObjectArray; static; overload;
+function TObjectArray.Create(var walker: TWalker; data: TMapObjectDataArray): TObjectArray; static;
 ```
 Create function to build your {ref}`TObjectArray`.
 
-This only accepts a `json` array and it expects a specific json structure which is
-the one that {ref}`Map JSONs` provide.
+Builds one {ref}`TObject` for each of the {ref}`Map Objects` in `data`.
 
 Example:
 ```pascal
@@ -172,20 +148,17 @@ var
   objs: TObjectArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(Map.Walker, ObjectsJSON.GetByName('Bank booth'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByName('Bank booth'));
 end;
 ```
 *)
-function TObjectArray.Create(var walker: TWalker; json: TJSONArray): TObjectArray; static;
+function TObjectArray.Create(var walker: TWalker; data: TMapObjectDataArray): TObjectArray; static;
 var
   i: Integer;
 begin
-  if json.Typ <> EJSONType.ARR then
-    raise GetDebugLn('TObject', 'JSON Array expected, got ' + ToStr(json.Typ) + '.');
-
-  SetLength(Result, json.Count);
+  SetLength(Result, Length(data));
   for i := 0 to High(Result) do
-    Result[i] := TObject.Create(walker, json.Item[i]);
+    Result[i] := TObject.Create(walker, data[i]);
 end;
 
 (*
@@ -194,7 +167,7 @@ end;
 TObject.Rotations: TIntegerArray;
 ```
 `Rotations` allows you to customize the rotation of a `TObject`.
-By default unless you used {ref}`ObjectsJSON` to create your object they will
+By default unless you used {ref}`MapObjects` to create your object they will
 no rotation set, AKA `0`.
 
 It's very important that `Rotations` is the same length as `Coordinates` as they
@@ -288,7 +261,7 @@ var
   cuboids: TCuboidArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   cuboids := objs[1].GetBoundsArray(Map.Position());
   ShowOnTarget(cuboids);
 end.
@@ -396,7 +369,7 @@ var
   objs: TObjectArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   ShowOnTarget(objs[1]);
 end.
 ```
@@ -421,7 +394,7 @@ var
   objs: TObjectArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   objs[1].Finder := []; //removing the finder for this example.
   ShowOnTarget(objs[1]);
 end.
@@ -511,7 +484,7 @@ var
   atpa: T2DPointArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   objs[1].Finder := [];
 
   while True do
@@ -731,7 +704,7 @@ var
   atpa: T2DPointArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   objs[1].Hover();
 end.
 ```
@@ -812,7 +785,7 @@ var
   atpa: T2DPointArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   objs[1].WalkHover();
 end.
 ```
@@ -910,7 +883,7 @@ var
   atpa: T2DPointArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   objs[1].Click();
 end.
 ```
@@ -944,7 +917,7 @@ var
   atpa: T2DPointArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   objs[1].Interact(['Collect']);
 end.
 ```
@@ -975,7 +948,7 @@ var
   atpa: T2DPointArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   objs[1].WalkClick();
 end.
 ```
@@ -1016,7 +989,7 @@ var
   atpa: T2DPointArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  objs := TObjectArray.Create(ObjectsJSON.GetByAction('Bank'));
+  objs := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
   objs[1].WalkInteract(['Collect']);
 end.
 ```

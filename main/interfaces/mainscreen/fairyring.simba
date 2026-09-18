@@ -685,7 +685,7 @@ end;
 
 procedure TFairyRing._SetupMapObjects();
 begin
-  Self.FairyRings := TObjectArray.Create(Map.Walker, ObjectsJSON.GetByName('Fairy ring'));
+  Self.FairyRings := TObjectArray.Create(Map.Walker, MapObjects.GetByName('Fairy ring'));
 end;
 
 (*

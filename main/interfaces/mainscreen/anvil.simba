@@ -301,7 +301,7 @@ var
   obj: TObject;
 begin
   if Self.Anvils = [] then
-    Self.Anvils := TObjectArray.Create(Map.Walker, ObjectsJSON.GetByAction('Smith'));
+    Self.Anvils := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Smith'));
 
   obj := Self.Anvils[Self.Anvils.ClosestIndex(Map.Position())];
   if walk then
@@ -364,7 +364,7 @@ begin
   end;
 
   if Self.Anvils = [] then
-    Self.Anvils := TObjectArray.Create(Map.Walker, ObjectsJSON.GetByAction('Smith'));
+    Self.Anvils := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Smith'));
 
   obj := Self.Anvils[Self.Anvils.ClosestIndex(Map.Position())];
   Result := Self.Open(obj, walk);
