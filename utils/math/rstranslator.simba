@@ -120,20 +120,6 @@ begin
 end;
 
 
-function TTranslator.Height2Color(height: Single): Int32;
-const
-  H_VALUE = 6048 / $FFFFFF;
-begin
-  Result := Round((height / H_VALUE) / 4 * 128);
-end;
-
-function TTranslator.Color2Height(color: Int32): Single;
-const
-  H_VALUE = 6048 / $FFFFFF;
-begin
-  Result := color * H_VALUE * 4 / 128;
-end;
-
 
 function TTranslator.Normalize(pt: TPoint): TPoint;
 begin

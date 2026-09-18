@@ -401,7 +401,7 @@ begin
     collision.Pixel[pt.X, pt.Y] := $F5F5F5;
   end;
 
-  Self.Images := [loader.Map.Copy(), loader.Heightmap.Copy(), collision];
+  Self.Images := [loader.Map.Copy(), loader.Heightmap, collision];
 
   Self.GetGlobal := @loader.GetGlobal;
 

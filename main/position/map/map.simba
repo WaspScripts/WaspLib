@@ -436,7 +436,7 @@ var
   neighbours: TPointArray;
   p: TPoint;
 begin
-  if Self.DisableHeightmap or not Assigned(Self.Loader.Heightmap) then
+  if Self.DisableHeightmap or Self.Loader.Regions.IsEmpty then
     Exit(0.0);
 
   if pt = Default(TPoint) then
@@ -455,10 +455,10 @@ begin
 
   for p in neighbours do
   begin
-    if Self.Loader.Heightmap.InImage(p.X, p.Y) then
-      Result += RSTranslator.Color2Height(Self.Loader.Heightmap.Pixel[p.X,p.Y])
-    else if Self.Loader.Heightmap.InImage(pt.X, pt.Y) then
-      Result += RSTranslator.Color2Height(Self.Loader.Heightmap.Pixel[pt.X,pt.Y]);
+    if p in Self.Loader.MapBox then
+      Result += Self.Loader.GetHeight(p)
+    else if pt in Self.Loader.MapBox then
+      Result += Self.Loader.GetHeight(pt);
   end;
 
   Result := Result/Length(neighbours);
@@ -661,7 +661,7 @@ begin
 
   Self.Position();
   loc := Self.Cache.LocalPosition;
-  h := RSTranslator.Color2Height(Self.Loader.Heightmap.Pixel[loc.X,loc.Y]);
+  h := Self.Loader.GetHeight(loc);
 
   for x := Minimap.Center.X - 120 to Minimap.Center.X + 120 with 4 do
     for y := Minimap.Center.Y - 120 to Minimap.Center.Y + 120 with 4 do

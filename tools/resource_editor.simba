@@ -183,7 +183,7 @@ begin
   Editor.Dialog.Width := 600;
   Editor.Dialog.Height := 800;
   Editor.Dialog.DefaultExt := '.bin';
-  Editor.Dialog.InitialDir := Map.Loader.CacheDir;
+  Editor.Dialog.InitialDir := WLEnv.CacheDir;
   Editor.Dialog.Options := [ELazOpenFileOptions.ShowHelp, ELazOpenFileOptions.ExtensionDifferent, ELazOpenFileOptions.FileMustExist];
 
   Editor.Form := TLazForm.Create();

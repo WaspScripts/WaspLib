@@ -173,7 +173,6 @@ begin
 
   WaspClient.Setup();
   WLAssets.Update();
-  Map.Loader.Init();
 
   Target.AddEvent(ETargetEvent.TARGET_RESIZE, @TargetResized);
   FormUtils.Setup();
