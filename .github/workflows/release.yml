@@ -51,6 +51,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           path: ./Includes/WaspLib
+          submodules: true
 
       - name: Upload WaspLib repo
         uses: actions/upload-artifact@v6
