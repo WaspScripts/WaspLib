@@ -126,8 +126,8 @@ var
   tmp: T2DPointArray;
 begin
   Self.Downscale := downscale;
-  Self.DownscaleMatrix := Self.Map.Downsample(Self.Downscale).ToMatrix();
-  Self.HalfMap := Self.Map.Downsample(2);
+  Self.DownscaleMatrix := Self.Map.Resize(EImageResizeAlgo.BOX, 1/Self.Downscale).ToMatrix();
+  Self.HalfMap := Self.Map.Resize(EImageResizeAlgo.BOX, 0.5);
 
   walls := Self.Map.FindColor($EEEEEE, 0);
   windows := Self.Map.FindColor($0000EE, 0);

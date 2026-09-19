@@ -167,7 +167,7 @@ begin
       else Self.DrawItem(slot, bg);
     end;
 
-  Self.ImageBox.SetImage(bg.Resize(EImageRotateAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
+  Self.ImageBox.SetImage(bg.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
 end;
 
 

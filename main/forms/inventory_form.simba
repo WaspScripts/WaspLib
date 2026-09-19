@@ -246,7 +246,7 @@ begin
     Self.DrawFloatingItem(Self.Layout.Items[Self.DragSource].Item, Self.Layout.Items[Self.DragSource].Amount, bg, origX, origY);
   end;
 
-  Self.ImageBox.SetImage(bg.Resize(EImageRotateAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
+  Self.ImageBox.SetImage(bg.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
 end;
 
 procedure TInventoryFormHelper.OnSelectionChange(sender: TLazObject);

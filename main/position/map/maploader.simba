@@ -751,8 +751,8 @@ begin
   Self.Map := newMap;
   Self.Collision := newCollision;
 
-  Self.HalfMap := Self.Map.Downsample(2);
-  Self.DownscaledMatrix := Self.Map.Downsample(Self.Downscale).ToMatrix();
+  Self.HalfMap := Self.Map.Resize(EImageResizeAlgo.BOX, 0.5);
+  Self.DownscaledMatrix := Self.Map.Resize(EImageResizeAlgo.BOX, 1/Self.Downscale).ToMatrix();
 
   if WebGraphGenerator.Disabled then
     Exit;

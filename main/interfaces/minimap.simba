@@ -1456,7 +1456,7 @@ begin
 
   Result := Result.Blend(tpa, 8);
   if scaling > 1 then
-    Result := Result.Downsample(scaling);
+    Result := Result.Resize(EImageResizeAlgo.BOX, 1/scaling);
 
   Result.DrawColor := $0;
   Result.DrawCircleInverted(Result.Center, radius div scaling);
