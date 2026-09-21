@@ -118,15 +118,22 @@ end;
 
 
 procedure TItemFinder.Setup();
+const
+  DB_PATH: String = SimbaEnv.DataPath + 'items-db' + PATH_SEP;
 begin
   if Self.IsSetup then
     Exit;
 
   Self.Version := WLAssets.JSON.Item['finders/items/data/hash.txt'].AsString;
 
+  if not DirExists(DB_PATH) then
+  begin
+    ItemLoader.WriteDatabase(DB_PATH);
+  end;
+
   Self.Database.Setup(
     'items', ['id', 'item', 'hash', 'border'],
-    SimbaEnv.DataPath + 'items-db' + PATH_SEP,
+    DB_PATH,
     Self.Version
   );
 
