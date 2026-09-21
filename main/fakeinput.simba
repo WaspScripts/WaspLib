@@ -57,8 +57,11 @@ begin
     raise GetDebugLn('RemoteInput', 'Can''t get target window.');
 
   Self.Window := Target.Info.Window;
-  if Self.Window.GetClassName() <> 'SunAwtCanvas' then
-    Exit;
+
+  case Self.Window.GetClassName() of
+    'SunAwtCanvas', 'net-runelite-client-RuneLite': ;
+    else Exit;
+  end;
 
   pid := Self.Window.GetPID();
 
@@ -243,7 +246,7 @@ fully or partially, on the client.
 
 Example:
 ```pascal
-WriteLm Client.IsInputEnabled();
+WriteLn Client.IsInputEnabled();
 ```
 *)
 function TClient.IsInputEnabled(): Boolean;
