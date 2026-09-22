@@ -1,20 +1,4 @@
-(*
-# Map Debugger
-Tool to help debug {ref}`TMap` and {ref}`TMapLoader`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Map.Setup([EChunk.VARROCK]);
-  MapDebugger.Setup(Map.Loader);
-  MapDebugger.Show();
-end.
-```
-
-```{figure} ../../images/map_debugger.gif
-```
-*)
 
 {$DEFINE WL_MAPDEBUGGER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -27,10 +11,7 @@ end;
 {$ENDIF}
 
 type
-(*
-## TMapDebugger
-Main record used to hold core values of the {ref}`Map Debugger`.
-*)
+
   TMapDebugger = record
     ImageBox: TImageBox;
     Images: TImageArray;
@@ -211,19 +192,7 @@ begin
 end;
 
 
-(*
-## MapDebugger.Show
-```pascal
-procedure TMapDebugger.Show();
-```
-Shows the `MapDebugger` form. You must first call {ref}`TMapDebugger.Setup`
-before calling this.
 
-Example:
-```pascal
-MapDebugger.Show();
-```
-*)
 procedure TMapDebugger.Show();
 var
   form: TLazForm;
@@ -369,19 +338,7 @@ begin
     Sleep(100);
 end;
 
-(*
-## MapDebugger.Setup
-```pascal
-procedure TMapDebugger.Setup(var loader: TMapLoader);
-```
-Setup method for the `MapDebugger` form.
-A {ref}`TMapLoader` must be passed into this as `loader`.
 
-Example:
-```pascal
-MapDebugger.Setup(@Map.Loader);
-```
-*)
 procedure TMapDebugger.Setup(var loader: TMapLoader);
 var
   collision: TImage;
@@ -423,10 +380,7 @@ end;
 {$R+}
 
 var
-(*
-## MapDebugger variable
-Global {ref}`TMapDebugger` variable.
-*)
+
   MapDebugger: TMapDebugger;
 
 procedure TMap.Debug();
