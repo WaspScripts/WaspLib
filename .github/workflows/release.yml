@@ -23,23 +23,21 @@ jobs:
         run: |
           README_URL="https://raw.githubusercontent.com/Villavu/Simba-Build-Archive/refs/heads/main/README.md"
           README=$(curl -sSL "$README_URL")
-          FULL_URL=$(echo "$README" | grep -oP '\[Win64\]\(/[^)]*simba2000[^)]*Win64\.zip\?raw=true\)' | head -n1 | sed 's/^\[Win64\](//; s/)$//')
+          FULL_URL=$(echo "$README" | grep -oP '\[Win64\]\(https://[^)]*simba2000[^)]*/Simba_windows_x86_64\.exe\.zip\)' | head -n1 | sed 's/^\[Win64\](//; s/)$//')
 
           if [[ -z "$FULL_URL" ]]; then
             echo "Error: Could not find simba2000 Win64 URL in README"
             exit 1
           fi
 
-          FULL_URL="https://raw.githubusercontent.com/Villavu/Simba-Build-Archive/refs/heads/main${FULL_URL}"
-
-          if [[ $FULL_URL =~ ([a-zA-Z0-9]{10})/Win64\.zip ]]; then
+          if [[ $FULL_URL =~ ([a-zA-Z0-9]{10})/Simba_windows_x86_64\.exe\.zip ]]; then
             BUILD_HASH="${BASH_REMATCH[1]}"
           else
             echo "Error: Could not extract build hash from $FULL_URL"
             exit 1
           fi
 
-          BASE_URL="${FULL_URL%Win64.zip*}"
+          BASE_URL="${FULL_URL%Simba_windows_x86_64.exe.zip}"
           echo "baseUrl=$BASE_URL" >> $GITHUB_OUTPUT
           echo "buildHash=$BUILD_HASH" >> $GITHUB_OUTPUT
           echo "fullUrl=$FULL_URL" >> $GITHUB_OUTPUT
@@ -87,13 +85,16 @@ jobs:
         target:
           - os: windows-latest
             arch: Win32
-            exec: ./Simba-Win32.exe
+            zip: Simba_windows_i386.exe.zip
+            exec: ./Simba_windows_i386.exe
           - os: windows-latest
             arch: Win64
-            exec: ./Simba-Win64.exe
+            zip: Simba_windows_x86_64.exe.zip
+            exec: ./Simba_windows_x86_64.exe
           - os: ubuntu-latest
             arch: Linux64
-            exec: ./Simba-Linux64
+            zip: Simba_linux_x86_64.zip
+            exec: ./Simba_linux_x86_64
           # - os: ubuntu-24.04-arm
           #   arch: Linux arm64
           #   exec: ./Simba-Linux
@@ -118,9 +119,7 @@ jobs:
         shell: bash
         run: |
           base_url="${{ needs.setup.outputs.base_url }}"
-          arch="${{ matrix.target.arch }}"
-          arch="${arch// /%20}"
-          download_url="${base_url}${arch}.zip?raw=true"
+          download_url="${base_url}${{ matrix.target.zip }}"
           echo "Download ${{ matrix.target.arch }} URL: $download_url"
           output_file="download.zip"
           curl -L "$download_url" -o "$output_file"
