@@ -20,11 +20,6 @@ type
     LevelsForm: TLazForm;
     LevelsButton: TLazButton;
     Config: TConfigJSON;
-
-    Unzipping: Boolean;
-    Timeout: TCountDown;
-    Version, CacheDir: String;
-    const ZIP: String = WLEnv.AssetsDir + 'images' + PATH_SEP + 'skills.zip';
   end;
 
 {$H-}
@@ -122,6 +117,70 @@ begin
   Self.Config.Save();
 end;
 
+(*
+## GoalsForm.GetSkillImages
+```pascal
+function TGoalsFormHelper.GetSkillImages(): array [ESkill] of TImage;
+```
+Internal function that reads the skill icons of the stats tab out of the game cache.
+Each icon is placed on its sprite's full 25x25 canvas, where the stats tab draws it.
+
+The client picks each skill's icon from an enum keyed by the skill's id, which is not the same
+as its {ref}`ESkill` value. The total level icon is not a skill so it is not in the enum.
+*)
+function TGoalsFormHelper.GetSkillImages(): array [ESkill] of TImage;
+const
+  SPRITE_ENUM: Integer = 255;
+  TOTAL_SPRITE: Integer = 222;
+  SKILL_IDS: array [ESkill] of Integer = [
+    0,  3,  14,
+    2,  16, 13,
+    1,  15, 10,
+    4,  17, 7,
+    5,  12, 11,
+    6,  9,  8,
+    20, 18, 19,
+    22, 21, 23,
+    -1
+  ];
+var
+  enumDef: TEnumDefinition;
+  index: TCacheIndex;
+  sector: TArchiveSector;
+  skill: ESkill;
+  i, spriteId: Integer;
+  sprite: TSpriteDefinition;
+begin
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  enumDef := TEnumDefinition.Create(
+    SPRITE_ENUM,
+    CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ENUMS].Files.Value[SPRITE_ENUM].Data
+  );
+
+  index := CacheReader.Indices[ECacheIndex.SPRITES];
+  for skill in ESkill do
+  begin
+    spriteId := TOTAL_SPRITE;
+    if skill <> ESkill.TOTAL then
+    begin
+      i := enumDef.Keys.IndexOf(SKILL_IDS[skill]);
+      if i = -1 then
+        raise GetDebugLn('GoalsForm', 'Failed to find the ' + ToStr(skill) + ' icon in the cache.');
+      spriteId := enumDef.IntVals[i];
+    end;
+
+    sector := index.ReadArchiveSector(spriteId, index.ID, index.IndexData);
+    if sector.Data = [] then
+      raise GetDebugLn('GoalsForm', 'Failed to read the ' + ToStr(skill) + ' icon from the cache.');
+
+    //the form stretches its icons, so place them on their full canvas like the stats tab does
+    sprite := TSpriteDefinition.Create(spriteId, sector.Decompress())[0];
+    Result[skill] := new TImage(sprite.MaxWidth, sprite.MaxHeight);
+    Result[skill].FillWithAlpha(0);
+    Result[skill].DrawImage(sprite.ToImage(), [sprite.OffsetX, sprite.OffsetY]);
+  end;
+end;
+
 procedure TGoalsFormHelper.SetupLevelsForm(owner: Pointer);
 var
   info: TLazLabel;
@@ -130,7 +189,10 @@ var
   img: TLazImage;
   edit: TLazSpinEdit;
   checkbox: TLazCheckBox;
+  images: array [ESkill] of TImage;
 begin
+  images := Self.GetSkillImages();
+
   Self.LevelsForm := TLazForm.Create(TLazComponent(owner));
   Self.LevelsForm.Caption := 'Stats Goals';
   Self.LevelsForm.Position := ELazFormPosition.OwnerFormCenter;
@@ -160,7 +222,7 @@ begin
   for skill := Low(ESkill) to High(ESkill)-1 do
   begin
     img := TLazImage.CreateEx(Self.LevelsForm);
-    img.Picture.LoadFromFile(Self.CacheDir + ToStr(skill) + '.png');
+    img.Picture.Bitmap := images[skill].ToLazBitmap();
     img.SetBounds(
       70 + 90 * (Ord(skill) mod 3),
       info.Bottom + 10 + 27 * (Ord(skill) div 3), 25, 25
@@ -186,7 +248,7 @@ begin
   end;
 
   img := TLazImage.CreateEx(Self.LevelsForm);
-  img.Picture.LoadFromFile(Self.CacheDir + ToStr(skill) + '.png');
+  img.Picture.Bitmap := images[skill].ToLazBitmap();
   img.SetBounds(150, info.Bottom + 10 + 27 * (Ord(skill) div 3), 25, 25);
 
   img.Stretch := True;
@@ -227,25 +289,7 @@ function TGoalsFormHelper.Create(owner: Pointer; actions, time, levels: Boolean 
 var
   lbl: TLazLabel;
   y, size: Integer;
-  timer: TCountDown;
 begin
-  timer.Start(8*SECOND);
-  while Self.Unzipping do
-  begin
-    Sleep(100);
-    if timer.IsFinished then
-    begin
-      DebugLn('GoalsForm', 'Unzipping files, please wait.');
-      timer.Restart();
-    end;
-
-    if Self.Timeout.IsFinished then
-    begin
-      DirDelete(Self.CacheDir, False);
-      raise GetDebugLn('GoalsForm', 'Timed out unzipping skill images.');
-    end;
-  end;
-
   Self.Config.Setup('goals' + PATH_SEP + ToStr(ProfileIndex));
 
   case orientation of
@@ -373,49 +417,6 @@ begin
   begin
     Self.LevelsButton.OnClick := @Self.OnLevelsClick;
     Self.SetupLevelsForm(owner);
-  end;
-end;
-
-procedure TGoalsFormHelper.Unzipped(constref result: TASyncUnzipResult);
-var
-  name, msg: String;
-begin
-  if not result.Success then
-  begin
-    DirDelete(Self.CacheDir, False);
-    raise GetDebugLn('GoalsForm', result.Exception);
-  end;
-  name := PathExtractName(result.ZipFile);
-  msg := 'Finished async unzip of ' +  name + ' in ' + ToStr(Round(result.TimeUsed, 2)) + 'ms.';
-  DebugLn('GoalsForm', msg, ELogLevel.SUCCESS);
-  Self.Unzipping := False;
-end;
-
-procedure TGoalsFormHelper.Setup();
-var
-  path, tmp: String;
-begin
-  Self.Version := WLAssets.JSON.Item['images/skills.zip'].AsString;
-  Self.CacheDir := WLEnv.CacheDir + 'skills' + PATH_SEP;
-
-  //Delete old cache files if they exist
-  for path in DirList(Self.CacheDir) do
-  begin
-    tmp := Copy(path, Length(path) - Length(Self.Version) + 1, Length(path));
-    if tmp = Self.Version then Continue;
-    DirDelete(path, False);
-  end;
-
-  Self.CacheDir += Self.Version + PATH_SEP;
-
-  if not DirCreate(Self.CacheDir) then
-    raise GetDebugLn('SpellFinder', 'Failed to create cache directory: ' + Self.CacheDir);
-
-  if DirList(Self.CacheDir).IsEmpty then
-  begin
-    Self.Unzipping := True;
-    Self.Timeout.Start(2*MINUTE);
-    Async.FileUnZip(Self.ZIP, Self.CacheDir, @Self.Unzipped);
   end;
 end;
 

@@ -198,7 +198,6 @@ begin
   PrayerFinder.Setup();
   OverheadFinder.Setup();
   HouseLayoutFinder.Setup();
-  GoalsForm.Setup();
   Consumables.Init();
 
   GameTabs.KeybindsEnabled := True;
