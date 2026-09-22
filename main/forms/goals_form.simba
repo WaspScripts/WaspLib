@@ -1,14 +1,4 @@
-(*
-# Goals Form
-This page is about the {ref}`Goals Form`, a dedicated `TLazForm` to configure
-skill level goals for a script.
 
-This is meant to be used with {ref}`TScriptForm` with
-{ref}`TScriptForm.CreateGoalsButton` and will setup a small `TLazPanel` on it
-with a checkbox and a button to open the form:
-```{figure} ../../images/goalsform.png
-```
-*)
 {$DEFINE WL_GOALS_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
