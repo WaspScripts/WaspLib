@@ -1,16 +1,4 @@
-(*
-# Models
-Types and methods that allows you to load and project 3D models.
 
-This is mostly for internal use for {ref}`RSObjects` and {ref}`RSEntities` but
-you may use this directly if you need and know what you are doing.
-
-If you are curious about how the projection works you should read about
-{ref}`Projection`.
-
-```{figure} ../../images/modeldraw.png
-```
-*)
 {$DEFINE WL_MODEL_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
@@ -23,16 +11,7 @@ end;
 {$ENDIF}
 
 type
-(*
-(TModelFace)=
-# TModelFace type
-Type that represents a model face.
 
-A model face consists of 3 vertices indices making a triangle and a
-"material" index to give the face a color.
-
-A 3D model will have several of these.
-*)
   TModelFace = record
     Vertices: array [0..2] of Int32;
     Material: Int32;
@@ -40,15 +19,7 @@ A 3D model will have several of these.
 
   TModelFaceArray = array of TModelFace;
 
-(*
-(TModel)=
-# TModel type
-Type that represents a 3D model.
 
-A model in it's basic form confists of several `Vertices` (`TVector3Array`) and
-faces that represent triangles among those vertices
-(array of {ref}`TModelFace`).
-*)
   TModel = object
     Vertices: TVector3Array;
     Faces: TModelFaceArray;
@@ -58,15 +29,7 @@ faces that represent triangles among those vertices
     Center: TVector3;
   end;
 
-(*
-# Model.LoadMTL
-```pascal
-procedure TModel.LoadMTL(fileName: string);
-```
-Read and parses a material .mtl file and loads it's data into the `TModel`.
 
-This is used to load materials (colors) into the `TModel`.
-*)
 procedure TModel.LoadMTL(fileName: string);
 var
   strings: TLazStringList;
@@ -110,15 +73,7 @@ begin
   end;
 end;
 
-(*
-# Model.LoadOBJ
-```pascal
-procedure TModel.LoadOBJ(fileName: string);
-```
-Read and parses a model .obj file and loads it's data into the `TModel`.
 
-This is used load vertices and faces information into the `TModel`.
-*)
 procedure TModel.LoadOBJ(fileName: String);
 var
   strings: TLazStringList;
@@ -193,25 +148,7 @@ begin
 end;
 
 
-(*
-# Model.Construct
-```pascal
-function TModel.Construct(objFile: String; mtlFile: String = ''): TModel; static;
-```
-Creates a new `TModel` out of the `objFile` and `mtlFile` passed in.
 
-If `mtlFile` is left empty no material data is loaded.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  model: TModel;
-begin
-  model := new TModel('path/to/my/model.obj');
-end.
-```
-*)
 function TModel.Construct(objFile: String; mtlFile: String = ''): TModel; static;
 begin
   if mtlFile <> '' then
@@ -220,50 +157,7 @@ begin
 end;
 
 
-(*
-# Model.Scale
-```pascal
-procedure TModel.Scale(factor: Single);
-```
-Scales a model by the `factor`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-  model: TModel;
-  tpa: TPointArray;
-  i: Integer;
-begin
-  model := new TModel('path/to/my/model.obj');
-
-  while True do
-  begin
-    for i := 0 to 100 do
-    begin
-      img := Target.GetImage(MainScreen.Bounds);
-      model.Scale(0.99);
-      tpa := Projection.ProjectModel(model, Minimap.Center.ToVec3(), Minimap.CompassRadians, 0);
-      model.DrawModel(img, tpa, True);
-      img.Show();
-    end;
-
-    for i := 0 to 100 do
-    begin
-      img := Target.GetImage(MainScreen.Bounds);
-      model.Scale(1.01);
-      tpa := Projection.ProjectModel(model, Minimap.Center.ToVec3(), Minimap.CompassRadians, 0);
-      model.DrawModel(img, tpa, True);
-      img.Show();
-    end;
-  end;
-end.
-```
-
-```{figure} ../../images/modelscale.gif
-```
-*)
 procedure TModel.Scale(factor: Single);
 var
   i: Integer;
@@ -284,36 +178,7 @@ begin
   Self.Center.Z := Self.Center.Z * factor;
 end;
 
-(*
-# Model.Rotate
-```pascal
-procedure TModel.Rotate(radians: Single);
-```
-Rotates a model in the X axis by `radians`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-  model: TModel;
-  tpa: TPointArray;
-begin
-  model := new TModel('path/to/my/model.obj');
-  while True do
-  begin
-    img := Target.GetImage(MainScreen.Bounds);
-    model.Rotate(0.005);
-    tpa := Projection.ProjectModel(model, Minimap.Center.ToVec3(), Minimap.CompassRadians, 0);
-    model.DrawModel(img, tpa, True);
-    img.Show();
-  end;
-end.
-```
-
-```{figure} ../../images/modelrotate.gif
-```
-*)
 procedure TModel.Rotate(radians: Single);
 var
   i: Integer;
@@ -324,47 +189,7 @@ begin
     Self.Vertices[i] := Self.Vertices[i].Rotate(radians, center);
 end;
 
-(*
-# Model.Offset
-```pascal
-procedure TModel.Offset(value: TVector3);
-```
-Offsets a model in the 3D space by `value`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-  model: TModel;
-  tpa: TPointArray;
-  i: Integer;
-begin
-  model := new TModel('path/to/my/model.obj');
-  while True do
-  begin
-    for i := 1 to 600 do
-    begin
-      img := Target.GetImage(MainScreen.Bounds);
-      case i of
-        1..100:   model.Offset([0,0,0.1]);
-        101..200: model.Offset([0,0,-0.1]);
-        201..300: model.Offset([0.1,0,0]);
-        301..400: model.Offset([-0.1,0,0]);
-        401..500: model.Offset([0,0.1,0]);
-        501..600: model.Offset([0,-0.1,0]);
-      end;
-      tpa := Projection.ProjectModel(model, Minimap.Center.ToVec3(), Minimap.CompassRadians, 0);
-      model.DrawModel(img, tpa, True);
-      img.Show();
-    end;
-  end;
-end.
-```
-
-```{figure} ../../images/modeloffset.gif
-```
-*)
 procedure TModel.Offset(value: TVector3);
 var
   i: Integer;
@@ -378,33 +203,7 @@ begin
 end;
 
 
-(*
-# Model.GetArea
-```pascal
-function TModel.GetArea(projection: TPointArray): TPointArray;
-```
-Takes a model projection as a `TPointArray` which you can get with
-{ref}`Model.Project` and returns it's area filled as a `TPointArray` with the
-"faces" information.
 
-It's very useful to get clickboxes of models.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  model: TModel;
-  tpa: TPointArray;
-begin
-  model := new TModel('path/to/my/model.obj');
-  tpa := Projection.ProjectModel(model, Minimap.Center.ToVec3(), Minimap.CompassRadians, 0);
-  ShowOnTarget(model.GetArea(tpa));
-end.
-```
-
-```{figure} ../../images/modelgetarea.png
-```
-*)
 function TModel.GetArea(projection: TPointArray): TPointArray;
 var
   i, j: Integer;
@@ -419,64 +218,13 @@ begin
   end;
 end;
 
-(*
-# Model.GetEdges
-```pascal
-function TModel.GetEdges(projection: TPointArray): TPointArray;
-```
-Takes a model projection as a `TPointArray` which you can get with
-{ref}`Model.Project` and returns it's area edges as a `TPointArray` with the
-"faces" information.
 
-Essentially gives you the model outline.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  model: TModel;
-  tpa: TPointArray;
-begin
-  model := new TModel('path/to/my/model.obj');
-  tpa := Projection.ProjectModel(model, Minimap.Center.ToVec3(), Minimap.CompassRadians, 0);
-  ShowOnTarget(model.GetEdges(tpa));
-end.
-```
-
-```{figure} ../../images/modelgetedges.png
-```
-*)
 function TModel.GetEdges(projection: TPointArray): TPointArray;
 begin
   Result := Self.GetArea(projection).Edges();
 end;
 
-(*
-# Model.DrawModel
-```pascal
-procedure TModel.DrawModel(img: TImage; projection: TPointArray; outline: Boolean = True);
-```
-Draws a model `projection` into a `img`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-  model: TModel;
-  tpa: TPointArray;
-begin
-  img := Target.GetImage(MainScreen.Bounds);
-  model := new TModel('path/to/my/model.obj');
-  tpa := Projection.ProjectModel(model, Minimap.Center.ToVec3(), Minimap.CompassRadians, 0);
-  model.DrawModel(img, tpa, True);
-  img.Show();
-end.
-```
-
-```{figure} ../../images/modeldraw.png
-```
-*)
 procedure TModel.DrawModel(img: TImage; projection: TPointArray; outline: Boolean = True);
 var
   i, j: Integer;

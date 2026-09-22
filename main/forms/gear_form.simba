@@ -1,28 +1,10 @@
-(*
-# Gear Form
-This page is about {ref}`Gear Layouts` dedicated `TLazForm` utilities.
 
-This is meant to be used with {ref}`TScriptForm` with
-{ref}`TScriptForm.CreateGearTab` and will setup a a `TLazTabSheet` on it with
-several controls to configure the {ref}`Gear Layouts`:
-```{figure} ../../images/gearform.png
-```
-*)
 
 {$DEFINE WL_GEAR_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TGearFormHelper
-The `TGearFormHelper` type is, as it's name implies a helper type for the
-`Gear Form`.
 
-It has a lot of methods and callbacks that are hidden by default and won't be mentioned on
-this page because they are internal methods you shouldn't touch.
-
-Do feel free to read the source code though if you so desire.
-*)
   TGearFormHelper = record
     Sets: array of TGear;
     Index: Integer;
@@ -379,15 +361,7 @@ begin
 end;
 
 
-(*
-## GearForm.CreateGearCombobox
-```pascal
-function TGearFormHelper.CreateGearCombobox(owner: Pointer; caption: TLazLabel = nil): TLazComboBox;
-```
-This is the only method from {ref}`Gear Form` you might need to use.
-This will create a combobox for you whose contents auto-update with changes made
-on the `Gear Form`.
-*)
+
 function TGearFormHelper.CreateGearCombobox(owner: Pointer; caption: String = 'Gear:'; left, top: Integer = 0): TLazComboBox;
 var
   i: Integer;
@@ -402,34 +376,10 @@ begin
 end;
 
 var
-(*
-## GearForm variable
-Global {ref}`TGearFormHelper` variable.
-*)
+
   GearForm: TGearFormHelper;
 
-(*
-## ScriptForm CreateGearTab
-```pascal
-function TScriptForm.CreateGearTab(): TLazTabSheet;
-```
-Sets up a `TLazTabSheet` on your `TScriptForm` to configure your `Gear Layouts`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  form: TScriptForm;
-begin
-  form.Setup();
-  form.CreateGearTab();
-  form.Run();
-end.
-```
-```{figure} ../../images/gearform.gif
-```
-For a more complete example check out the file `Simba/Includes/WaspLib/examples/gear_form.simba`.
-*)
 function TScriptForm.CreateGearTab(): TLazTabSheet;
 var
   save, read: TLazButton;

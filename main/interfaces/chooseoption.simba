@@ -1,18 +1,9 @@
-(*
-# ChooseOption
-Methods to interact with the game context menu.
 
-```{figure} ../../images/chooseoption.png
-```
-*)
 {$DEFINE WL_CHOOSEOPTION_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TOption
-Helper record to interact with {ref}`ChooseOption`.
-*)
+
   TOption = record
     Text: String;
     Bounds: TBox;
@@ -21,10 +12,7 @@ Helper record to interact with {ref}`ChooseOption`.
 
   TOptionArray = array of TOption;
 
-(*
-## TChooseOption
-Core record responsible with interacting with the {ref}`ChooseOption` context menu.
-*)
+
   TChooseOption = record
     Bounds: TBox;
     MinDelay, MaxDelay: Integer;
@@ -54,18 +42,7 @@ begin
   Result.Y2 := Result.Y1 + Self.TitleImg.Height - 3;
 end;
 
-(*
-## ChooseOption.IsOpen
-```pascal
-function TChooseOption.IsOpen(): Boolean;
-```
-Returns True/False if the {ref}`ChooseOption` menu is currently visible/open.
 
-Example:
-```pascal
-WriteLn ChooseOption.IsOpen();
-```
-*)
 function TChooseOption.IsOpen(): Boolean;
 var
   tpa: TPointArray;
@@ -87,36 +64,14 @@ begin
   Result := True;
 end;
 
-(*
-## ChooseOption.WaitOpen
-```pascal
-function TChooseOption.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
-```
-Returns True/False if the {ref}`ChooseOption` menu is becomes visible/open within the specified `time`.
 
-Example:
-```pascal
-WriteLn ChooseOption.WaitOpen();
-```
-*)
 function TChooseOption.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## ChooseOption.Open
-```pascal
-function TChooseOption.Open(): Boolean;
-```
-Opens the {ref}`ChooseOption` context menu if it's not currently open.
 
-Example:
-```pascal
-WriteLn ChooseOption.Open();
-```
-*)
 function TChooseOption.Open(): Boolean;
 begin
   if Self.IsOpen() then
@@ -139,14 +94,7 @@ begin
   Result.Index := idx;
 end;
 
-(*
-## ChooseOption.GetOptions
-```pascal
-function TChooseOption.GetOptions(): TChooseOption_OptionArray;
-```
-Returns a `TOptionArray` of all available options in the {ref}`ChooseOption` context menu.
-This is a internal method, you probably don't need to call it.
-*)
+
 function TChooseOption.GetOptions(): TOptionArray;
 var
   i, x, offset: Integer;
@@ -179,13 +127,7 @@ begin
     Result[High(Result)].Bounds.Y2 -= 1;
 end;
 
-(*
-## ChooseOption.FindSubmenu
-```pascal
-function TChooseOption.FindSubmenu(): TBox;
-```
-Returns the bounds of the submenu if it exists, otherwise returns an empty TBox.
-*)
+
 function TChooseOption.FindSubmenu(): TBox;
 var
   atpa: T2DPointArray;
@@ -201,19 +143,7 @@ begin
       Exit(tpa.Bounds().Expand(-2));
 end;
 
-(*
-## ChooseOption.Close
-```pascal
-function TChooseOption.Close(): Boolean;
-```
-Closes the {ref}`ChooseOption` context menu if it's open.
-Returns True on success.
 
-Example:
-```pascal
-WriteLn ChooseOption.Close();
-```
-*)
 function TChooseOption.Close(): Boolean;
 var
   boxes: TBoxArray;
@@ -237,26 +167,7 @@ begin
 end;
 
 
-(*
-## ChooseOption.Find
-```pascal
-function TChooseOption.Find(strings: TStringArray; out option: TOption; matchCase: Boolean = True; closeOnFail: Boolean = True): Boolean;
-```
-Check if an option is available in the {ref}`ChooseOption` context menu.
-Returns true if any of the specified `strings` is available and the `option` parameter will
-return the `TOption` data.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  option: TOption;
-begin
-  if ChooseOption.Find(['Take'], option) then
-    ShowOnTarget(option.Bounds);
-end.
-```
-*)
 function TChooseOption.Find(strings: TStringArray; out option: TOption; matchCase: Boolean = True; closeOnFail: Boolean = True): Boolean;
 var
   i, x, offset: Integer;
@@ -301,22 +212,7 @@ begin
 end;
 
 
-(*
-## ChooseOption.ContainsAny
-```pascal
-function TChooseOption.ContainsAny(strings: TStringArray; matchCase, closeOnFail: Boolean = True): Boolean;
-```
-Checks if an option is available in the {ref}`ChooseOption` context menu.
-Returns true if any of the specified `strings` is available.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn ChooseOption.ContainsAny(['Take']);
-end.
-```
-*)
 function TChooseOption.ContainsAny(strings: TStringArray; matchCase, closeOnFail: Boolean = True): Boolean;
 var
   option: TOption;
@@ -325,20 +221,7 @@ begin
 end;
 
 
-(*
-## ChooseOption.Hover
-```pascal
-procedure TChooseOption.Hover(const option: TOption);
-function TChooseOption.Hover(strings: TStringArray; matchCase, closeOnFail: Boolean = True): Boolean; overload;
-function TChooseOption.Hover(text: String; matchCase, closeOnFail: Boolean = True): Boolean; overload;
-```
-Hovers the specified option if it exists on the {ref}`ChooseOption` context menu.
 
-Example:
-```pascal
-WriteLn ChooseOption.Select('Take Bones');
-```
-*)
 procedure TChooseOption.Hover(const option: TOption);
 begin
   Mouse.Move(option.Bounds.Expand(-1));
@@ -359,20 +242,7 @@ begin
 end;
 
 
-(*
-## ChooseOption.Select
-```pascal
-procedure TChooseOption.Select(const option: TOption);
-function TChooseOption.Select(strings: TStringArray; matchCase, closeOnFail: Boolean = True): Boolean; overload;
-function TChooseOption.Select(text: String; matchCase, closeOnFail: Boolean = True): Boolean; overload;
-```
-Selects the specified option if it exists on the {ref}`ChooseOption` context menu.
 
-Example:
-```pascal
-WriteLn ChooseOption.Select('Take Bones');
-```
-*)
 procedure TChooseOption.Select(const option: TOption);
 begin
   Self.Hover(option);
@@ -392,38 +262,19 @@ begin
 end;
 
 
-(*
-## ChooseOption.HasSubmenu
-```pascal
-function TChooseOption.HasSubmenu(): Boolean;
-```
-Returns True if the {ref}`ChooseOption` context menu has a submenu (indicated by ' >' in the option text).
-*)
+
 function TChooseOption.HasSubmenu(): Boolean;
 begin
   Result := Self.IsOpen() and Self.ContainsAny([' >']);
 end;
 
-(*
-## ChooseOption.IsSubmenuOpen
-```pascal
-function TChooseOption.IsSubmenuOpen(): Boolean;
-```
-Returns True if a submenu is currently open and visible.
-*)
+
 function TChooseOption.IsSubmenuOpen(): Boolean;
 begin
   Result := Self.FindSubmenu() <> [];
 end;
 
-(*
-## ChooseOption.OpenSubmenu
-```pascal
-function TChooseOption.OpenSubmenu(closeIfNotFound: Boolean = True): Boolean;
-```
-Opens a submenu if it exists. Returns True if successful.
-If closeIfNotFound is True, closes the context menu if no submenu is found.
-*)
+
 function TChooseOption.OpenSubmenu(closeOnFail: Boolean = True): Boolean;
 begin
   if Self.IsSubmenuOpen() then
@@ -439,14 +290,7 @@ begin
     Self.Close();
 end;
 
-(*
-## ChooseOption.GetSubmenuOptions
-```pascal
-function TChooseOption.GetSubmenuOptions(): TOptionArray;
-```
-Returns a `TOptionArray` of all available options in the submenu.
-This is a internal method, you probably don't need to call it.
-*)
+
 function TChooseOption.GetSubmenuOptions(): TOptionArray;
 var
   bounds, b: TBox;
@@ -472,14 +316,7 @@ begin
   end;
 end;
 
-(*
-## ChooseOption.FindSubmenuOption
-```pascal
-function TChooseOption.FindSubmenuOption(text: TStringArray; out option: TOption; matchCase, closeIfNotFound: Boolean = True): Boolean;
-```
-Searches for a specific option in the submenu. Returns True if found.
-The found option is returned through the 'option' parameter.
-*)
+
 function TChooseOption.FindSubmenuOption(text: TStringArray; out option: TOption; matchCase, closeIfNotFound: Boolean = True): Boolean;
 var
   o: TOption;
@@ -496,14 +333,7 @@ begin
     Self.Close;
 end;
 
-(*
-## ChooseOption.HoverSubmenuOption
-```pascal
-function TChooseOption.HoverSubmenuOption(const option: TOption): Boolean;
-function TChooseOption.HoverSubmenuOption(text: TStringArray; matchCase, closeOnFail: Boolean = True): Boolean; overload;
-```
-Hovers over a specific option in the submenu. Returns True if successful.
-*)
+
 function TChooseOption.HoverSubmenuOption(const option: TOption): Boolean;
 begin
   Self.Hover(option);
@@ -522,14 +352,7 @@ begin
     and Self.HoverSubmenuOption(option);
 end;
 
-(*
-## ChooseOption.SelectSubmenuOption
-```pascal
-function TChooseOption.SelectSubmenuOption(const option: TOption): Boolean;
-function TChooseOption.SelectSubmenuOption(text: TStringArray; matchCase, closeOnFail: Boolean = True): Boolean;
-```
-Selects a specific option in the submenu by clicking on it. Returns True if successful.
-*)
+
 function TChooseOption.SelectSubmenuOption(const option: TOption): Boolean;
 begin
   if not Self.HoverSubmenuOption(option) then
@@ -549,8 +372,5 @@ begin
 end;
 
 var
-(*
-## ChooseOption variable
-Global {ref}`TChooseOption` variable.
-*)
+
   ChooseOption: TChooseOption;
