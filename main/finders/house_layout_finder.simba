@@ -1,15 +1,9 @@
-(*
-# House Layout Finder
-Provides and compares images for {ref}`House Viewer`.
-*)
+
 {$DEFINE WL_HOUSE_LAYOUT_FINDER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## THouseLayoutFinder
-Main record used to interact with the {ref}`House Viewer`.
-*)
+
   THouseLayoutFinder = record
     RoomImages: array [EHouseRoom] of TImageArray;
     Version: String;
@@ -18,18 +12,7 @@ Main record used to interact with the {ref}`House Viewer`.
     CacheDir: String;
   end;
 
-(*
-## HouseLayoutFinder.Setup
-```pascal
-procedure THouseLayoutFinder.Setup();
-```
-Sets up the {ref}`THouseLayoutFinder`, including cache management and similarity settings.
 
-Example:
-```pascal
-HouseLayoutFinder.Setup();
-```
-*)
 procedure THouseLayoutFinder.Setup();
 var
   path, tmp: String;
@@ -55,20 +38,7 @@ begin
     Self.Similarity := 0.85;
 end;
 
-(*
-## HouseLayoutFinder.GetImages
-```pascal
-function THouseLayoutFinder.GetImages(room: EHouseRoom): TImageArray;
-```
-Retrieves the images for a specific `room`, loading it from cache or extracting from ZIP if needed.
-This returns a `TImageArray` with 4 images, one for each possible rotation.
 
-Example:
-```pascal
-img := HouseLayoutFinder.GetImage(EHouseRoom.ACHIEVEMENT_GALLERY)[0];
-img.Show();
-```
-*)
 property THouseLayoutFinder.Images(room: EHouseRoom): TImageArray;
 var
   name, path: String;
@@ -121,8 +91,5 @@ begin
 end;
 
 var
-(*
-## HouseLayoutFinder variable
-Global {ref}`THouseLayoutFinder` variable.
-*)
+
   HouseLayoutFinder: THouseLayoutFinder;

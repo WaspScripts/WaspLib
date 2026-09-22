@@ -1,20 +1,10 @@
-(*
-# Prayer Form
-A {ref}`TLazForm` utility to aid in prayer selection settings.
 
-This will setup a {ref}`TLazButton` which opens a {ref}`TLazForm` that mimics the prayer
-tab and allows a user to select prayers to be used.
-*)
 
 {$DEFINE WL_PRAYER_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TPrayerForm
-The `TPrayerForm` type contains all of the components to build the button and
-form used for prayer selection settings.
-*)
+
   TPrayerForm = record
     OpenFormButton: TLazButton;
     SelectedPrayers, AllowedPrayers: TPrayerSet;
@@ -162,60 +152,7 @@ begin
 end;
 {$H+}
 
-(*
-## TPrayerForm.Selected
-```pascal
-property TPrayerForm.Selected(prayers: TPrayerSet);
-property TPrayerForm.Selected: TPrayerSet;
-```
-Get/Set the defined prayers as a set of selected prayers.
 
-Useful for saving user settings between sessions.
-
-Selected prayers from a previous session could be saved and then reset on the
-next session by setting them with the procedure upon building the form.
-
-Getting example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  form: TScriptForm;
-  tab: TTabSheet;
-  prayerForm: TPrayerForm;
-
-begin
-  form.Setup('Script settings');
-  tab := TLazTabSheet.Create(form.PageControl);
-  prayerForm.Setup(tab, 50, 50);
-  prayerForm.SetAllowedPrayers([EPrayer.EAGLE_EYE, EPrayer.RIGOUR]);
-  form.Run();
-  WriteLn(prayerForm.Selected);
-end.
-```
-
-Setting example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  prayerForm: TPrayerForm;
-  config: TJSONParser;
-  savedPrayers: TJSONItem;
-  i: Integer;
-  selected: TPrayerSet;
-begin
-  ...
-  config := new TJSONParser();
-  config.Load('my_script_config.json');
-  if config.GetArray('prayers', savedPrayers) then
-    for i := 0 to savedPrayers.Count - 1 do
-      selected += EPrayer(savedPrayers.Item[i].AsInt);
-
-  prayerForm.SetSelected(selected);
-end;
-```
-*)
 property TPrayerForm.Selected(prayers: TPrayerSet);
 var
   prayer: EPrayer;
@@ -233,33 +170,7 @@ begin
   Result := Self.SelectedPrayers;
 end;
 
-(*
-## TPrayerForm SetAllowedPrayers
-```pascal
-procedure TPrayerForm.SetAllowedPrayers(prayers: TPrayerSet);
-```
-Set's the defined prayers as the only selectable prayers. Prayers that
-arent defined here will be greyed out and unselectable. Use to narrow
-the selection for example, selections for offensive range prayer.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  form: TScriptForm;
-  tab: TTabSheet;
-  prayerForm: TPrayerForm;
-
-begin
-  form.Setup('Script settings');
-  tab := TLazTabSheet.Create(form.PageControl);
-  prayerForm.Setup(tab, 50, 50);
-  prayerForm.SetAllowedPrayers([EPrayer.EAGLE_EYE, EPrayer.RIGOUR]);
-  form.Run();
-end.
-```
-*)
 procedure TPrayerForm.SetAllowedPrayers(prayers: TPrayerSet);
   function Blend(bg, fg: TColor; a: Byte): TColor;
   begin
@@ -292,30 +203,7 @@ begin
   Self.AllowedPrayers := prayers;
 end;
 
-(*
-## TPrayerForm Setup
-```pascal
-procedure TPrayerForm.Setup(buttonParent: Pointer; buttonLeft, buttonTop: Integer);
-```
-Setup the prayer form and add the select button to the defined parent
-at the defined position.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  form: TScriptForm;
-  tab: TTabSheet;
-  prayerForm: TPrayerForm;
-begin
-  form.Setup('Script settings');
-  tab := TLazTabSheet.Create(form.PageControl);
-  prayerForm.Setup(tab, 50, 50)
-  form.Run();
-end;
-```
-*)
 procedure TPrayerForm.Setup(parent: Pointer; buttonLeft, buttonTop: Integer);
 var
   I: Integer;

@@ -1,9 +1,4 @@
-(*
-# Combat
-Methods to interact with the combat gametab:
-```{figure} ../../images/combattab.png
-```
-*)
+
 {$DEFINE WL_COMBAT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -101,10 +96,7 @@ begin
 end;
 
 type
-(*
-## TCombat
-Main record responsible with handling the combat gametab.
-*)
+
   TCombat = record
     SailingBox, AutoRetaliateBox, SpecialAttackBox,
     CategoryBox, _StylesBox: TBox;
@@ -129,35 +121,13 @@ begin
 end;
 
 
-(*
-## Combat.IsOpen
-```pascal
-function TCombat.IsOpen(): Boolean;
-```
-Returns true/false if the combat tab is open.
 
-Example:
-```pascal
-WriteLn Combat.IsOpen();
-```
-*)
 function TCombat.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.COMBAT) and not Sailing.IsOpen();
 end;
 
-(*
-## Combat.Open
-```pascal
-function TCombat.Open(): Boolean;
-```
-Attempts to open the combat gametab.
 
-Example:
-```pascal
-WriteLn Combat.Open();
-```
-*)
 function TCombat.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.COMBAT);
@@ -169,21 +139,7 @@ begin
 end;
 
 
-(*
-## Combat.GetCategory
-```pascal
-function TCombat.GetCategory(): EWeaponCategory;
-```
-Returns the `EWeaponCategory` of the current weapon.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Combat.GetCategory();
-end.
-```
-*)
 function TCombat.GetCategory(): EWeaponCategory;
 var
   str: String;
@@ -194,24 +150,7 @@ begin
   Result := EWeaponCategory(WEAPON_CATEGORIES.IndexOf(str));
 end;
 
-(*
-## Combat.StyleBoxes
-```pascal
-property TCombat.StyleBoxes: TBoxArray;
-```
-Returns the the attack style boxes available.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  while True do
-    ShowOnTarget(Combat.StyleBoxes);
-end.
-```
-```{figure} ../../images/attackstyles.gif
-```
-*)
 property TCombat.StyleBoxes: TBoxArray;
 var
   tpa: TPointArray;
@@ -235,24 +174,7 @@ begin
 end;
 
 
-(*
-## Combat.WeaponStyle
-```pascal
-property TCombat.WeaponStyle: EWeaponStyle;
-property TCombat.WeaponStyle(value: EWeaponStyle): Boolean;
-```
-Gets/Sets the weapon `EWeaponStyle`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Combat.WeaponStyle;
-  WriteLn Combat.WeaponStyle := EWeaponStyle.BLOCK;
-  WriteLn Combat.WeaponStyle;
-end.
-```
-*)
 property TCombat.WeaponStyle: EWeaponStyle;
 var
   b: TBox;
@@ -298,25 +220,7 @@ begin
 end;
 
 
-(*
-## Combat.MeleeStyle
-```pascal
-property TCombat.MeleeStyle: EMeleeStyle;
-property TCombat.MeleeStyle(value: EMeleeStyle): Boolean;
-```
-Gets/Sets the combat `EMeleeStyle`. Doesn't do anything if we don't have a
-melee weapon.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Combat.MeleeStyle;
-  WriteLn Combat.MeleeStyle := EMeleeStyle.SLASH;
-  WriteLn Combat.MeleeStyle;
-end.
-```
-*)
 property TCombat.MeleeStyle: EMeleeStyle;
 begin
   Result := Self._GetMeleeStyle(Self.GetCategory());
@@ -352,26 +256,7 @@ begin
 end;
 
 
-(*
-## Combat.AutoRetaliate
-```pascal
-property TCombat.AutoRetaliate: Boolean;
-property TCombat.AutoRetaliate(value: Boolean): Boolean;
-```
-Gets/Sets the auto retaliate state.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Combat.AutoRetaliate;
-  Combat.AutoRetaliate := True;
-  WriteLn Combat.AutoRetaliate;
-  Combat.AutoRetaliate := False;
-  WriteLn Combat.AutoRetaliate;
-end.
-```
-*)
 property TCombat.AutoRetaliate: Boolean;
 begin
   Result := Target.HasColor([$1D1F82, 0.560, EColorSpace.HSL, [1.403, 1.403, 0.196]], 1, Self.AutoRetaliateBox);
@@ -389,26 +274,7 @@ begin
 end;
 
 
-(*
-## Combat.SpecialAttack
-```pascal
-property TCombat.SpecialAttack: Boolean;
-property TCombat.SpecialAttack(value: Boolean): Boolean;
-```
-Gets/Sets the special attack state.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Combat.SpecialAttack;
-  Combat.SpecialAttack := True;
-  WriteLn Combat.SpecialAttack;
-  Combat.SpecialAttack := False;
-  WriteLn Combat.SpecialAttack;
-end.
-```
-*)
 property TCombat.SpecialAttack: Boolean;
 begin
   Result := Minimap.SpecialEnabled();
@@ -434,8 +300,5 @@ begin
 end;
 
 var
-(*
-## Combat variable
-Global {ref}`TCombat` variable.
-*)
+
   Combat: TCombat;
