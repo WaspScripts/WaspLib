@@ -26,7 +26,20 @@ form used for prayer selection settings.
     const HIGHLIGHT_COLOR = $6DB3CE;
   end;
 
-function TPrayerForm._GetInterferingPrayers(prayer: EPrayer): TPrayerSet;
+(*
+## EPrayer.GetInterfering
+```pascal
+function EPrayer.GetInterfering(): TPrayerSet;
+```
+The prayers that can't be active at the same time as this one, including itself.
+Activating a prayer in game turns all of these off.
+
+Example:
+```pascal
+WriteLn EPrayer.PIETY.GetInterfering();
+```
+*)
+function EPrayer.GetInterfering(): TPrayerSet;
 {$SCOPEDENUMS OFF}
 type
   EPrayerGroup = (
@@ -38,19 +51,19 @@ const
     [EPrayer.CLARITY_OF_THOUGHT, EPrayer.IMPROVED_REFLEXES, EPrayer.INCREDIBLE_REFLEXES],
     [EPrayer.BURST_OF_STRENGTH, EPrayer.SUPERHUMAN_STRENGTH, EPrayer.ULTIMATE_STRENGTH],
     [EPrayer.THICK_SKIN, EPrayer.ROCK_SKIN, EPrayer.STEEL_SKIN],
-    [EPrayer.SHARP_EYE, EPrayer.HAWK_EYE, EPrayer.EAGLE_EYE],
-    [EPrayer.MYSTIC_WILL, EPrayer.MYSTIC_LORE, EPrayer.MYSTIC_MIGHT],
+    [EPrayer.SHARP_EYE, EPrayer.HAWK_EYE, EPrayer.EAGLE_EYE, EPrayer.DEADEYE],
+    [EPrayer.MYSTIC_WILL, EPrayer.MYSTIC_LORE, EPrayer.MYSTIC_MIGHT, EPrayer.MYSTIC_VIGOUR],
     [EPrayer.CHIVALRY, EPrayer.PIETY, EPrayer.RIGOUR, EPrayer.AUGURY],
     [EPrayer.PROTECT_FROM_MAGIC, EPrayer.PROTECT_FROM_MISSILES, EPrayer.PROTECT_FROM_MELEE, EPrayer.REDEMPTION, EPrayer.SMITE, EPrayer.RETRIBUTION]
   ];
 var
   group: EPrayerGroup;
 begin
-  if prayer in PRAYER_GROUPS[pgNone] then
+  if Self in PRAYER_GROUPS[pgNone] then
     Exit;
 
   for group := pgAttack to pgOverhead do
-    if prayer in PRAYER_GROUPS[group] then
+    if Self in PRAYER_GROUPS[group] then
       Break;
 
   if group > pgOverhead then
@@ -143,7 +156,7 @@ begin
     Self._Deselect(prayerClicked)
   else
   begin
-    for prayer in Self._GetInterferingPrayers(prayerClicked) do
+    for prayer in prayerClicked.GetInterfering() do
       Self._Deselect(prayer);
     Self._Select(prayerClicked);
   end;
@@ -318,14 +331,20 @@ end;
 *)
 procedure TPrayerForm.Setup(parent: Pointer; buttonLeft, buttonTop: Integer);
 var
-  I: Integer;
-  img: TImage;
+  I, extra: Integer;
+  img, icon: TImage;
   backgroundImage: TImage;
   background: TLazImage;
   saveButton: TLazSpeedButton;
 begin
-  backgroundImage := new TImage();
-  backgroundImage.FromString(TPrayerForm.BACKGROUND_IMAGE);
+  img := new TImage();
+  img.FromString(TPrayerForm.BACKGROUND_IMAGE);
+
+  //the background fits 6 rows of prayers, stretch its plain middle for any extra rows
+  extra := Max(0, (Length(EPrayer) + 4) div 5 - 6) * (33 + 4);
+  backgroundImage := new TImage(img.Width, img.Height + extra);
+  backgroundImage.DrawImage(img, [0, extra]);
+  backgroundImage.DrawImage(img.Copy([0, 0, img.Width - 1, img.Height div 2]), [0, 0]);
 
   Self.Form := TLazForm.Create(TLazComponent(parent));
   Self.Form.SetBounds(0, 0, backgroundImage.Width, backgroundImage.Height);
@@ -346,8 +365,11 @@ begin
   SetLength(Self.PrayerImages, Length(EPrayer));
   for i := 0 to Ord(High(EPrayer)) do
   begin
-    img := PrayerFinder.GetImage(EPrayer(i)).Copy();
-    img.ReplaceColor($0, TPrayerForm.BACKGROUND_COLOR);
+    img := new TImage(33, 33);
+    img.Fill(TPrayerForm.BACKGROUND_COLOR);
+    icon := PrayerFinder.GetImage(EPrayer(i));
+    if icon <> nil then
+      img.DrawImage(icon, [(img.Width - icon.Width) div 2, (img.Height - icon.Height) div 2]);
     Self.PrayerImages[i] := TLazImage.Create(Self.Form);
     Self.PrayerImages[i].Picture.Bitmap := img.ToLazBitmap();
     Self.PrayerImages[i].Top := 9 + ((i div 5) * (33 + 4));
@@ -360,7 +382,7 @@ begin
   img.FromString(TPrayerForm.SAVE_IMAGE);
   saveButton := TLazSpeedButton.Create(Self.Form);
   saveButton.Parent := Self.Form;
-  saveButton.SetBounds(Self.Form.Width div 2 - img.Width div 2, 230, img.Width, img.Height);
+  saveButton.SetBounds(Self.Form.Width div 2 - img.Width div 2, 230 + extra, img.Width, img.Height);
   saveButton.Glyph := img.ToLazBitmap();
   saveButton.OnClick := @Self._OnSaveButtonClick;
 
@@ -368,4 +390,431 @@ begin
   Self.OpenFormButton.OnClick := @Self._OnOpenFormButtonClick;
 
   Self.AllowedPrayers := [Low(EPrayer)..High(EPrayer)];
+end;
+
+type
+(*
+## TPrayerLayout
+Type that represents a named set of prayers, as saved by {ref}`ScriptForm.CreatePrayerTab`.
+*)
+  TPrayerLayout = record
+    Name: String;
+    Prayers: TPrayerSet;
+  end;
+
+(*
+## TPrayerLayout.ToJSON
+```pascal
+function TPrayerLayout.ToJSON(): TJSONItem;
+```
+Convert the `TPrayerLayout` into a `TJSONItem`.
+Prayers are saved by name so the saved layouts don't depend on the order of {ref}`EPrayer`.
+*)
+function TPrayerLayout.ToJSON(): TJSONItem;
+var
+  prayer: EPrayer;
+begin
+  Result := new TJSONObject();
+  for prayer in EPrayer do
+    Result.AddBool(ToStr(prayer).After('.').ToLower(), prayer in Self.Prayers);
+end;
+
+type
+(*
+## TPrayerLayoutFormHelper
+The `TPrayerLayoutFormHelper` type is, as it's name implies a helper type for the
+prayer layouts tab made by {ref}`ScriptForm.CreatePrayerTab`.
+
+It has a lot of methods and callbacks that are hidden by default and won't be
+mentioned on this page because they are internal methods you shouldn't touch.
+*)
+  TPrayerLayoutFormHelper = record
+    Layouts: array of TPrayerLayout;
+    Index: Integer;
+    Layout: TPrayerLayout;
+
+    SlotBoxes, DPISlots: TBoxArray;
+
+    HoverLabel: TLazLabel;
+    PrayerList: TLazListBox;
+    LayoutCombobox: TLazComboBox;
+    LinkedComboboxes: array of TLazComboBox;
+    LayoutNameEdit: TLazEdit;
+    DuplicateButton, RemoveButton: TLazButton;
+    ImageBox: TImageBox;
+
+    Config: TConfigJSON;
+    BackgroundImg: TImage;
+  end;
+
+procedure TPrayerLayoutFormHelper.Setup();
+var
+  i, rows: Integer;
+  prayer: EPrayer;
+  key: String;
+  item: TJSONItem;
+begin
+  Self.Config.Setup('prayerlayouts' + PATH_SEP + ToStr(ProfileIndex));
+  SetLength(Self.Layouts, Self.Config.Data.Count);
+
+  Self.BackgroundImg := new TImage(WLEnv.AssetsDir + 'images' + PATH_SEP + 'gametab.png');
+
+  //laid out like the prayer tab, 5 prayers per row and centered on the background
+  rows := (Length(EPrayer) + 4) div 5;
+  Self.SlotBoxes := TBoxArray.Create(
+    [(Self.BackgroundImg.Width - (5 * 37 - 4)) div 2, (Self.BackgroundImg.Height - (rows * 37 - 4)) div 2],
+    5, rows, 33, 33, [4, 4]
+  );
+  Self.DPISlots := [];
+  for i := 0 to High(Self.SlotBoxes) do
+    with Self.SlotBoxes[i] do
+      Self.DPISlots += [Round(FormUtils.Scale * X1), Round(FormUtils.Scale * Y1), Round(FormUtils.Scale * X2), Round(FormUtils.Scale * Y2)];
+
+  try
+    for i := 0 to Self.Config.Data.Count-1 do
+    begin
+      Self.Layouts[i].Name := Self.Config.Data.Key[i];
+      item := Self.Config.Data.Item[i];
+
+      for prayer in EPrayer do
+      begin
+        key := ToStr(prayer).After('.').ToLower();
+        if item.Has(key) and item.Item[key].AsBool then
+          Self.Layouts[i].Prayers += prayer;
+      end;
+    end;
+  except
+    FileDelete(Self.Config.Path); //corrupted config.
+  end;
+end;
+
+procedure TPrayerLayoutFormHelper.UpdateConfig();
+var
+  i: Integer;
+begin
+  Self.Config.Data := new TJSONObject();
+  for i := 0 to High(Self.Layouts) do
+    Self.Config.Data.Add(Self.Layouts[i].Name, Self.Layouts[i].ToJSON());
+  Self.Config.Save();
+end;
+
+procedure TPrayerLayoutFormHelper.AddLayout(layout: TPrayerLayout);
+begin
+  Self.Layouts += layout;
+  Self.UpdateConfig();
+end;
+
+procedure TPrayerLayoutFormHelper.RemoveLayout(index: Integer);
+begin
+  Delete(Self.Layouts, index, 1);
+  Self.UpdateConfig();
+end;
+
+function TPrayerLayoutFormHelper.PrayerName(prayer: EPrayer): String;
+begin
+  Result := ToStr(prayer).After('.').ToLower().Capitalize().Replace('_', ' ');
+end;
+
+procedure TPrayerLayoutFormHelper.UpdatePrayerList();
+var
+  prayer: EPrayer;
+begin
+  Self.PrayerList.Items.BeginUpdate();
+  Self.PrayerList.Clear();
+  for prayer in Self.Layout.Prayers do
+    Self.PrayerList.Items.Add(Self.PrayerName(prayer));
+  Self.PrayerList.Items.EndUpdate();
+end;
+
+function TPrayerLayoutFormHelper.DrawLayout(): TImage;
+var
+  icon: TImage;
+  prayer: EPrayer;
+  box: TBox;
+begin
+  Result := Self.BackgroundImg.Copy();
+
+  for prayer in EPrayer do
+  begin
+    box := Self.SlotBoxes[Ord(prayer)];
+
+    if prayer in Self.Layout.Prayers then
+    begin
+      Result.DrawColor := TPrayerForm.HIGHLIGHT_COLOR;
+      Result.DrawAlpha := $7D;
+      Result.DrawTPA(TPointArray.CreateFromCircle(box.Center, box.Width div 2, True));
+      Result.DrawAlpha := $FF;
+    end;
+
+    icon := PrayerFinder.GetImage(prayer);
+    if icon <> nil then
+      Result.DrawImage(icon, [box.X1 + (box.Width - icon.Width) div 2, box.Y1 + (box.Height - icon.Height) div 2]);
+  end;
+end;
+
+procedure TPrayerLayoutFormHelper.UpdateBackground();
+begin
+  Self.ImageBox.SetImage(Self.DrawLayout().Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
+end;
+
+procedure TPrayerLayoutFormHelper.Refresh();
+begin
+  Self.UpdatePrayerList();
+  Self.UpdateBackground();
+end;
+
+{$H-}
+procedure TPrayerLayoutFormHelper.OnImgClick(sender: TImageBox; x, y: Integer);
+var
+  i: Integer;
+  prayer: EPrayer;
+begin
+  i := Self.DPISlots.ContainsPoint([x, y]);
+  if not InRange(i, 0, Ord(High(EPrayer))) then
+    Exit;
+
+  prayer := EPrayer(i);
+  if prayer in Self.Layout.Prayers then
+    Self.Layout.Prayers -= [prayer]
+  else
+    Self.Layout.Prayers := Self.Layout.Prayers - prayer.GetInterfering() + [prayer];
+
+  Self.Refresh();
+end;
+
+procedure TPrayerLayoutFormHelper.OnImgMouseMove(sender: TImageBox; shift: ELazShiftStates; x, y: Integer);
+var
+  i: Integer;
+begin
+  i := Self.DPISlots.ContainsPoint([x, y]);
+  if InRange(i, 0, Ord(High(EPrayer))) then
+    Self.HoverLabel.Caption := 'Prayer: ' + Self.PrayerName(EPrayer(i))
+  else
+    Self.HoverLabel.Caption := 'Prayer: ';
+end;
+
+procedure TPrayerLayoutFormHelper.OnSaveClick(sender: TLazObject);
+var
+  i: Integer;
+begin
+  Self.Layout.Name := Self.LayoutNameEdit.Text;
+  Self.LayoutCombobox.Items.Strings[Self.Index] := Self.LayoutNameEdit.Text;
+  for i := 0 to High(Self.LinkedComboboxes) do
+    if Self.Index < Self.LinkedComboboxes[i].Items.Count then
+      Self.LinkedComboboxes[i].Items.Strings[Self.Index] := Self.LayoutNameEdit.Text;
+
+  if Self.Index = (High(Self.Layouts) + 1) then
+  begin
+    Self.AddLayout(Self.Layout);
+    Self.LayoutCombobox.Items.Add('New Layout');
+    for i := 0 to High(Self.LinkedComboboxes) do
+      Self.LinkedComboboxes[i].Items.Add(Self.Layout.Name);
+    Self.DuplicateButton.Enabled := True;
+    Self.RemoveButton.Enabled := True;
+  end
+  else
+  begin
+    Self.Layouts[Self.Index] := Self.Layout;
+    Self.UpdateConfig();
+  end;
+end;
+
+procedure TPrayerLayoutFormHelper.OnDuplicateClick(sender: TLazObject);
+var
+  layout: TPrayerLayout;
+  i: Integer;
+begin
+  if Self.Index = (High(Self.Layouts) + 1) then Exit;
+  layout := Self.Layouts[Self.Index];
+  layout.Name += ' duplicate';
+  Self.AddLayout(layout);
+  Self.LayoutCombobox.Items.Insert(High(Self.Layouts), layout.Name);
+  Self.LayoutCombobox.ItemIndex := High(Self.Layouts);
+  for i := 0 to High(Self.LinkedComboboxes) do
+    Self.LinkedComboboxes[i].Items.Add(layout.Name);
+  Self.OnLayoutChange(Self.LayoutCombobox);
+end;
+
+procedure TPrayerLayoutFormHelper.OnRemoveClick(sender: TLazObject);
+var
+  i: Integer;
+begin
+  if Self.Index = (High(Self.Layouts) + 1) then Exit;
+  Self.RemoveLayout(Self.Index);
+  Self.LayoutCombobox.Items.Delete(Self.Index);
+  for i := 0 to High(Self.LinkedComboboxes) do
+    Self.LinkedComboboxes[i].Items.Delete(Self.Index);
+  Self.Index := Max(Self.Index-1, 0);
+  Self.LayoutCombobox.ItemIndex := Max(High(Self.Layouts), 0);
+  Self.OnLayoutChange(Self.LayoutCombobox);
+end;
+
+procedure TPrayerLayoutFormHelper.OnClearClick(sender: TLazObject);
+begin
+  Self.Layout.Prayers := [];
+  Self.Refresh();
+end;
+
+procedure TPrayerLayoutFormHelper.OnReadClick(sender: TLazObject);
+var
+  btn: TLazButton;
+begin
+  btn := TLazButton(sender);
+
+  if not Prayer.IsOpen() then
+  begin
+    btn.Caption := 'Open the prayer tab first';
+    Exit;
+  end;
+
+  btn.Caption := 'Loading...';
+  btn.Font.Style := btn.Font.Style - [ELazFontStyles.Bold];
+  btn.Enabled := False;
+  btn.Update();
+
+  Self.Layout.Prayers := Prayer.GetActivePrayers();
+  Self.Refresh();
+
+  btn.Caption := 'Read From Client';
+  btn.Font.Style := [ELazFontStyles.Bold];
+  btn.Enabled := True;
+end;
+{$H+}
+
+procedure TPrayerLayoutFormHelper.OnLayoutChange(sender: TLazObject);
+begin
+  Self.Index := TLazComboBox(sender).ItemIndex;
+  if Self.Index > High(Self.Layouts) then
+  begin
+    Self.Layout.Name := TLazComboBox(sender).Text;
+    Self.Layout.Prayers := [];
+
+    Self.DuplicateButton.Enabled := False;
+    Self.RemoveButton.Enabled := False;
+  end
+  else
+  begin
+    Self.Layout := Self.Layouts[Self.Index];
+    Self.DuplicateButton.Enabled := True;
+    Self.RemoveButton.Enabled := True;
+  end;
+  Self.LayoutNameEdit.Caption := TLazComboBox(sender).Text;
+
+  Self.Refresh();
+end;
+
+(*
+## PrayerLayoutForm.CreatePrayerCombobox
+```pascal
+function TPrayerLayoutFormHelper.CreatePrayerCombobox(owner: Pointer; caption: String = 'Prayer Layout:'; left, top: Integer = 0): TLazComboBox;
+```
+This will create a combobox for you whose contents auto-update with changes made
+on the prayer layouts tab. The combobox `ItemIndex` is the index of the layout in `PrayerLayoutForm.Layouts`.
+*)
+function TPrayerLayoutFormHelper.CreatePrayerCombobox(owner: Pointer; caption: String = 'Prayer Layout:'; left, top: Integer = 0): TLazComboBox;
+var
+  i: Integer;
+begin
+  Result := TLazComboBox.CreateEx(owner, caption, 'Pick a prayer layout.', left, top, 170, 40);
+  Self.LinkedComboboxes += Result;
+
+  for i := 0 to High(Self.Layouts) do
+    Result.Items.Add(Self.Layouts[i].Name);
+
+  Result.ItemIndex := Low(Self.Layouts);
+end;
+
+var
+(*
+## PrayerLayoutForm variable
+Global {ref}`TPrayerLayoutFormHelper` variable.
+*)
+  PrayerLayoutForm: TPrayerLayoutFormHelper;
+
+(*
+## ScriptForm.CreatePrayerTab
+```pascal
+function TScriptForm.CreatePrayerTab(): TLazTabSheet;
+```
+Sets up a `TLazTabSheet` on your `TScriptForm` to configure prayer layouts, named sets of prayers
+your script can activate with {ref}`Prayer.Activate`.
+
+Example:
+```pascal
+{$I WaspLib/main.simba}
+var
+  form: TScriptForm;
+begin
+  form.Setup();
+  form.CreatePrayerTab();
+  form.Run();
+end.
+```
+For a more complete example check out the file `Simba/Includes/WaspLib/examples/prayer_form.simba`.
+*)
+function TScriptForm.CreatePrayerTab(): TLazTabSheet;
+var
+  save, read, clear: TLazButton;
+  width, i: Integer;
+  tips: TLazLabel;
+begin
+  PrayerLayoutForm.Setup();
+
+  Result := Self.CreateTab('Prayer Layouts');
+  width := 300;
+
+  PrayerLayoutForm.HoverLabel := TLazLabel.CreateEx(Result, 'Prayer: ', 'Hover a prayer on the right side to see its name.', 40, 20);
+
+  PrayerLayoutForm.PrayerList := TLazListBox.CreateEx(Result, 'Selected prayers:', 'Prayers in the current layout.', 40, 60, width, 240);
+
+  clear := TLazButton.CreateEx(Result, 'Clear prayers', 'Remove every prayer from the current layout.', 0, 0, width);
+  clear.AnchorVertically(PrayerLayoutForm.PrayerList, 10);
+  clear.OnClick := @PrayerLayoutForm.OnClearClick;
+
+  tips := TLazLabel.CreateEx(Result,
+                             'Tips:' + LINE_SEP +
+                             '- Click a prayer to add or remove it.' + LINE_SEP +
+                             '- Prayers that can''t be on at the same time' + LINE_SEP +
+                             '  as the one you click are removed.' + LINE_SEP +
+                             '- Read From Client uses your active prayers.'
+          );
+  tips.AnchorVertically(clear, 10);
+
+  PrayerLayoutForm.LayoutCombobox := TLazComboBox.CreateEx(Result, 'Layout:', 'Select a prayer layout.', Round(Result.Width / FormUtils.Scale) - width - 80, 30, width);
+  for i := 0 to High(PrayerLayoutForm.Layouts) do
+    PrayerLayoutForm.LayoutCombobox.Items.Add(PrayerLayoutForm.Layouts[i].Name);
+  PrayerLayoutForm.LayoutCombobox.Items.Add('New Layout');
+  PrayerLayoutForm.LayoutCombobox.ItemIndex := 0;
+  PrayerLayoutForm.LayoutCombobox.OnChange := @PrayerLayoutForm.OnLayoutChange;
+
+  PrayerLayoutForm.LayoutNameEdit := TLazEdit.CreateEx(Result, 'Layout name:', 'Change the current layout name.', 0,0, width);
+  PrayerLayoutForm.LayoutNameEdit.AnchorVertically(PrayerLayoutForm.LayoutCombobox, 30);
+
+  save := TLazButton.CreateEx(Result, 'Save' , 'Save the current prayer layout.');
+  save.AnchorVertically(PrayerLayoutForm.LayoutNameEdit, 10);
+  save.BorderSpacing.Left := 18;
+  save.OnClick := @PrayerLayoutForm.OnSaveClick;
+
+  PrayerLayoutForm.DuplicateButton := TLazButton.CreateEx(Result, 'Duplicate' , 'Duplicate the current prayer layout.');
+  PrayerLayoutForm.DuplicateButton.AnchorHorizontally(save, 10);
+  PrayerLayoutForm.DuplicateButton.OnClick := @PrayerLayoutForm.OnDuplicateClick;
+
+  PrayerLayoutForm.RemoveButton := TLazButton.CreateEx(Result, 'Remove' , 'Remove the current prayer layout.');
+  PrayerLayoutForm.RemoveButton.AnchorHorizontally(PrayerLayoutForm.DuplicateButton, 10);
+  PrayerLayoutForm.RemoveButton.OnClick := @PrayerLayoutForm.OnRemoveClick;
+
+  PrayerLayoutForm.ImageBox := TImageBox.CreateEx(Result, '', '', Round(Result.Width / FormUtils.Scale) - width - 36, 170, PrayerLayoutForm.BackgroundImg.Width, PrayerLayoutForm.BackgroundImg.Height);
+  PrayerLayoutForm.ImageBox.AllowZoom      := False;
+  PrayerLayoutForm.ImageBox.AllowMoving    := False;
+  PrayerLayoutForm.ImageBox.ShowScrollBars := False;
+  PrayerLayoutForm.ImageBox.ShowStatusBar  := False;
+  PrayerLayoutForm.ImageBox.OnImgClick     := @PrayerLayoutForm.OnImgClick;
+  PrayerLayoutForm.ImageBox.OnImgMouseMove := @PrayerLayoutForm.OnImgMouseMove;
+
+  read := TLazButton.CreateEx(Result, 'Read From Client' , 'Read the active prayers from the client.', 0, 0, 204);
+  read.Font.Style := [ELazFontStyles.Bold];
+  read.AnchorVertically(PrayerLayoutForm.ImageBox, 10);
+  read.OnClick := @PrayerLayoutForm.OnReadClick;
+
+  PrayerLayoutForm.OnLayoutChange(PrayerLayoutForm.LayoutCombobox);
 end;

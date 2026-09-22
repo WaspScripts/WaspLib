@@ -1,0 +1,29 @@
+//!PACKAGE EXAMPLE
+{$I WaspLib/main.simba}
+
+var
+  prayers: TPrayerSet;
+  layoutSelector: TLazComboBox;
+
+procedure TScriptForm.OnStart(sender: TLazObject); override;
+begin
+  if layoutSelector.ItemIndex > -1 then
+    prayers := PrayerLayoutForm.Layouts[layoutSelector.ItemIndex].Prayers;
+
+  WriteLn('Prayer Layout: ', prayers);
+  inherited();
+end;
+
+var
+  form: TScriptForm;
+  tab: TLazTabSheet;
+begin
+  form.Setup();
+
+  tab := form.CreateTab('My Settings');
+  form.CreatePrayerTab();
+
+  layoutSelector := PrayerLayoutForm.CreatePrayerCombobox(tab, 'Choose Prayer Layout:', 200, 200);
+
+  form.Run();
+end.
