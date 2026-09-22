@@ -12,10 +12,8 @@ Main record used to interact with the {ref}`House Viewer`.
 *)
   THouseLayoutFinder = record
     RoomImages: array [EHouseRoom] of TImageArray;
-    Version: String;
     Similarity: Single;
     ImageCompare: TImageCompareUtils;
-    CacheDir: String;
   end;
 
 (*
@@ -23,7 +21,7 @@ Main record used to interact with the {ref}`House Viewer`.
 ```pascal
 procedure THouseLayoutFinder.Setup();
 ```
-Sets up the {ref}`THouseLayoutFinder`, including cache management and similarity settings.
+Sets up the {ref}`THouseLayoutFinder` similarity.
 
 Example:
 ```pascal
@@ -31,25 +29,7 @@ HouseLayoutFinder.Setup();
 ```
 *)
 procedure THouseLayoutFinder.Setup();
-var
-  path, tmp: String;
 begin
-  Self.Version := WLAssets.JSON.Item['finders/house_layout.zip'].AsString;
-  Self.CacheDir := WLEnv.CacheDir + 'houselayoutfinder' + PATH_SEP;
-
-  //Delete old cache files if they exist
-  for path in DirList(Self.CacheDir) do
-  begin
-    tmp := Copy(path, Length(path) - Length(Self.Version), Length(path));
-    if tmp = Self.Version then Continue;
-    DirDelete(path, False);
-  end;
-
-  Self.CacheDir += Self.Version + PATH_SEP;
-
-  if not DirCreate(Self.CacheDir) then
-    raise GetDebugLn('HouseLayoutFinder', 'Failed to create cache directory: ' + Self.CacheDir);
-
   //only set similarity if the user didn't set it already
   if Self.Similarity = 0 then
     Self.Similarity := 0.85;
@@ -60,8 +40,13 @@ end;
 ```pascal
 function THouseLayoutFinder.GetImages(room: EHouseRoom): TImageArray;
 ```
-Retrieves the images for a specific `room`, loading it from cache or extracting from ZIP if needed.
+Retrieves the images for a specific `room`, as the {ref}`House Viewer` draws them.
 This returns a `TImageArray` with 4 images, one for each possible rotation.
+`EHouseRoom.UNKNOWN` has no image and returns an empty array.
+
+The images are read from the game cache the first time a room is asked for and kept in memory
+after that. The house viewer picks each room's image from an enum keyed by the room's type,
+which is not the same as its {ref}`EHouseRoom` value.
 
 Example:
 ```pascal
@@ -70,23 +55,40 @@ img.Show();
 ```
 *)
 property THouseLayoutFinder.Images(room: EHouseRoom): TImageArray;
+const
+  SPRITE_ENUM: Integer = 1423;
+  ROOM_TYPES: array [EHouseRoom] of Integer = [
+    -1, 1, 2, 3, 4, 12, 5, 7,
+    29, 6, 22, 9, 25,
+    24, 13, 23, 11, 14, 21,
+    15, 26, 28, 27
+  ];
 var
-  name, path: String;
-  i: Integer;
+  enumDef: TEnumDefinition;
+  index: TCacheIndex;
+  sector: TArchiveSector;
+  i, spriteId: Integer;
 begin
-  if Self.RoomImages[room] <> [] then
+  if (Self.RoomImages[room] <> []) or (room = EHouseRoom.UNKNOWN) then
     Exit(Self.RoomImages[room]);
 
-  name := LowerCase(ToStr(room).After('.')) + '.png';
-  path := Self.CacheDir + name;
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  enumDef := TEnumDefinition.Create(
+    SPRITE_ENUM,
+    CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ENUMS].Files.Value[SPRITE_ENUM].Data
+  );
 
-  if not FileExists(path) then
-    ZipExtract(WLEnv.AssetsDir + 'finders' + PATH_SEP + 'house_layout.zip', Self.CacheDir, [name]);
+  i := enumDef.Keys.IndexOf(ROOM_TYPES[room]);
+  if i = -1 then
+    raise GetDebugLn('HouseLayoutFinder', 'Failed to find the ' + ToStr(room) + ' image in the cache.');
+  spriteId := enumDef.IntVals[i];
 
-  Self.RoomImages[room] += new TImage(path);
+  index := CacheReader.Indices[ECacheIndex.SPRITES];
+  sector := index.ReadArchiveSector(spriteId, index.ID, index.IndexData);
+  if sector.Data = [] then
+    raise GetDebugLn('HouseLayoutFinder', 'Failed to read the ' + ToStr(room) + ' image from the cache.');
 
-  if room = EHouseRoom.UNKNOWN then
-    Exit(Self.RoomImages[room]);
+  Self.RoomImages[room] += TSpriteDefinition.Create(spriteId, sector.Decompress())[0].ToImage();
 
   for i := 1 to 3 do
     Self.RoomImages[room] += Self.RoomImages[room][i-1].RotateClockWise(1);
@@ -99,25 +101,34 @@ var
   room: EHouseRoom;
   sample: TImage;
   templates: TImageArray;
-  match: Single;
+  match, best: Single;
+  i: Integer;
 begin
+  rotation := 0;
   if Target.HasColor($3F4A53, 0.4, 1, bounds) then
-  begin
-    rotation := 0;
     Exit(EHouseRoom.UNKNOWN);
-  end;
 
   sample := Target.GetImage(bounds);
   for room := EHouseRoom.PARLOUR to High(EHouseRoom) do
   begin
+    //rooms that look alike when turned pass the similarity in more than one rotation, the best one is the real one
     templates := Self.Images[room];
-    for rotation := 0 to High(templates) do
+    best := 0;
+    for i := 0 to High(templates) do
     begin
-      match := templates[rotation].Compare(sample);
-      if match >= Self.Similarity then
-        Exit(room);
+      match := templates[i].Compare(sample);
+      if match > best then
+      begin
+        best := match;
+        rotation := i;
+      end;
     end;
+
+    if best >= Self.Similarity then
+      Exit(room);
   end;
+
+  rotation := 0;
 end;
 
 var
