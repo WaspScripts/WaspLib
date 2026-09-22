@@ -1,8 +1,4 @@
-(*
-# Transporter
-Responsible for transporting you from one place to another.
-This is not meant to be used directly but through {ref}`TWalker` WebWalking.
-*)
+
 
 {$DEFINE WL_TRANSPORTER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -111,11 +107,7 @@ const
   ];
 
 type
-(*
-(TTransporter)=
-## TTransporter type
-Main record responsible for transporting the player from one place to another.
-*)
+
   TTransporter = record
     HomeTeleportTimer: TCountDown;
   end;
@@ -212,9 +204,6 @@ end;
 
 {$H-}
 var
-(*
-## Transporter variable
-Global {ref}`TTransporter` variable.
-*)
+
   Transporter: TTransporter;
 {$H+}

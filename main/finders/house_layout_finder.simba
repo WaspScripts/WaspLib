@@ -1,33 +1,16 @@
-(*
-# House Layout Finder
-Provides and compares images for {ref}`House Viewer`.
-*)
+
 {$DEFINE WL_HOUSE_LAYOUT_FINDER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## THouseLayoutFinder
-Main record used to interact with the {ref}`House Viewer`.
-*)
+
   THouseLayoutFinder = record
     RoomImages: array [EHouseRoom] of TImageArray;
     Similarity: Single;
     ImageCompare: TImageCompareUtils;
   end;
 
-(*
-## HouseLayoutFinder.Setup
-```pascal
-procedure THouseLayoutFinder.Setup();
-```
-Sets up the {ref}`THouseLayoutFinder` similarity.
 
-Example:
-```pascal
-HouseLayoutFinder.Setup();
-```
-*)
 procedure THouseLayoutFinder.Setup();
 begin
   //only set similarity if the user didn't set it already
@@ -35,25 +18,7 @@ begin
     Self.Similarity := 0.85;
 end;
 
-(*
-## HouseLayoutFinder.GetImages
-```pascal
-function THouseLayoutFinder.GetImages(room: EHouseRoom): TImageArray;
-```
-Retrieves the images for a specific `room`, as the {ref}`House Viewer` draws them.
-This returns a `TImageArray` with 4 images, one for each possible rotation.
-`EHouseRoom.UNKNOWN` has no image and returns an empty array.
 
-The images are read from the game cache the first time a room is asked for and kept in memory
-after that. The house viewer picks each room's image from an enum keyed by the room's type,
-which is not the same as its {ref}`EHouseRoom` value.
-
-Example:
-```pascal
-img := HouseLayoutFinder.GetImage(EHouseRoom.ACHIEVEMENT_GALLERY)[0];
-img.Show();
-```
-*)
 property THouseLayoutFinder.Images(room: EHouseRoom): TImageArray;
 const
   SPRITE_ENUM: Integer = 1423;
@@ -132,8 +97,5 @@ begin
 end;
 
 var
-(*
-## HouseLayoutFinder variable
-Global {ref}`THouseLayoutFinder` variable.
-*)
+
   HouseLayoutFinder: THouseLayoutFinder;

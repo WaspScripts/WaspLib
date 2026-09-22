@@ -1,39 +1,20 @@
-(*
-# Logger
-Logging utilities for WaspLib scripts.
-*)
+
 
 {$DEFINE WL_LOGGER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 type
-(*
-## ELogLevel
-```pascal
-ELogLevel = enum(SUCCESS, WARN, ERROR);
-```
-Enum representing log message severity levels.
-*)
+
   ELogLevel = enum(INFO, SUCCESS, WARN, ERROR);
 
-(*
-## TLogger
-Record for managing script logging to files and console output.
-*)
+
   TLogger = record
     Name, Path, PreviousMessage: String;
     TimeRunning: TStopwatch;
     IsSetup, Verbose: Boolean;
   end;
 
-(*
-## Logger.Init
-```pascal
-procedure TLogger.Init();
-```
-Initializes the logger, creating the log directory and file.
-Called automatically at script start.
-*)
+
 procedure TLogger.Init();
 var
   files: TStringArray;
@@ -70,18 +51,7 @@ begin
   Self.TimeRunning.Start();
 end;
 
-(*
-## Logger.Setup
-```pascal
-procedure TLogger.Setup(name: String = '');
-```
-Configures the logger with a script name. Creates a dedicated log directory.
 
-Example:
-```pascal
-Logger.Setup('MyScript');
-```
-*)
 procedure TLogger.Setup(name: String = '');
 var
   old: String;
@@ -114,21 +84,10 @@ begin
 end;
 
 var
-(*
-## Logger variable
-Global {ref}`TLogger` variable.
-*)
+
   Logger: TLogger;
 
-(*
-## GetDebugLn
-```pascal
-function GetDebugLn(text: String; log: Boolean = True): String;
-function GetDebugLn(name, text: String; log: Boolean = True): String; overload;
-```
-Returns a formatted debug string with timestamp.
-Optionally logs to file.
-*)
+
 function GetDebugLn(text: String; log: Boolean = True): String;
 begin
   Result := GetTimeStamp() + ': ' + text;
@@ -143,17 +102,7 @@ begin
     Logger.AddLine(Result);
 end;
 
-(*
-## DebugLn
-```pascal
-procedure DebugLn(text: String; level: ELogLevel = ELogLevel.INFO; log: Boolean = True);
-procedure DebugLn(
-  name, text: String; level: ELogLevel = ELogLevel.INFO; log: Boolean = True
-); overload;
-```
-Prints a formatted debug string with timestamp.
-Optionally logs to file and applies color formatting based on `level`.
-*)
+
 procedure DebugLn(text: String; level: ELogLevel = ELogLevel.INFO; log: Boolean = True);
 begin
   case level of
@@ -181,28 +130,14 @@ begin
   ResetWriteColor();
 end;
 
-(*
-## ErrorDialog
-```pascal
-procedure ErrorDialog(name, text: String; log: Boolean = True);
-```
-Show an error dialog and then raises an exception.
-*)
+
 procedure ErrorDialog(name, text: String; log: Boolean = True);
 begin
   ShowDialog(EDialogIcon.ERROR, [EDialogButton.ABORT], name, text);
   raise GetDebugLn(name, text, log);
 end;
 
-(*
-## Logger.Info
-```pascal
-procedure TLogger.Info(text: String; vars: TVariantArray = []);
-```
-Logs an info message.
 
-Duplicate consecutive messages are suppressed unless `Logger.Verbose` is True.
-*)
 procedure TLogger.Info(text: String; vars: TVariantArray = []);
 var
   formatted: String;
@@ -215,13 +150,7 @@ begin
   Self.PreviousMessage := formatted;
 end;
 
-(*
-## Logger.Success
-```pascal
-procedure TLogger.Success(text: String; vars: TVariantArray = []);
-```
-Logs a success message (green colored output).
-*)
+
 procedure TLogger.Success(text: String; vars: TVariantArray = []);
 var
   formatted: String;
@@ -234,13 +163,7 @@ begin
   ResetWriteColor();
 end;
 
-(*
-## Logger.Warn
-```pascal
-procedure TLogger.Warn(text: String; vars: TVariantArray = []);
-```
-Logs a warning message (yellow colored output).
-*)
+
 procedure TLogger.Warn(text: String; vars: TVariantArray = []);
 var
   formatted: String;
@@ -253,13 +176,7 @@ begin
   ResetWriteColor();
 end;
 
-(*
-## Logger.Error
-```pascal
-procedure TLogger.Error(text: String; vars: TVariantArray = []);
-```
-Logs an error message (red colored output).
-*)
+
 procedure TLogger.Error(text: String; vars: TVariantArray = []);
 var
   formatted: String;
@@ -272,13 +189,7 @@ begin
   ResetWriteColor();
 end;
 
-(*
-## Logger.Exception
-```pascal
-procedure TLogger.Exception(text: String; vars: TVariantArray = []);
-```
-Logs an error message and raises an exception to halt script execution.
-*)
+
 procedure TLogger.Exception(text: String; vars: TVariantArray = []);
 var
   formatted: String;
