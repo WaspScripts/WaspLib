@@ -8,10 +8,10 @@ The library layout is heavily inspired in
 
 Documentation can be found here: <https://docs.waspscripts.dev/>
 
-Credits to certain code might be temporarily missing, refer to the original
-libraries above for proper credits, if a piece of code exists in both this and
-one of the libraries above, the credits to the original author will probably be
-there.
+To clone the repo you should also clone the submodules:
+```
+git clone --recurse-submodules https://github.com/WaspScripts/WaspLib
+```
 
 For more information about WaspScripts and more about color
 botting visit [waspscripts.com](https://waspscripts.com) and
