@@ -13,7 +13,8 @@ type
 Record responsible for providing item information in WaspLib.
 *)
   TItemData = record
-    DefinitionsJSON, PricesJSON: TJSONParser;
+    PricesJSON: TJSONParser;
+    Items: TArchive;
     Filename: String;
     Timeout: UInt64;
     Disabled: Boolean;
@@ -84,21 +85,20 @@ procedure TItemData.Setup();
 begin
   if not DirCreate(Self.CacheDir + 'prices' + PATH_SEP) then
     raise GetDebugLn('ItemData', 'Failed to create cache directory: ' + Self.CacheDir + 'prices' + PATH_SEP);
-  if not DirCreate(Self.CacheDir + 'items' + PATH_SEP) then
-    raise GetDebugLn('ItemData', 'Failed to create cache directory: ' + Self.CacheDir + 'items' + PATH_SEP);
 
-  Self.DefinitionsJSON := new TJSONParser();
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  Self.Items := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
 end;
 
 
 (*
 ## ItemData.GetDefinition
 ```pascal
-function TItemData.GetDefinition(itemID: String): TJSONItem;
+function TItemData.GetDefinition(id: Integer): TItemDefinition;
 ```
 This is mostly for internal use but you may use it for whatever you wish.
 
-This returns a `TJSONItem` of the item definition.
+This returns the {ref}`TItemDefinition` of an item, read straight from the game cache.
 
 Item definitions are items information stored in the game cache, things like:
 - Item ID
@@ -108,35 +108,19 @@ Item definitions are items information stored in the game cache, things like:
 - Item is members
 - ...
 
-WaspLib includes a zip file with item definitions for all non "null" items as .json files
-in `WaspLib\main\data\items.zip`.
-
 Example:
 ```pascal
 id := ItemFinder.Database.Get('abyssal whip', 'item', 'id');
-json := ItemData.GetDefinition(id);
-parser := json.ToParser();
-WriteLn parser.ToString();
-parser.Free();
+def := ItemData.GetDefinition(StrToInt(id));
+WriteLn def.Name, ' costs ', def.Cost;
 ```
 *)
-function TItemData.GetDefinition(itemID: String): TJSONItem;
-var
-  path, filename: String;
+function TItemData.GetDefinition(id: Integer): TItemDefinition;
 begin
-  if Self.DefinitionsJSON.GetObject(itemID, Result) then
-    Exit;
+  if not Self.Items.Files.Exists(id) then
+    raise GetDebugLn('ItemData', 'Couldn''t find item ' + ToStr(id) + ' in the cache.');
 
-  path := Self.CacheDir  + 'items' + PATH_SEP;
-  filename := path + itemID + '.json';
-  if not FileExists(filename) then
-    if not ZipExtract(WLEnv.AssetsDir + 'jsons' + PATH_SEP + 'item-definitions.zip', path, [itemID +'.json']) then
-      raise  GetDebugLn('ItemData', 'Couldn''t find ' + itemID + '.json');
-
-  Result := new TJSONParser();
-
-  TJSONParser(Result).Load(filename);
-  Self.DefinitionsJSON.Add(itemID, Result);
+  Result := TItemDefinition.Create(id, Self.Items.Files.Value[id].Data);
 end;
 
 (*
@@ -164,16 +148,13 @@ function TItemData.GetTradeableID(item: TItem): String;
 var
   ids: TStringArray;
   id: String;
-  json: TJSONItem;
-  tradeable: Boolean;
 begin
   if item.IsNumeric then ids := [item]
   else ids := ItemFinder.Database.GetAll(item.ToLower(), 'item', 'id');
 
   for id in ids do
   begin
-    json := Self.GetDefinition(id);
-    if json.GetBool('tradeable', tradeable) and tradeable then
+    if Self.GetDefinition(StrToInt(id)).Tradeable then
       Exit(id);
   end;
 end;
@@ -262,18 +243,16 @@ function TItemData.GetLowAlch(item: TItem): Integer;
 var
   ids: TStringArray;
   id: String;
-  json: TJSONItem;
-  value: Int64;
+  cost: Integer;
 begin
   if item.IsNumeric then ids := [item]
   else ids := ItemFinder.Database.GetAll(item.ToLower(), 'item', 'id');
 
   for id in ids do
   begin
-    json := Self.GetDefinition(id);
-    if json.GetInt('cost', value) then
-      if value > 0 then
-        Exit(Round(value * 0.4));
+    cost := Self.GetDefinition(StrToInt(id)).Cost;
+    if cost > 0 then
+      Exit(Floor(cost * 0.4));
   end;
 end;
 
@@ -293,18 +272,16 @@ function TItemData.GetHighAlch(item: TItem): Integer;
 var
   ids: TStringArray;
   id: String;
-  json: TJSONItem;
-  value: Int64;
+  cost: Integer;
 begin
   if item.IsNumeric then ids := [item]
   else ids := ItemFinder.Database.GetAll(item.ToLower(), 'item', 'id');
 
   for id in ids do
   begin
-    json := Self.GetDefinition(id);
-    if json.GetInt('cost', value) then
-      if value > 0 then
-        Exit(Round(value * 0.6));
+    cost := Self.GetDefinition(StrToInt(id)).Cost;
+    if cost > 0 then
+      Exit(Floor(cost * 0.6));
   end;
 end;
 
@@ -312,25 +289,13 @@ function TItemData.IsStackable(item: TItem): Boolean;
 var
   ids: TStringArray;
   id: String;
-  json: TJSONItem;
 begin
   if item.IsNumeric then ids := [item]
   else ids := ItemFinder.Database.GetAll(item.ToLower(), 'item', 'id');
 
   for id in ids do
-  begin
-    json := Self.GetDefinition(id);
-    if not json.Has('stackable') then
-      Continue;
-
-    case json.Item['stackable'].Typ of
-      EJSONType.INT:  if json.Item['stackable'].AsInt <> 0 then
-                        Exit(True);
-
-      EJSONType.BOOL: if json.Item['stackable'].AsBool then
-                        Exit(True);
-    end;
-  end;
+    if Self.GetDefinition(StrToInt(id)).Stackable <> 0 then
+      Exit(True);
 end;
 
 var
