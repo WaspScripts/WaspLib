@@ -421,4 +421,6 @@ begin
 end;
 
 var
+{$H-}
   GoalsForm: TGoalsFormHelper;
+{$H+}

@@ -341,7 +341,6 @@ Record containing pre-loaded game fonts and common text colors.
     const LIGHT_ORANGE: TColor = $3FB8FF;
     const LIGHT_YELLOW: TColor = $A2D8E4;
     const BROWN: TColor        = $002040;
-    const PATH = WLEnv.CacheDir + 'fonts' + PATH_SEP;
   end;
 
 procedure TFonts.Setup();
