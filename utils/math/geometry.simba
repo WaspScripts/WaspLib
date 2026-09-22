@@ -1,7 +1,4 @@
-(*
-# Geometry
-Methods and functions related to geometry.
-*)
+
 {$DEFINE WL_GEOMETRY_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
@@ -72,15 +69,7 @@ begin
 end;
 
 
-(*
-## TPoint.InRange
-```pascal
-function TPoint.InRange(other: TPoint; dist: Double): Boolean; constref;
-function TPoint.AnyInRange(other: TPointArray; dist: Double): Boolean; constref;
-function TPoint.AllInRange(other: TPointArray; dist: Double): Boolean; constref;
-```
-Checks if the current point is within `dist` distance of `other`.
-*)
+
 function TPoint.InRange(other: TPoint; dist: Double): Boolean;
 begin
   Result := Self.DistanceTo(other) <= dist;
@@ -320,13 +309,7 @@ begin
 end;
 
 
-(*
-## TImage.RotateClockWise
-```pascal
-function TImage.RotateClockWise(times: Integer = 1): TImage;
-```
-Rotate a TImage clockwise `times` amoutn of times.
-*)
+
 function TImage.RotateClockWise(times: Integer = 1): TImage;
 var
   i: Integer;
@@ -336,13 +319,7 @@ begin
     Result := Result.Mirror(EImageMirrorStyle.LINE).Mirror(EImageMirrorStyle.WIDTH);
 end;
 
-(*
-## TImage.RotateCounterClockWise
-```pascal
-function TImage.RotateCounterClockWise(times: Integer = 1): TImage;
-```
-Rotate a TImage counter clockwise `times` amoutn of times.
-*)
+
 function TImage.RotateCounterClockWise(times: Integer = 1): TImage;
 var
   i: Integer;

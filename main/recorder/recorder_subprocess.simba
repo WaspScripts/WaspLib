@@ -1,7 +1,4 @@
-(*
-# Recorder SubProcess
-Standalone script meant to be ran by WaspLib to record a target
-*)
+
 {$loadlib Plugins/wasp-plugins/librecorder/librecorder}
 {$loadlib Plugins/wasp-plugins/libremoteinput/libremoteinput}
 {$loadlib Plugins/wasp-plugins/waspinput/waspinput}

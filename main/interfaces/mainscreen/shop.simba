@@ -1,29 +1,12 @@
-(*
-# Shop
-Methods to interact with the shop interface.
-```{figure} ../../images/shop_interface.png
-```
-```{note}
-Credits to GodTierKappa a.k.a. jacz24
-```
-*)
+
 
 {$DEFINE WL_SHOP_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EShopQuantity
-```pascal
-EShopQuantity = enum(ONE, FIVE, TEN, FIFTY);
-```
-Enum representing the shop quantity buttons.
-*)
+
   EShopQuantity = enum(ONE, FIVE, TEN, FIFTY);
-(*
-## TShop
-Main record to interact with the {ref}`Shop` interface.
-*)
+
   TShop = record
     Title: TInterfaceTitle;
     Slots: TSlotInterface;
@@ -39,31 +22,7 @@ Main record to interact with the {ref}`Shop` interface.
     Merchants: TEntityArray;
   end;
 
-(*
-## Shop.FindItemBoundaries
-```pascal
-function TShop.FindItemBoundaries(): TBoxArray;
-```
-Finds item boundaries and returns them as a TBoxArray.
 
-You have 2 ways of getting the shop item slots, a static one:
-```pascal
-ShowOnTarget(Shop.SlotBoxes);
-```
-```{figure} ../../images/shop_static_slots.png
-The shop static slots.
-```
-
-And a dynamic one:
-```pascal
-ShowOnTarget(Shop.FindItemBoundaries());
-```
-```{figure} ../../images/shop_item_boundaries.png
-The shop "dynamic" slots.
-```
-
-There are use cases for both, internally, `Shop.FindItemBoundaries` is usually used.
-*)
 function TShop.FindItemBoundaries(): TBoxArray;
 var
   tpa, final: TPointArray;
@@ -96,14 +55,7 @@ end;
 
 function TShop.IsOpen(): Boolean; forward;
 
-(*
-## Shop.SetupInterface
-```pascal
-procedure TShop.SetupInterface();
-```
-Internal method used to setup the {ref}`TShop` coordinates.
-This is automatically called for you on the {ref}`Shop variable`.
-*)
+
 procedure TShop.SetupInterface();
 var
   boxes: TBoxArray;
@@ -150,18 +102,7 @@ begin
     );
 end;
 
-(*
-## Shop.IsOpen
-```pascal
-function TShop.IsOpen(): Boolean;
-```
-Returns true if the shop interface is open.
 
-Example:
-```pascal
-WriteLn Shop.IsOpen();
-```
-*)
 function TShop.IsOpen(): Boolean;
 begin
   Result := OCR.Recognize(
@@ -170,38 +111,14 @@ begin
   );
 end;
 
-(*
-## Shop.WaitOpen
-```pascal
-function TShop.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
-```
-Returns true if the shop opens within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn Shop.WaitOpen();
-```
-*)
 function TShop.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## Shop.Close
-```pascal
-function TShop.Close(escape: Boolean): Boolean;
-function TShop.Close(escapeProbability: Double = BioHash): Boolean; overload;
-```
-Closes the {ref}`Shop` interface, depending on `escape` the function will either
-press escape or click the close button.
 
-Example:
-```pascal
-WriteLn Shop.Close();
-```
-*)
 function TShop.Close(escape: Boolean): Boolean;
 begin
   Result := Self.Title.Close(escape);
@@ -212,21 +129,7 @@ begin
   Result := Self.Title.Close(escapeProbability);
 end;
 
-(*
-## Shop.Buy
-```pascal
-function TShop.Buy(
-  item: TItem; quantity: EShopQuantity = EShopQuantity.ONE
-): Boolean;
-```
-Attempts to buy the specified item from the shop.
-With the proper quantity button enabled.
 
-Example:
-```pascal
-WriteLn Shop.Buy('Gold ore', EShopQuantity.FIFTY);
-```
-*)
 function TShop.Buy(
   item: TItem; quantity: EShopQuantity = EShopQuantity.ONE
 ): Boolean;
@@ -252,21 +155,7 @@ begin
   Result := True;
 end;
 
-(*
-## Shop.Sell
-```pascal
-function TShop.Sell(
-  item: TItem; quantity: EShopQuantity = EShopQuantity.ONE
-): Boolean;
-```
-Attempts to sell the specified item to the shop from your inventory.
-With the proper quantity button enabled.
 
-Example:
-```pascal
-WriteLn Shop.Sell('Bones', EShopQuantity.FIVE);
-```
-*)
 function TShop.Sell(
   item: TItem; quantity: EShopQuantity = EShopQuantity.ONE
 ): Boolean;
@@ -290,18 +179,7 @@ begin
   Result := True;
 end;
 
-(*
-## Shop.GetPrice
-```pascal
-function TShop.GetPrice(item: TItem): Integer;
-```
-Returns the price of an item in the shop by examining it.
 
-Example:
-```pascal
-WriteLn Shop.GetPrice('Gold ore');
-```
-*)
 function TShop.GetPrice(item: TItem): Integer;
 begin
   if not Self.IsOpen() then
@@ -321,18 +199,7 @@ begin
   end;
 end;
 
-(*
-## Shop.SetQuantity
-```pascal
-function TShop.SetQuantity(quantity: EShopQuantity): Boolean;
-```
-Sets the shop quantity button (1, 5, 10, or 50).
 
-Example:
-```pascal
-WriteLn Shop.SetQuantity(EShopQuantity.TEN);
-```
-*)
 function TShop.SetQuantity(quantity: EShopQuantity): Boolean;
 begin
   if Self.QuantityButtons[quantity].Enabled then Exit(True);
@@ -351,18 +218,7 @@ begin
   );
 end;
 
-(*
-## Shop.Hover
-```pascal
-function TShop.Hover(obj: TObject; walk: Boolean = True): Boolean;
-function TShop.Hover(npc: TEntity; walk: Boolean = True): Boolean; overload;
-```
-This assumes that {ref}`Map` is being used and setup.
-It's possible to use this with other systems but you need to configure it all
-manually.
 
-If you are too far, it will attempt to walk closer to it.
-*)
 
 function TShop.Hover(obj: TObject; walk: Boolean = True): Boolean;
 begin
@@ -378,24 +234,7 @@ begin
   Result := npc.Hover();
 end;
 
-(*
-## Shop.Open
-```pascal
-function TShop.Open(obj: TObject; walk: Boolean = True): Boolean;
-function TShop.Open(npc: TEntity; walk: Boolean = True): Boolean; overload;
-```
-Opens the shop for you.
-This assumes that {ref}`Map` is being used and setup.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Map.Setup([Map.Setup([EChunk.BLAST_FURNACE]));
-  Shop.Open(TEntity.Create(NPCsJSON.GetByName('Ordan', 1).Item[0]));
-end.
-```
-*)
 function TShop.Open(obj: TObject; walk: Boolean = True): Boolean;
 begin
   if walk then
@@ -426,8 +265,5 @@ begin
 end;
 
 var
-(*
-## Shop variable
-Global {ref}`TShop` variable.
-*)
+
   Shop: TShop;
