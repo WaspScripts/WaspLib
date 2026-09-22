@@ -25,10 +25,10 @@ They are last so the values of the other prayers stay the same for scripts that 
     MYSTIC_LORE,          STEEL_SKIN,         ULTIMATE_STRENGTH,
     INCREDIBLE_REFLEXES,  PROTECT_FROM_MAGIC, PROTECT_FROM_MISSILES,
     PROTECT_FROM_MELEE,   EAGLE_EYE,          MYSTIC_MIGHT,
-    RETRIBUTION,          REDEMPTION,         SMITE,
-    PRESERVE,             CHIVALRY,           PIETY,
-    RIGOUR,               AUGURY,
-    DEADEYE,              MYSTIC_VIGOUR
+    DEADEYE,              MYSTIC_VIGOUR,      RETRIBUTION,
+    REDEMPTION,           SMITE,              PRESERVE,
+    CHIVALRY,             PIETY,              RIGOUR,
+    AUGURY
   );
 
 (*
