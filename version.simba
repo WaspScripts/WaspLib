@@ -5,10 +5,10 @@
 const
 
   WL_VERSION_YEAR: Integer = 2026;
-  WL_VERSION_MONTH: Integer = 07;
-  WL_VERSION_DAY: Integer = 31;
+  WL_VERSION_MONTH: Integer = 09;
+  WL_VERSION_DAY: Integer = 22;
 
-  WL_VERSION_COMMIT_HASH: String = 'e80c66a';
+  WL_VERSION_COMMIT_HASH: String = '4bdde4f';
 
 
 
