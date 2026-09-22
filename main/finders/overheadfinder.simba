@@ -6,6 +6,8 @@ Prayer/Protection Overhead Detection System.
 A comprehensive system for detecting and locating prayer and protection overhead icons
 in game. This module uses template matching to identify various
 overhead prayer effects on players and NPCs.
+
+The overhead icons are read straight from the game cache.
 *)
 {$DEFINE WL_OVERHEADFINDER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -16,17 +18,20 @@ overhead prayer effects on players and NPCs.
 EOverhead = (
   MAGIC, RANGED, MELEE, RETRIBUTION, REDEMPTION, SMITE,
   MAGIC_AND_RANGED, MAGIC_AND_MELEE, RANGED_AND_MELEE, ALL,
-  DAMPEN_MELEE
+  DAMPEN_MELEE, DAMPEN_RANGED, DAMPEN_MAGIC
 );
 ```
 Enumeration of all detectable overhead prayer and protection types in game.
 Includes individual protections, combinations, and special prayer effects.
+
+`DAMPEN_RANGED` and `DAMPEN_MAGIC` are last so the values of the others stay the same for scripts
+that saved them.
 *)
 type
   EOverhead = (
     MAGIC, RANGED, MELEE, RETRIBUTION, REDEMPTION, SMITE,
     MAGIC_AND_RANGED, MAGIC_AND_MELEE, RANGED_AND_MELEE, ALL,
-    DAMPEN_MELEE
+    DAMPEN_MELEE, DAMPEN_RANGED, DAMPEN_MAGIC
   );
 
 (*
@@ -59,7 +64,6 @@ Dynamic array of TOverhead records for storing multiple detected overhead icons.
 ```pascal
 TOverheadFinder = record
   Images: array[EOverhead] of TImage;
-  Version, CacheDir: String;
   Similarity: Single;
 end;
 ```
@@ -68,9 +72,7 @@ overhead icon recognition using template matching algorithms.
 *)
   TOverheadFinder = record
     Images: array[EOverhead] of TImage;
-    Version, CacheDir: String;
     Similarity: Single;
-    const BACKGROUND_COLOR: TColorTolerance = [$74B0C7, 2.844, EColorSpace.RGB, [0.681, 1.299, 1.021]];
   end;
 
 (*
@@ -80,9 +82,7 @@ procedure TOverheadFinder.Setup();
 ```
 
 Internal procedure called when library is loaded.
-Initializes the overhead finder system. Creates cache directories,
-manages version control, and sets default similarity threshold.
-Must be called before using detection methods.
+Sets the default similarity threshold.
 
 Example:
 ```pascal
@@ -91,28 +91,46 @@ WriteLn('OverheadFinder initialized successfully');
 ```
 *)
 procedure TOverheadFinder.Setup();
-var
-  path, tmp: String;
 begin
-  Self.Version := WLAssets.JSON.Item['finders/overheads.zip'].AsString;
-  Self.CacheDir := WLEnv.CacheDir + 'overheadfinder' + PATH_SEP;
-
-  //Delete old cache files if they exist
-  for path in DirList(Self.CacheDir) do
-  begin
-    tmp := Copy(path, Length(path) - Length(Self.Version) + 1, Length(path));
-    if tmp <> Self.Version then
-      DirDelete(path, False);
-  end;
-
-  Self.CacheDir += Self.Version + PATH_SEP;
-
-  if not DirCreate(Self.CacheDir) then
-    raise GetDebugLn('OverheadFinder', 'Failed to create cache directory: ' + Self.CacheDir);
-
   //only set similarity if the user didn't set it already
   if Self.Similarity = 0 then
     Self.Similarity := 0.90;
+end;
+
+(*
+## TOverheadFinder.LoadImages
+```pascal
+procedure TOverheadFinder.LoadImages();
+```
+Internal procedure that reads the overhead icons out of the game cache and fills `Images`.
+
+All overheads are frames of the same 25x25 sprite. Only the middle 14x14 of each frame is kept,
+which leaves out the transparent corners so the icons match whatever the game draws behind them.
+It runs once, the first time an overhead image is needed.
+*)
+procedure TOverheadFinder.LoadImages();
+const
+  SPRITE_ID: Integer = 440;
+  FRAMES: array [EOverhead] of Integer = [2, 1, 0, 3, 5, 4, 6, 8, 7, 9, 12, 13, 14];
+  CROP: TBox = [6, 6, 19, 19];
+var
+  index: TCacheIndex;
+  sector: TArchiveSector;
+  sprites: TSpriteDefinitionArray;
+  overhead: EOverhead;
+begin
+  index := CacheReader.Indices[ECacheIndex.SPRITES];
+  sector := index.ReadArchiveSector(SPRITE_ID, index.ID, index.IndexData);
+  if sector.Data = [] then
+    raise GetDebugLn('OverheadFinder', 'Failed to read the overhead sprite from the cache');
+
+  sprites := TSpriteDefinition.Create(SPRITE_ID, sector.Decompress());
+
+  for overhead in EOverhead do
+  begin
+    Self.Images[overhead] := sprites[FRAMES[overhead]].ToImage();
+    Self.Images[overhead].Crop(CROP);
+  end;
 end;
 
 (*
@@ -121,8 +139,8 @@ end;
 function TOverheadFinder.GetImage(overhead: EOverhead): TImage;
 ```
 Internal function.
-Retrieves or loads the template image for a specific overhead type.
-Images are cached after first load.
+Retrieves the template image for a specific overhead type.
+Images are read from the game cache the first time one is needed and kept in memory after that.
 
 Parameters:
 - overhead: The overhead type to get the template image for
@@ -130,19 +148,11 @@ Parameters:
 Returns TImage object containing the template, or raises exception if image cannot be loaded.
 *)
 function TOverheadFinder.GetImage(overhead: EOverhead): TImage;
-var
-  name, path: String;
 begin
-  if Self.Images[overhead] <> nil then
-    Exit(Self.Images[overhead]);
+  if Self.Images[overhead] = nil then
+    Self.LoadImages();
 
-  name := ToStr(overhead).ToLower().After('.') + '.png';
-  path := Self.CacheDir + name;
-
-  if not (FileExists(path) or ZipExtract(WLEnv.AssetsDir + 'finders' + PATH_SEP + 'overheads.zip', Self.CacheDir, [name])) then
-    raise GetDebugLn('OverheadFinder', Format('Failed to unzip overhead image %s', [name]));
-
-  Result := Self.Images[overhead] := new TImage(path);
+  Result := Self.Images[overhead];
 end;
 
 (*
@@ -151,8 +161,9 @@ end;
 function TOverheadFinder.Find(overheads: set of EOverhead; maxToFind: Integer = 5): TOverheadArray;
 ```
 Searches the main screen for specified overhead prayer/protection icons using template matching.
-Detects overhead icons by first finding the characteristic background color, then performing
-template matching within those regions.
+Detects overhead icons by first finding their characteristic colors: the tan background of the
+protection prayers, the purple background of the dampen ones, the red of retribution and the teal
+of smite and redemption. The regions around those colors are then searched with template matching.
 
 Parameters:
 - overheads: Set of overhead types to search for
@@ -182,8 +193,21 @@ end;
 {figure} ../../images/overhead_detection_example.png
 *)
 function TOverheadFinder.Find(overheads: set of EOverhead; maxToFind: Integer = 5): TOverheadArray;
+const
+  //the tan and purple backgrounds, then the red of retribution and the teal of smite and redemption
+  COLORS: array of TColorTolerance = [
+    [$74B0C7, 2.844, EColorSpace.RGB, [0.681, 1.299, 1.021]],
+    [$A77EBC, 3, EColorSpace.RGB, [0.681, 1.299, 1.021]],
+    [$0000FB, 3, EColorSpace.RGB, [1, 1, 1]],
+    [$ACC814, 3, EColorSpace.RGB, [1, 1, 1]]
+  ];
+  //a color pixel inside a template is at most this far from the template's opposite edge
+  MARGIN: Integer = 13;
+  //every overhead has more pixels of its colors than this, smaller clusters are just noise
+  MIN_POINTS: Integer = 20;
 var
-  background: TPointArray;
+  color: TColorTolerance;
+  tpa, cluster: TPointArray;
   overhead: EOverhead;
   bounds: TBox;
   searchingBounds: TBoxArray;
@@ -191,11 +215,15 @@ var
   imgMatrix: TIntegerMatrix;
   matrix: TSingleMatrix;
 begin
-  background := Target.FindColor(TOverheadFinder.BACKGROUND_COLOR, MainScreen.Bounds);
-  if background.Length = 0 then
+  for color in COLORS do
+    tpa += Target.FindColor(color, MainScreen.Bounds);
+
+  if tpa = [] then
     Exit;
 
-  searchingBounds := background.Cluster(8).BoundsArray();
+  for cluster in tpa.Cluster(8) do
+    if Length(cluster) >= MIN_POINTS then
+      searchingBounds += cluster.Bounds().Expand(MARGIN, MainScreen.Bounds);
 
   for overhead in overheads do
   begin
@@ -212,9 +240,9 @@ begin
       with matrix.ArgMax() do
       begin
         if matrix[Y,X] < Self.Similarity then
-          Break;
+          Continue;
 
-        Result += [Point(X + 6,Y + 7).Offset(bounds.TopLeft).Offset(MainScreen.Bounds.TopLeft), overhead];
+        Result += [Point(X + 6, Y + 6).Offset(bounds.TopLeft), overhead];
         if Result.Length = maxToFind then
           Exit;
       end;
