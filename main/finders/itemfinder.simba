@@ -124,11 +124,15 @@ begin
   if Self.IsSetup then
     Exit;
 
-  Self.Version := WLAssets.JSON.Item['finders/items/data/hash.txt'].AsString;
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  Self.Archive := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
+  Self.Version := ToStr(Self.Archive.CRC);
 
-  if not DirExists(DB_PATH) then
+  if not DirExists(DB_PATH) or (FileRead(DB_PATH + 'version.txt').Trim() <> Self.Version) then
   begin
     ItemLoader.WriteDatabase(DB_PATH);
+    if not FileWrite(DB_PATH + 'version.txt', Self.Version) then
+      raise GetDebugLn('ItemFinder', 'Couldn''t write ' + DB_PATH + 'version.txt');
   end;
 
   Self.Database.Setup(
@@ -145,9 +149,6 @@ begin
 
   Self.ImageCompare.Align := @Self.Align;
   Self.ImageCompare.Clean := @Self.Clean;
-
-  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
-  Self.Archive := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
 
   Self.IsSetup := True;
 end;

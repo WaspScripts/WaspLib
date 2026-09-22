@@ -81,7 +81,7 @@ procedure TPrayerFinder.Setup();
 var
   path, tmp: String;
 begin
-  Self.Version := WLAssets.JSON.Item['finders/prayer.zip'].AsString;
+  Self.Version  := WLAssets.JSON.Item['finders/prayer.zip'].AsString;
   Self.CacheDir := WLEnv.CacheDir + 'prayerfinder' + PATH_SEP;
 
   //Delete old cache files if they exist
