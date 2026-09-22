@@ -1,17 +1,10 @@
-(*
-# Data
-This page is about fetching game data with WaspLib.
-WaspLib has several tools to get information about items, npcs, weapons, ...
-*)
+
 
 {$DEFINE WL_DATA_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TItemData
-Record responsible for providing item information in WaspLib.
-*)
+
   TItemData = record
     DefinitionsJSON, PricesJSON: TJSONParser;
     Filename: String;
@@ -21,10 +14,7 @@ Record responsible for providing item information in WaspLib.
     const PRICES_URL: String = 'https://prices.runescape.wiki/api/v1/osrs/latest';
   end;
 
-(*
-## TItemPriceData
-Record responsible for holding item price data.
-*)
+
   TItemPriceData = record
     High, HighTime, Low, LowTime: Integer;
   end;
@@ -91,35 +81,7 @@ begin
 end;
 
 
-(*
-## ItemData.GetDefinition
-```pascal
-function TItemData.GetDefinition(itemID: String): TJSONItem;
-```
-This is mostly for internal use but you may use it for whatever you wish.
 
-This returns a `TJSONItem` of the item definition.
-
-Item definitions are items information stored in the game cache, things like:
-- Item ID
-- Item name
-- Item is tradeable
-- Item is stackable
-- Item is members
-- ...
-
-WaspLib includes a zip file with item definitions for all non "null" items as .json files
-in `WaspLib\main\data\items.zip`.
-
-Example:
-```pascal
-id := ItemFinder.Database.Get('abyssal whip', 'item', 'id');
-json := ItemData.GetDefinition(id);
-parser := json.ToParser();
-WriteLn parser.ToString();
-parser.Free();
-```
-*)
 function TItemData.GetDefinition(itemID: String): TJSONItem;
 var
   path, filename: String;
@@ -139,27 +101,7 @@ begin
   Self.DefinitionsJSON.Add(itemID, Result);
 end;
 
-(*
-## ItemData.GetTradeableID
-```pascal
-function TItemData.GetTradeableID(item: TItem): String;
-```
-Mostly for internal use but you may use it as you see fit.
 
-Some items in the game have versions of themselves that are not tradeable and
-can't be used to fetch item prices, such as degraded items, ornamented items, etc.
-
-This function checks every id associated with the specified `item` and checks
-the item definition of each one (check {ref}`ItemData.GetDefinition`) for the
-tradeable key.
-
-The first tradeable id found is returned.
-
-Example:
-```pascal
-WriteLn ItemData.GetTradeableID('Rune scimitar'); //rune scimitar has 2 ids and one is not tradeable.
-```
-*)
 function TItemData.GetTradeableID(item: TItem): String;
 var
   ids: TStringArray;
@@ -178,23 +120,7 @@ begin
   end;
 end;
 
-(*
-## ItemData.GetPriceData
-```pascal
-function TItemData.GetPriceData(item: TItem): TItemPriceData;
-```
-Method used to return the price data of the specified `item`.
 
-Example:
-```pascal
-var
-  priceData: TItemPriceData;
-begin
-  priceData := ItemData.GetPriceData('Abyssal whip');
-  WriteLn('High: ' + ToStr(priceData.high) + ' Low: ' + ToStr(priceData.low));
-end;
-```
-*)
 function TItemData.GetPriceData(item: TItem): TItemPriceData;
 var
   id: String;
@@ -213,18 +139,7 @@ begin
   Result.LowTime := json.Item['lowTime'].AsInt;
 end;
 
-(*
-## ItemData.GetPrice
-```pascal
-function TItemData.GetPrice(item: TItem): Integer;
-```
-Method used to return the average price of the specified `item`.
 
-Example:
-```pascal
-WriteLn ItemData.GetPrice('Abyssal whip');
-```
-*)
 function TItemData.GetPrice(item: TItem): Integer;
 var
   priceData: TItemPriceData;
@@ -246,18 +161,7 @@ begin
 end;
 
 
-(*
-## ItemData.GetLowAlch()
-```pascal
-function TItemData.GetLowAlch(item: TItem): Integer;
-```
-Method used to get the the low alchemy value of an item.
 
-Example:
-```pascal
-WriteLn ItemData.GetLowAlch('Magic longbow');
-```
-*)
 function TItemData.GetLowAlch(item: TItem): Integer;
 var
   ids: TStringArray;
@@ -277,18 +181,7 @@ begin
   end;
 end;
 
-(*
-## ItemData.GetHighAlch()
-```pascal
-function TItemData.GetHighAlch(item: TItem): Integer;
-```
-Method used to get the the high alchemy value of an item.
 
-Example:
-```pascal
-WriteLn ItemData.GetHighAlch('Magic longbow');
-```
-*)
 function TItemData.GetHighAlch(item: TItem): Integer;
 var
   ids: TStringArray;
@@ -334,29 +227,16 @@ begin
 end;
 
 var
-(*
-## ItemData variable
-Global {ref}`TItemData` variable.
-*)
+
   ItemData: TItemData;
 
 type
-(*
-## TGearData
-Type responsible for retrieving gear data.
-"Gear" refers to as any equippable item in the game.
-*)
+
   TGearData = record
     Data: TJSONItem;
   end;
 
-(*
-## GearData.Setup
-```pascal
-procedure TGearData.Setup();
-```
-Internal method to setup TGearData.
-*)
+
 procedure TGearData.Setup();
 begin
   if Self.Data <> nil then Exit;
@@ -364,18 +244,7 @@ begin
   TJSONParser(Self.Data).Load(WLEnv.AssetsDir + 'jsons' + PATH_SEP + 'gear.json');
 end;
 
-(*
-## GearData.GetArray
-```pascal
-function TGearData.GetArray(index: Integer): TJSONItem;
-function TGearData.GetArray(key: String): TJSONItem; overload;
-```
-Method to fetch json arrays from gear.json.
 
-```{note}
-Using this requires knowledge of the structure of gear.json
-```
-*)
 function TGearData.GetArray(index: Integer): TJSONItem;
 begin
   Self.Setup();
@@ -389,14 +258,7 @@ begin
   Result := Self.Data.Item[key];
 end;
 
-(*
-## GearData.GetItems
-```pascal
-function TGearData.GetItems(key: Integer): TItemArray;
-function TGearData.GetItems(key: String): TItemArray; overload;
-```
-Method to fetch items under a key in gear.json.
-*)
+
 function TGearData.GetItems(key: Integer): TItemArray;
 var
   i: Int32;
@@ -417,10 +279,7 @@ begin
 end;
 
 var
-(*
-## GearData variable
-Global {ref}`TGearData` variable.
-*)
+
   GearData: TGearData;
 
 type
