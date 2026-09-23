@@ -320,13 +320,16 @@ Type responsible for retrieving gear data.
 ```pascal
 procedure TGearData.Setup();
 ```
-Internal method to setup TGearData.
+Internal method to setup TGearData, loading `gear.json` out of the item database
+{ref}`TItemLoader.WriteDatabase` builds from the game cache.
 *)
 procedure TGearData.Setup();
 begin
-  if Self.Data <> nil then Exit;
+  if Self.Data <> nil then
+    Exit;
+
   Self.Data := new TJSONParser();
-  TJSONParser(Self.Data).Load(WLEnv.AssetsDir + 'jsons' + PATH_SEP + 'gear.json');
+  TJSONParser(Self.Data).Load(ItemFinder.DB_PATH + 'gear.json');
 end;
 
 (*

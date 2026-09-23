@@ -24,6 +24,7 @@ type
 
     Archive: TArchive;
     Unzipping, IsSetup: Boolean;
+    const DB_PATH: String = SimbaEnv.DataPath + 'items-db' + PATH_SEP;
   end;
 
 
@@ -118,8 +119,6 @@ end;
 
 
 procedure TItemFinder.Setup();
-const
-  DB_PATH: String = SimbaEnv.DataPath + 'items-db' + PATH_SEP;
 begin
   if Self.IsSetup then
     Exit;
@@ -128,16 +127,16 @@ begin
   Self.Archive := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
   Self.Version := ToStr(Self.Archive.CRC);
 
-  if not DirExists(DB_PATH) or (FileRead(DB_PATH + 'version.txt').Trim() <> Self.Version) then
+  if not DirExists(Self.DB_PATH) or (FileRead(Self.DB_PATH + 'version.txt').Trim() <> Self.Version) then
   begin
-    ItemLoader.WriteDatabase(DB_PATH);
-    if not FileWrite(DB_PATH + 'version.txt', Self.Version) then
-      raise GetDebugLn('ItemFinder', 'Couldn''t write ' + DB_PATH + 'version.txt');
+    ItemLoader.WriteDatabase(Self.DB_PATH);
+    if not FileWrite(Self.DB_PATH + 'version.txt', Self.Version) then
+      raise GetDebugLn('ItemFinder', 'Couldn''t write ' + Self.DB_PATH + 'version.txt');
   end;
 
   Self.Database.Setup(
     'items', ['id', 'item', 'hash', 'border'],
-    DB_PATH,
+    Self.DB_PATH,
     Self.Version
   );
 
