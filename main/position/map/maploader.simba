@@ -1,16 +1,4 @@
-(*
-# MapLoader
-This file is responsible for loading chunk maps for TMap.
-It was made from scratch but heavily inspired in the original
-TWalker by [slacky](https://slacky.one/) and it's future iterations made by Olly.
 
-```{note}
-Most things in this file are for internal use only and you shouldn't use them directly
-nor modify them if you don't quite understand them.
-```
-
-Credits: Torwent
-*)
 
 {$DEFINE WL_MAPLOADER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -30,13 +18,7 @@ end;
 {$ENDIF}
 
 type
-(*
-## TMapRegion
-Map region record, responsible for storing the map region/chunk data.
-```{note}
-This is an internal type. Don't use it if you don't know what you are doing.
-```
-*)
+
   TMapRegion = record
     Chunks: TPointArray;
     Original, Region: TBox;
@@ -46,13 +28,7 @@ This is an internal type. Don't use it if you don't know what you are doing.
     Heights: THeightMap;
   end;
 
-(*
-## TMapRegion.Name
-```pascal
-property TMapRegion.Name: String;
-```
-Returns a unique string representing this map region.
-*)
+
 property TMapRegion.Name: String;
 begin
   with Self.Chunks.Bounds() do
@@ -60,24 +36,10 @@ begin
 end;
 
 type
-(*
-## EMap
-```pascal
-EMap = enum(NORMAL, COLLISION);
-Enum representing the types of map images TMap and TMapLoader render.
-```
-Heights are not one of these: they are kept as tile data on each {ref}`TMapRegion` rather than
-drawn into an image. See {ref}`TMapLoader.GetHeight`.
-*)
+
   EMap = enum(NORMAL, COLLISION);
 
-(*
-## TMapLoader
-TMapLoader is what's responsible for loading a map for TMap based on chunks.
-```{note}
-This is an internal type. Don't use it if you don't know what you are doing.
-```
-*)
+
   TMapLoader = record
     GraphsDir: String;
     Map, Collision, HalfMap: TImage;
@@ -94,49 +56,9 @@ This is an internal type. Don't use it if you don't know what you are doing.
     const TILE_SIZE: Integer = 4;
   end;
 
-(*
-## Points Translation
-This might be the only thing you need to use from time to time from the
-{ref}`MapLoader`.
 
-It's important to understand the difference between local and global points to
-use these effectively.
-Understanding them and making conversions of this coordinates is needed for
-proper coordinate debugging.
 
-### Global Points
-Global points and points on the real game map. This is the "Global map".
 
-E.G., if you visit [Wasp Map](https://map.waspscripts.com/),
-all coordinates on that map are **Global** coordinates.
-
-These are usually the ones you use when telling your scripts
-to walk or click a certain tile and/or object.
-
-### Local Points
-When you build a map, the region or regions you load are taken from the map and
-joined into a small, efficient map that only contains what you choose.
-
-This is your "Local map".
-
-This is important because the bigger the map is the slower it is to use.
-
-Because the regions are joined into a small map, it means that their "coordinates"
-don't line up with their original ones anymore.
-
-If you pick for example, pixel [100, 100] on your local map, that pixel won't be
-matching the pixel [100, 100] on the global map. Instead it matches the pixel
-[100,100] from the top left corner of one of your regions to put it simply.
-*)
-
-(*
-### TMapLoader.LocalIndex
-```pascal
-function TMapLoader.LocalIndex(pt: TPoint): Integer;
-```
-Returns the index of the TMapRegion a {ref}`Local point` is at.
-Returns `-1` if none is found.
-*)
 function TMapLoader.LocalIndex(pt: TPoint): Integer;
 begin
   for Result := 0 to High(Self.Regions) do
@@ -145,14 +67,7 @@ begin
   Result := -1;
 end;
 
-(*
-### TMapLoader.GlobalIndex
-```pascal
-function TMapLoader.GlobalIndex(pt: TPoint): Integer;
-```
-Returns the index of the TMapRegion a {ref}`Global point` is at.
-Returns `-1` if none is found.
-*)
+
 function TMapLoader.GlobalIndex(pt: TPoint): Integer;
 begin
   for Result := 0 to High(Self.Regions) do
@@ -162,19 +77,7 @@ begin
 end;
 
 
-(*
-### TMapLoader.GetGlobal
-```pascal
-function TMapLoader.GetGlobal(regionIdx: Integer; pt: TPoint; offset: TPoint = [0,0]): TPoint;
-function TMapLoader.GetGlobal(pt: TPoint; offset: TPoint = [0,0]): TPoint; overload;
-```
-Converts a {ref}`Local point` to a {ref}`Global point`.
 
-You can optionally specify the `regionIdx` you want your `pt` to be converted to or let Simba figure it out.
-For points in bulk from the same region specifying it is better as you save Simba from doing more math.
-
-The specified `pt` is returned unmodified if not region index matching the point is found.
-*)
 function TMapLoader.GetGlobal(regionIdx: Integer; pt: TPoint; offset: TPoint = [0,0]): TPoint;
 var
   reg: TMapRegion;
@@ -210,21 +113,7 @@ begin
 end;
 
 
-(*
-### TMapLoader.GetLocal
-```pascal
-function TMapLoader.GetLocal(regionIdx: Integer; pt: TPoint; offset: TPoint = [0,0]): TPoint;
-function TMapLoader.GetLocal(regionIdx: Integer; b: TBox; offset: TPoint = [0,0]): TBox; overload;
-function TMapLoader.GetLocal(pt: TPoint; offset: TPoint = [0,0]): TPoint; overload;
-function TMapLoader.GetLocal(tpa: TPointArray; offset: TPoint = [0,0]): TPointArray; overload;
-```
-Converts a {ref}`Global point` to a {ref}`Local point`.
 
-You can optionally specify the `regionIdx` you want your `pt` to be converted to or let Simba figure it out.
-You can also optionally specify points in bulk as a `tpa`.
-
-The specified `pt` is returned unmodified if not region index matching the point is found.
-*)
 function TMapLoader.GetLocal(regionIdx: Integer; pt: TPoint; offset: TPoint = [0,0]): TPoint;
 begin
   Result := pt - Self.Regions[regionIdx].Offset + Self.Regions[regionIdx].Region.TopLeft + offset;
@@ -283,20 +172,7 @@ begin
 end;
 
 
-(*
-## MapLoader.SetupChunkLoader
-```pascal
-procedure TMapLoader.SetupChunkLoader();
-```
-Prepares the {ref}`TMapChunkLoader` that renders map chunks out of the game cache.
 
-Caching the map index and loading the definitions the renderer needs takes close to a second, so
-it's done the first time a chunk is asked for rather than on every script that includes WaspLib.
-
-```{note}
-This is an internal method. Don't use it if you don't know what you are doing.
-```
-*)
 procedure TMapLoader.SetupChunkLoader();
 begin
   if Self.ChunkLoaderReady then
@@ -307,16 +183,7 @@ begin
   Self.ChunkLoaderReady := True;
 end;
 
-(*
-## MapLoader.GetFile
-```pascal
-function TMapLoader.GetFile(chunk: T3DPoint; map: EMap): TImage;
-```
-Internal method that returns a chunk image, rendered from the game cache with
-{ref}`TMapChunkLoader.GetChunkImage` or {ref}`TMapChunkLoader.GetChunkCollisionImage`.
 
-A chunk the cache has no region for comes back as a blank image.
-*)
 function TMapLoader.GetFile(chunk: T3DPoint; map: EMap): TImage;
 begin
   if (map = EMap.COLLISION) and WebGraphGenerator.BlockedChunks.Contains(chunk) then
@@ -330,13 +197,7 @@ begin
   Result := Self.ChunkLoader.GetChunkImage(chunk.X, chunk.Y, chunk.Z);
 end;
 
-(*
-## MapLoader.GetMap
-```pascal
-function TMapLoader.GetMap(chunks: TPointArray; plane: Integer; map: EMap): TImage;
-```
-Internal method that returns a `TImage` of all the `chunks` you pass into it.
-*)
+
 function TMapLoader.GetMap(chunks: TPointArray; plane: Integer; map: EMap): TImage;
 var
   i, x, y, n: Integer;
@@ -373,42 +234,14 @@ begin
   end;
 end;
 
-(*
-## MapLoader.GetHeights
-```pascal
-function TMapLoader.GetHeights(chunks: TPointArray; plane: Integer): THeightMap;
-```
-Internal method that returns the terrain heights of all the `chunks` you pass into it, one value
-per tile rather than one per pixel, laid out the way {ref}`MapLoader.GetMap` lays out its image.
 
-These are the raw heights the game stores, which are negative upwards.
-{ref}`MapLoader.GetHeight` is what turns one into the height a script works with.
-*)
 function TMapLoader.GetHeights(chunks: TPointArray; plane: Integer): THeightMap;
 begin
   Self.SetupChunkLoader();
   Result := Self.ChunkLoader.GetChunksHeightMap(chunks.Bounds(), plane);
 end;
 
-(*
-## MapLoader.GetHeight
-```pascal
-function TMapLoader.GetHeight(regionIdx: Integer; local: TPoint): Single;
-function TMapLoader.GetHeight(local: TPoint): Single; overload;
-```
-The terrain height at a {ref}`Local point`, in the units scripts have always used: the raw cache
-height divided by 32, counted upwards.
 
-The cache stores one height per tile, and it is the height of that tile's south-west corner.
-The ground between corners is interpolated from the four corners around the point, the same way
-the game client does it. A point on a tile's edge or corner therefore gives the same height from
-whichever tile it is read, so neighbouring tiles line up.
-
-A tile is `TILE_SIZE` pixels wide with its corners on multiples of it, so a tile's centre is
-`TILE_SIZE div 2` pixels past its north-west corner.
-Corners past the last row or column of a region reuse the edge ones.
-A point outside every region, or in a region's padding, has no tile behind it and gives `0`.
-*)
 function TMapLoader.GetHeight(regionIdx: Integer; local: TPoint): Single;
 var
   region: TMapRegion;
@@ -458,23 +291,7 @@ begin
   Result := Self.GetHeight(regionIdx, local);
 end;
 
-(*
-## MapLoader.Heightmap
-```pascal
-property TMapLoader.Heightmap: TImage;
-```
-The loaded heights drawn as a greyscale image the size of {ref}`TMapLoader.Map`, black at ground
-level and white at the highest terrain the game uses.
 
-Nothing internally works off this image - heights are kept as tile data - it exists so the
-{ref}`Map Debugger` has something to show. Each region is drawn at its own place on the map, so
-it lines up with the other debugger layers.
-
-Example:
-```pascal
-Map.Loader.Heightmap.Show();
-```
-*)
 property TMapLoader.Heightmap: TImage;
 var
   i: Integer;
@@ -501,17 +318,7 @@ begin
 end;
 
 
-(*
-## MapLoader.CacheGraph
-```pascal
-procedure TMapLoader.CacheGraph(constref graph: TWebGraph);
-```
-Caches a {ref}`TWebGraph` for future uses so we don't need to regenerate it.
 
-```{note}
-This is an internal method. Don't use it if you don't know what you are doing.
-```
-*)
 procedure TMapLoader.CacheGraph(constref graph: TWebGraph; path: String);
 begin
   if graph.Nodes.IsEmpty then
@@ -538,17 +345,7 @@ begin
       raise GetDebugLn('MapLoader', 'Failed to create cache for graph ObjectClusters: ' + path);
 end;
 
-(*
-## MapLoader.GraphFromCache
-```pascal
-function TMapLoader.GraphFromCache(path: String): TWebGraph;
-```
-Loads a previously cached {ref}`TWebGraph`.
 
-```{note}
-This is an internal method. Don't use it if you don't know what you are doing.
-```
-*)
 function TMapLoader.GraphFromCache(path: String): TWebGraph;
 begin
   if FileExists(path + 'nodes.txt') then
@@ -566,20 +363,7 @@ begin
   SetLength(Result.Paths, Length(Result.Nodes));
 end;
 
-(*
-## MapLoader.GetGraph
-```pascal
-function TMapLoader.GetGraph(const region: TMapRegion; map: TImage): TWebGraph;
-```
-Returns a TWebGraph for the given `map`.
 
-If the graph is already cached we load it from cache, otherwise we build it
-with {ref}`WebGraph Generator` and save it into cache.
-
-```{note}
-This is an internal method. Don't use it if you don't know what you are doing.
-```
-*)
 function TMapLoader.GetGraph(const region: TMapRegion; map: TImage): TWebGraph;
 var
   name, path, plane: String;
@@ -614,19 +398,7 @@ begin
 end;
 
 
-(*
-## MapLoader.Add
-```pascal
-procedure TMapLoader.Add(chunks: array of TMapChunk; downscale: UInt32 = 8; padding: UInt32 = 40);
-```
-Adds one or more `TMapChunk` to your already, previously loaded `TMapLoader`.
 
-This incrementally adds new chunks without regenerating existing ones.
-
-```{note}
-This is an internal method. Usually, {ref}`TMap` `Add` methods will call this for you.
-```
-*)
 procedure TMapLoader.Add(chunks: array of TMapChunk; downscale: UInt32 = 8; padding: UInt32 = 40);
 var
   chunk: TMapChunk;
@@ -777,41 +549,7 @@ begin
   end;
 end;
 
-(*
-## MapLoader.Load
-```pascal
-procedure TMapLoader.Load(chunks: TMapChunkArray; downscale: Integer = 8; padding: Integer = 40);
-```
-Loads a map and sets the {ref}`TMapLoader` internal values, the most important
-ones being:
-- `TMapLoader.Map`, which will hold the image of your map.
-- `TMapLoader.Regions[i].Heights` which holds the terrain heights of each region, per tile.
-  {ref}`MapLoader.GetHeight` reads them and {ref}`MapLoader.HeightmapImage` draws them.
-- `TMapLoader.Collision` which will hold your collision map
-- `TMapLoader.DownscaledMap` which is an exact copy of `TMapLoader.Map` downscaled by the specified `downscale`.
-- `TMapLoader.Graph` which holds your {ref}`TWebGraph` which is used for walking.
-- `TMapLoader.Regions` an array of the available {ref}`TMapRegion` that were loaded.
 
-The best way to visualize most of these is to use the {ref}`Map Debugger`:
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-
-begin
-  Map.Setup([EChunk.VARROCK]);
-  MapDebugger.Setup(@Map.Loader);
-  MapDebugger.Show();
-end.
-```
-
-```{figure} ../../images/map_debugger.gif
-```
-
-```{note}
-This is an internal method. Usually, {ref}`TMap` `Load` methods will call this for you.
-```
-*)
 procedure TMapLoader.Load(chunks: TMapChunkArray; downscale: UInt32 = 8; padding: UInt32 = 40);
 begin
   Self.Setup(downscale);
