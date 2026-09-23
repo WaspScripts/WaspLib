@@ -1,28 +1,9 @@
-(*
-# RSInterface Controls
-This page is about controls on game interfaces.
-These can be buttons, scrollbars, dropdowns, checkboxes, etc.
-*)
+
 {$DEFINE WL_INTERFACE_CONTROLS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TButton type
-The game has several types of buttons, {ref}`TButton` can be used for
-several of them but it's made specifically for buttons that have an
-"enabled" and "disabled" state:
-```{figure} ../../images/Tbuttons.png
-```
-You can also use them very effectively for this type of buttons that are "linked" together:
-```{figure} ../../images/linked_Tbuttons.png
-```
-With "linked", it means that enabling one, disabled the linked one(s).
 
-You can also use them for other types of buttons and imagination is the limit
-but in a lot of cases you won't be able to make use of the {ref}`TButton`
-methods.
-*)
   TButton = object
     EnabledColors: array of TColorTolerance;
     Bounds: TBox;
@@ -38,40 +19,14 @@ begin
   Result.EnabledColors := enabledColors;
 end;
 
-(*
-### TButton.Click
-```pascal
-procedure TButton.Click(button: EMouseButton = EMouseButton.LEFT);
-```
-Clicks a {ref]`TButton` with the specified mouse `button` which by default is the
-left one.
 
-Example:
-```pascal
-Button.Click();
-```
-*)
 procedure TButton.Click(button: EMouseButton = EMouseButton.LEFT);
 begin
   Mouse.Click(Self.Bounds, button);
 end;
 
 {$R-}
-(*
-### TButton.Enabled
-```pascal
-property TButton.Enabled: Boolean;
-property TButton.Enabled(value: Boolean);
-```
-Property to get/set a {ref}`TButton` `Enabled` state.
 
-Example:
-```pascal
-WriteLn Button.Enabled;
-Button.Enabled := True; //or Button.Enabled[True];
-WriteLn Button.Enabled;
-```
-*)
 property TButton.Enabled: Boolean;
 var
   i: Integer;
@@ -95,18 +50,7 @@ begin
   Result := SleepUntil(Self.Enabled = value, RandomMode(100, 50, 1500), TICK);
 end;
 
-(*
-### TButton.WaitEnabled
-```pascal
-function TButton.WaitEnabled(time: Integer = TICK; interval: Integer = -1): Boolean;
-```
-Returns True if the button is enabled within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn Button.WaitEnabled();
-```
-*)
 function TButton.WaitEnabled(time: Integer = TICK; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -127,33 +71,14 @@ end;
 
 
 type
-(*
-## TSlider type
-A record meant to handle sliders in the game interfaces:
-```{figure} ../../images/sliders.png
-```
-*)
+
   TSlider = record
     Color: TColor;
     Width: Integer;
     Bounds: TBox;
   end;
 
-(*
-### TSlider.GetLevel
-```pascal
-function TSlider.GetLevel(): Integer;
-```
-Returns the slider level from 0 to 100. It's important to keep in mind that
-while we use a scale from 0 to 100, don't have that many "levels".
 
-For example, the brightness slider only have 5 or 6 possible positions.
-
-Example:
-```pascal
-WriteLn slider.GetLevel();
-```
-*)
 function TSlider.GetLevel(): Integer;
 var
   tpa: TPointArray;
@@ -164,18 +89,7 @@ begin
   Result := (tpa.Mean().X - Self.Bounds.X1) * 100 div Self.Width;
 end;
 
-(*
-### TSlider.SetLevel
-```pascal
-function TSlider.SetLevel(level: Integer): Boolean;
-```
-Attempts to set the slider to the specified `level`.
 
-Example:
-```pascal
-WriteLn slider.SetLevel(60);
-```
-*)
 function TSlider.SetLevel(level: Integer): Boolean;
 var
   current: Integer;
@@ -206,36 +120,13 @@ end;
 
 
 type
-(*
-(TScrollBar)=
-## TScrollBar type
-Record to handle the game interface's scrollbars:
-```{figure} ../../images/scrollbar.png
-```
-*)
+
   TScrollBar = record
     Area, Up, Down, Bounds: TBox;
     Width, Height: Integer;
   end;
 
-(*
-### TScrollBar.Setup
-```pascal
-procedure TScrollBar.Setup(rightSide: Boolean = True);
-```
-Method used to setup several {ref}`TScrollBar` internal variables.
-When creating a {ref}`TScrollBar` you should first setup it's `Area` variable
-and then call this.
 
-Example:
-```pascal
-scroll.Area.X1 := Bank.Bounds.X1 + 5;
-scroll.Area.Y1 := Bank.Bounds.Y1 + 78;
-scroll.Area.X2 := Bank.Bounds.X2 - 22;
-scroll.Area.Y2 := Bank.Bounds.Y2 - 44;
-scroll.Setup();
-```
-*)
 procedure TScrollBar.Setup(rightSide: Boolean = True);
 begin
   if Self.Area = Default(TBox) then
@@ -267,18 +158,7 @@ begin
   Self.Down.Y2 := Self.Area.Y2;
 end;
 
-(*
-### TScrollBar.IsVisible
-```pascal
-function TScrollBar.IsVisible(): Boolean;
-```
-Returns True/False if the scrollbar is visible.
 
-Example:
-```pascal
-WriteLn Bank.Scroll.IsVisible();
-```
-*)
 function TScrollBar.IsVisible(): Boolean;
 begin
   Result :=
@@ -291,20 +171,7 @@ begin
     );
 end;
 
-(*
-### TScrollBar.Slider
-```pascal
-property TScrollBar.Slider: TBox;
-```
-Returns a `TBox` of the scrollbar slider.
 
-Example:
-```pascal
-ShowOnTarget(Bank.Scroll.Slider);
-```
-```{figure} ../../images/scrollbar_slider.png
-```
-*)
 property TScrollBar.Slider: TBox;
 var
   pt: TPoint;
@@ -323,21 +190,7 @@ begin
   Result.Y2 := tpa.Last.Y;
 end;
 
-(*
-### TScrollBar.CanScroll
-```pascal
-function TScrollBar.CanScroll(): Boolean;
-```
-Returns True/False if the scrollbar is "scrollable".
 
-A scrollbar is not scrollable if it's not visible or if the slider occupies the whole
-space available.
-
-Example:
-```pascal
-WriteLn Chat.Scroll.CanScroll();
-```
-*)
 function TScrollBar.CanScroll(): Boolean;
 begin
   if not Self.IsVisible() then
@@ -348,38 +201,14 @@ begin
 end;
 
 
-(*
-### TScrollBar.GetLevel
-```pascal
-function TScrollBar.GetLevel(): Integer;
-```
-Returns the level of the scrollbar.
-This is a percentage between the available space and the slider size.
 
-Example:
-```pascal
-WriteLn Chat.Scroll.GetLevel();
-```
-*)
 function TScrollBar.GetLevel(): Integer;
 begin
   with Self.Slider do
     Result := Round((Y1 - Self.Bounds.Y1) * 100 / (Self.Height - Height));
 end;
 
-(*
-### TScrollBar.ScrollArea
-```pascal
-property TScrollBar.ScrollArea: TBox;
-```
-Returns a area where you can scroll the mouse, using {ref}`TBiometrics` between
-`TScrollBar.Area` and `TScrollBar.Bounds`.
 
-Example:
-```pascal
-ShowOnTarget(Chat.Scroll.ScrollArea);
-```
-*)
 property TScrollBar.ScrollArea: TBox;
 begin
   if Biometrics.RandomBoolean(0.9) then
@@ -388,18 +217,7 @@ begin
     Result := Self.Bounds;
 end;
 
-(*
-### TScrollBar.SetLevel
-```pascal
-function TScrollBar.SetLevel(value: Integer): Integer;
-```
-Attempts to set a scroll level on a scrollbar.
 
-Example:
-```pascal
-WriteLn Chat.Scroll.SetLevel(50);
-```
-*)
 function TScrollBar.SetLevel(value: Integer): Integer;
 var
   old, scrolls: Integer;
@@ -441,18 +259,7 @@ begin
 end;
 
 
-(*
-### TScrollBar.Scroll
-```pascal
-function TScrollBar.Scroll(amount: Integer; down: Boolean): Boolean;
-```
-Scroll `amount` amount of times in a direction decided by `down`.
 
-Example:
-```pascal
-WriteLn Chat.Scroll.Scroll(3, True);
-```
-*)
 function TScrollBar.Scroll(amount: Integer; down: Boolean): Boolean;
 var
   i: Integer;
@@ -488,24 +295,14 @@ end;
 
 
 type
-(*
-(TDropDownOption)=
-## TDropDownOption type
-Helper record to handle {ref}`TDropDown` options.
-*)
+
   TDropDownOption = record
     Index: Integer;
     Bounds: TBox;
     Text: String;
   end;
 
-(*
-(TDropDown)=
-## TDropDown type
-Record to handle drop downs in the game interfaces:
-```{figure} ../../images/dropdowns.png
-```
-*)
+
   TDropDown = record
     Index: Integer;
     Bounds, Arrow: TBox;
@@ -517,28 +314,7 @@ Record to handle drop downs in the game interfaces:
 
   TDropDownArray = array of TDropDown;
 
-(*
-### TDropDown.Setup
-```pascal
-procedure TDropDown.Setup(
-  options: TStringArray; constref font: TPixelFont;
-  colors: TColorArray = [$1F98FF, $3FB8FF]
-);
-```
-Sets up a {ref}`TDropDown` internal variables.
 
-This has to be used after the `TDropDown.Bounds` variable is already set.
-
-Example:
-```pascal
-DropDown.Setup(
-  [
-    'Fixed - Classic layout', 'Resizable - Classic layout',
-    'Resizable - Modern layout'
-  ]
-);
-```
-*)
 procedure TDropDown.Setup(
   options: TStringArray; constref font: TPixelFont;
   colors: TColorArray = [$1F98FF, $3FB8FF]
@@ -577,18 +353,7 @@ begin
 end;
 
 
-(*
-### TDropDown.IsVisible
-```pascal
-function TDropDown.IsVisible(): Boolean;
-```
-Returns true if a {ref}`TDropDown` is visible.
 
-Example:
-```pascal
-WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].IsVisible();
-```
-*)
 function TDropDown.IsVisible(): Boolean;
 begin
   Result := Target.HasColor(
@@ -597,18 +362,7 @@ begin
 end;
 
 
-(*
-### TDropDown.IsOpen
-```pascal
-function TDropDown.IsOpen(): Boolean;
-```
-Returns true if a {ref}`TDropDown` is open.
 
-Example:
-```pascal
-WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].IsOpen();
-```
-*)
 function TDropDown.IsOpen(): Boolean;
 var
   tpa: TPointArray;
@@ -620,18 +374,7 @@ begin
 end;
 
 
-(*
-### TDropDown.WaitOpen
-```pascal
-function TDropDown.WaitOpen(time: Integer = TICK; interval: Integer = -1): Boolean;
-```
-Returns true if {ref}`TDropDown.IsOpen` returns true within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].WaitOpen();
-```
-*)
 function TDropDown.WaitOpen(time: Integer = TICK; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -639,18 +382,7 @@ begin
 end;
 
 
-(*
-### TDropDown.Open
-```pascal
-function TDropDown.Open(): Boolean;
-```
-Attempts to open a {ref}`TDropDown`.
 
-Example:
-```pascal
-WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].Open();
-```
-*)
 function TDropDown.Open(): Boolean;
 begin
   if not Self.IsVisible() then
@@ -661,18 +393,7 @@ begin
   Result := Self.WaitOpen(2000);
 end;
 
-(*
-### TDropDown.Close
-```pascal
-function TDropDown.Close(): Boolean;
-```
-Attempts to close a {ref}`TDropDown`.
 
-Example:
-```pascal
-WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].Close();
-```
-*)
 function TDropDown.Close(): Boolean;
 begin
   if not Self.IsVisible() or not Self.IsOpen() then
@@ -682,18 +403,7 @@ begin
 end;
 
 
-(*
-### TDropDown.GetSelected
-```pascal
-function TDropDown.GetSelected(): Integer;
-```
-Returns the index of the currently selected option on a {ref}`TDropDown`.
 
-Example:
-```pascal
-WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].GetSelected();
-```
-*)
 function TDropDown.GetSelected(): Integer;
 var
   match: Single;
@@ -716,22 +426,7 @@ begin
 end;
 
 
-(*
-### TDropDown.Select
-```pascal
-function TDropDown.Select(index: Integer): Boolean;
-function TDropDown.Select(option: String): Boolean; overload;
-```
-Attempts to select an option on a {ref}`TDropDown`.
 
-You can either use an option index or substring of an option.
-If you use a substring, the first match will be used.
-
-Example:
-```pascal
-WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].Select('Fixed');
-```
-*)
 function TDropDown.Select(index: Integer): Boolean;
 begin
   if (Self.Index < 0) and (Self.GetSelected() < 0) then

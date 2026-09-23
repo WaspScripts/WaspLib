@@ -1,15 +1,9 @@
-(*
-# Assets
-Responsible for managing assets that WaspLib requires to run.
-*)
+
 {$DEFINE WL_ASSETS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 type
-(*
-## TWLAssets
-Record for managing WaspLib asset downloads and updates.
-*)
+
   TWLAssets = record
     Config: TConfigJSON;
     JSON: TJSONObject;
@@ -101,13 +95,7 @@ begin
   Self.Lock.Leave();
 end;
 
-(*
-## TWLAssets.Update
-```pascal
-procedure TWLAssets.Update();
-```
-Internal method used to update WaspLib Assets.
-*)
+
 procedure TWLAssets.Update();
 var
   i: Integer;
