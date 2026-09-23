@@ -14,6 +14,8 @@ Main record used to interact with the {ref}`House Viewer`.
     RoomImages: array [EHouseRoom] of TImageArray;
     Similarity: Single;
     ImageCompare: TImageCompareUtils;
+    CacheEnum: TEnumDefinition;
+    CacheIndex: TCacheIndex;
   end;
 
 (*
@@ -29,7 +31,18 @@ HouseLayoutFinder.Setup();
 ```
 *)
 procedure THouseLayoutFinder.Setup();
+const
+  SPRITE_ENUM: Integer = 1423;
 begin
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+
+  Self.CacheEnum := TEnumDefinition.Create(
+    SPRITE_ENUM,
+    CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ENUMS].Files.Value[SPRITE_ENUM].Data
+  );
+
+  Self.CacheIndex := CacheReader.Indices[ECacheIndex.SPRITES];
+
   //only set similarity if the user didn't set it already
   if Self.Similarity = 0 then
     Self.Similarity := 0.85;
@@ -56,36 +69,27 @@ img.Show();
 *)
 property THouseLayoutFinder.Images(room: EHouseRoom): TImageArray;
 const
-  SPRITE_ENUM: Integer = 1423;
-  ROOM_TYPES: array [EHouseRoom] of Integer = [
+  ROOM_TYPES: TIntegerArray = [
     -1, 1, 2, 3, 4, 12, 5, 7,
     29, 6, 22, 9, 25,
     24, 13, 23, 11, 14, 21,
     15, 26, 28, 27
   ];
 var
-  enumDef: TEnumDefinition;
-  index: TCacheIndex;
   sector: TArchiveSector;
   i, spriteId: Integer;
 begin
-  if (Self.RoomImages[room] <> []) or (room = EHouseRoom.UNKNOWN) then
+  if (room = EHouseRoom.UNKNOWN) or (Self.RoomImages[room] <> []) then
     Exit(Self.RoomImages[room]);
 
-  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
-  enumDef := TEnumDefinition.Create(
-    SPRITE_ENUM,
-    CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ENUMS].Files.Value[SPRITE_ENUM].Data
-  );
-
-  i := enumDef.Keys.IndexOf(ROOM_TYPES[room]);
+  i := Self.CacheEnum.Keys.IndexOf(ROOM_TYPES[room]);
   if i = -1 then
     raise GetDebugLn('HouseLayoutFinder', 'Failed to find the ' + ToStr(room) + ' image in the cache.');
-  spriteId := enumDef.IntVals[i];
+  spriteId := Self.CacheEnum.IntVals[i];
 
-  index := CacheReader.Indices[ECacheIndex.SPRITES];
-  sector := index.ReadArchiveSector(spriteId, index.ID, index.IndexData);
-  if sector.Data = [] then
+
+  sector := Self.CacheIndex.ReadArchiveSector(spriteId, Self.CacheIndex.ID, Self.CacheIndex.IndexData);
+  if sector.Data.IsEmpty then
     raise GetDebugLn('HouseLayoutFinder', 'Failed to read the ' + ToStr(room) + ' image from the cache.');
 
   Self.RoomImages[room] += TSpriteDefinition.Create(spriteId, sector.Decompress())[0].ToImage();
