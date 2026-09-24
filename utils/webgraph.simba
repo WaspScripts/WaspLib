@@ -79,19 +79,42 @@ distances between nodes very fast.
 function TWebGraph.GetKDItems(offset: Integer = 0): TKDItems;
 var
   i, j: Integer;
-  boxes: TBoxArray;
+  b: TBox;
+  owner: TIntegerMatrix;
+  remaining, inside: TPointArray;
+  pt: TPoint;
 begin
-  boxes := Self.WalkableClusters.BoundsArray();
-
   SetLength(Result, Length(Self.Nodes));
+  if Self.Nodes.IsEmpty then
+    Exit;
+
+  b := Self.Nodes.Bounds();
+  SetLength(owner, b.Height, b.Width);
+
+  remaining := Self.Nodes;
+  for j := 0 to High(Self.WalkableClusters) do
+  begin
+    if remaining.IsEmpty then
+      Break;
+
+    inside := remaining.Intersection(Self.WalkableClusters[j]);
+    if inside.IsEmpty then
+      Continue;
+
+    for pt in inside do
+      owner[pt.Y-b.Y1, pt.X-b.X1] := j+1;
+
+    remaining := remaining.Difference(inside);
+  end;
+
+  //nodes no cluster holds are left at the default KDItem
   for i := 0 to High(Self.Nodes) do
-    for j := 0 to High(Self.WalkableClusters) do
-      if boxes[j].Contains(Self.Nodes[i]) then
-        if Self.WalkableClusters[j].Contains(Self.Nodes[i]) then
-        begin
-          Result[i] := [j+offset, [Self.Nodes[i].X, Self.Nodes[i].Y]];
-          Continue(2);
-        end;
+  begin
+    pt := Self.Nodes[i];
+    j := owner[pt.Y-b.Y1, pt.X-b.X1];
+    if j > 0 then
+      Result[i] := [j-1+offset, [pt.X, pt.Y]];
+  end;
 end;
 
 (*
@@ -632,12 +655,47 @@ end;
 
 
 (*
+## TWebGraph.MaxEdgeLength
+```pascal
+function TWebGraph.MaxEdgeLength(): Integer;
+```
+Returns the length of the longest connection in the graph, measured as the
+largest of its horizontal and vertical spans.
+
+{ref}`TWebGraph.Draw` needs this to know how far outside of the region it's drawing
+a node can sit and still have a connection reaching into it.
+*)
+function TWebGraph.MaxEdgeLength(): Integer;
+var
+  i, j, dist: Integer;
+  a, b: TPoint;
+begin
+  for i := 0 to High(Self.Paths) do
+  begin
+    a := Self.Nodes[i];
+    for j := 0 to High(Self.Paths[i]) do
+    begin
+      b := Self.Nodes[Self.Paths[i, j]];
+      dist := Max(Abs(a.X - b.X), Abs(a.Y - b.Y));
+      if dist > Result then
+        Result := dist;
+    end;
+  end;
+end;
+
+(*
 ## TWebGraph.Draw
 ```pascal
 procedure TWebGraph.Draw(img: TImage);
 procedure TWebGraph.Draw(canvas: TImageBoxCanvas); overload;
+procedure TWebGraph.Draw(canvas: TImageBoxCanvas; view: TBox; margin: Integer); overload;
 ```
 Used for `TWebGraph` debugging.
+
+The overload taking a `view` only draws what's inside it, which is how the
+{ref}`Map Debugger` keeps repaints cheap on large maps. `margin` must be at
+least {ref}`TWebGraph.MaxEdgeLength` or connections reaching into `view` from
+off screen nodes will be missing.
 *)
 procedure TWebGraph.Draw(img: TImage);
 var
@@ -659,7 +717,8 @@ procedure TWebGraph.Draw(canvas: TImageBoxCanvas); overload;
 var
   i,j: Integer;
 begin
-  if Self.Nodes = [] then Exit;
+  if Self.Nodes.IsEmpty then
+    Exit;
 
   for i := 0 to High(Self.Paths) do
     for j := 0 to High(Self.Paths[i]) do
@@ -667,5 +726,34 @@ begin
 
   for i := 0 to High(Self.Nodes) do
     canvas.DrawBoxFilled(TBox.Create(Self.Nodes[i], 1, 1), $0101CC);
+end;
+
+procedure TWebGraph.Draw(canvas: TImageBoxCanvas; view: TBox; margin: Integer); overload;
+var
+  i, j: Integer;
+  wide, nodeView: TBox;
+begin
+  if Self.Nodes.IsEmpty then
+    Exit;
+
+  //A connection reaching into `view` has both of its nodes within `margin` of
+  //it, so anything further out can be skipped without losing a single pixel.
+  wide := view.Expand(margin);
+
+  //nodes are drawn as a 3x3 box, so one just outside of `view` still paints in it
+  nodeView := view.Expand(1);
+
+  for i := 0 to High(Self.Paths) do
+  begin
+    if not wide.Contains(Self.Nodes[i]) then
+      Continue;
+
+    for j := 0 to High(Self.Paths[i]) do
+      canvas.DrawLine(Self.Nodes[i], Self.Nodes[Self.Paths[i, j]], $00EAEA);
+  end;
+
+  for i := 0 to High(Self.Nodes) do
+    if nodeView.Contains(Self.Nodes[i]) then
+      canvas.DrawBoxFilled(TBox.Create(Self.Nodes[i], 1, 1), $0101CC);
 end;
 {$R+}

@@ -47,6 +47,10 @@ Main record used to hold core values of the {ref}`Map Debugger`.
     ShowGraph, ShowWalkableSpace, ShowWalkableClusters, ShowObjectClusters, Normalize: Boolean;
     ColorArray: TColorArray;
     Target: TTarget;
+
+    //cached in Setup so painting never has to walk the whole graph
+    WalkableBoxes, ObjectBoxes: TBoxArray;
+    MaxEdge: Integer;
   end;
 
 procedure TMapDebugger.OnChange(sender: TLazObject);
@@ -58,24 +62,28 @@ end;
 procedure TMapDebugger.ImgBoxPaint(sender: TImageBox; canvas: TImageBoxCanvas; r: TLazRect);
 var
   p: TPoint;
-  b: TBox;
+  view: TBox;
   tpa: TPointArray;
   i: Int32;
 begin
+  view := Box(r.Left, r.Top, r.Right, r.Bottom);
+
   if Self.ShowWalkableSpace then
     canvas.DrawPoints(Self.Graph.WalkableSpace, Self.ColorArray.Last);
 
   if Self.ShowWalkableClusters then
     for i := 0 to High(Self.Graph.WalkableClusters) do
-      canvas.DrawPoints(Self.Graph.WalkableClusters[i], Self.ColorArray[i]);
+      if Self.WalkableBoxes[i].Overlap(view) then
+        canvas.DrawPoints(Self.Graph.WalkableClusters[i], Self.ColorArray[i]);
 
   if Self.ShowObjectClusters then
     for i := 0 to High(Self.Graph.ObjectClusters) do
-      canvas.DrawPoints(Self.Graph.ObjectClusters[i], Self.ColorArray[i]);
+      if Self.ObjectBoxes[i].Overlap(view) then
+        canvas.DrawPoints(Self.Graph.ObjectClusters[i], Self.ColorArray[i]);
 
   if Self.ShowGraph and (Self.Graph.Nodes <> []) then
   begin
-    Self.Graph.Draw(canvas);
+    Self.Graph.Draw(canvas, view, Self.MaxEdge);
     if Self.Selected > -1 then
     begin
       canvas.DrawBoxFilled(TBox.Create(Self.Graph.Nodes[Self.Selected], 1, 1), $00FF00);
@@ -412,8 +420,13 @@ begin
   Self.Graph.WalkableClusters := loader.Graph.WalkableClusters;
   Self.Graph.ObjectClusters := loader.Graph.ObjectClusters;
 
-  for i := 0 to Max(Length(Self.Graph.WalkableClusters), Length(Self.Graph.ObjectClusters)) do
-    Self.ColorArray += TColor.Random();
+  Self.WalkableBoxes := Self.Graph.WalkableClusters.BoundsArray();
+  Self.ObjectBoxes   := Self.Graph.ObjectClusters.BoundsArray();
+  Self.MaxEdge       := Self.Graph.MaxEdgeLength();
+
+  SetLength(Self.ColorArray, Max(Length(Self.Graph.WalkableClusters), Length(Self.Graph.ObjectClusters)) + 1);
+  for i := 0 to High(Self.ColorArray) do
+    Self.ColorArray[i] := TColor.Random();
 
   Self.Graph.KDTree := loader.Graph.KDTree;
   Self.ShowGraph := True;
