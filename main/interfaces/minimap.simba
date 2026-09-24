@@ -59,8 +59,6 @@ Main record used to interact with the {ref}`Minimap`.
       Accuracy: Single;
     end;
 
-    Mask: TPointArray;
-
     const FLAG: TImage = ImageFromString('IMG:AQAAAAIAAAACAAAAAAAAAIDjPwEAAAAA7joBAAEAAACQ4z8BAAAAALEMAQABAAAAgH8GCQAAAAAAiAYJAAAAAAgAAAAIAAAAgH8GCQAAAAABAAAAAgAAAAIAAAAYAAAAAAAAAAAAAAAAAAAAAwAAABgIEAgICAAAAAEAAAIAAAAAAAAAAAAAAAAAAAAAiVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFUlEQVR4nGP4z8AQayzIcCyMBUgBABrmA2K2r4OdAAAAAElFTkSuQmCC');
   end;
 
@@ -75,7 +73,6 @@ This is automatically called for you on the {ref}`Minimap variable`.
 *)
 procedure TMinimap.SetupInterface();
 var
-  img: TImage;
   tpa: TPointArray;
   i: Integer;
 begin
@@ -84,9 +81,6 @@ begin
   case Client.Mode of
     EMode.RESIZABLE, EMode.MODERN_COMPACT, EMode.MODERN_WIDE:
     begin
-      img := new TImage(WLEnv.AssetsDir + 'images' + PATH_SEP + 'mm_resizable_mask.png');
-      Self.Mask := img.FindColor($0, 0).Invert().Grow(3).ExtractBox([0, 0, img.Width-1, img.Height-1]);
-
       with Client.Bounds do
       begin
         Self.Bounds.X1 := X2 - 157;
@@ -100,9 +94,6 @@ begin
 
     EMode.FIXED:
     begin
-      img := new TImage(WLEnv.AssetsDir + 'images' + PATH_SEP + 'mm_fixed_mask.png');
-      Self.Mask := img.FindColor($0, 0).Invert().Grow(3).ExtractBox([0, 0, img.Width-1, img.Height-1]);
-
       with Client.Bounds do
       begin
         Self.Bounds.X1 := X2 - 194;
