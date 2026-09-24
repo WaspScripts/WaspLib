@@ -1,60 +1,29 @@
-(*
-# Profiles
-Page dedicated to handling profile accounts.
-*)
+
 {$DEFINE WL_PROFILES_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 var
-(*
-## ProfileIndex variable
-This variable is what tells WaspLib which account you will be using of the ones you have in a {ref}`TProfileArray` you want to
-use for this botting session.
-*)
+
   ProfileIndex: Integer;
 
 type
-(*
-## TProfile
-Record holding account credentials and world preferences.
-*)
+
   TProfile = record
     Name, Username, Password, Pin: String;
     Worlds: TIntegerArray;
     Active: Boolean;
   end;
 
-(*
-## TProfileArray
-Type that holds player account information for {ref}`login`, world hopping and {ref}`bankpin` handling.
-*)
+
   TProfileArray = array of TProfile;
 
-(*
-## TProfileArray.Add
-```pascal
-procedure TProfileArray.Add(user, pass: String; pin: String = ''; worlds: TIntegerArray = []);
-```
-Adds a TProfile to the TProfileArray.
 
-Example:
-```pascal
-Profiles.Add('username', 'password', '0000');
-```
-*)
 procedure TProfileArray.Add(name, user, pass: String; pin: String = ''; worlds: TIntegerArray = []);
 begin
   Self += [name, user, pass, pin, worlds, True];
 end;
 
-(*
-## TProfileArray.NextPlayer
-```pascal
-procedure TProfileArray.NextPlayer(disableCurrent: Boolean);
-```
-Switches to the next active profile. If `disableCurrent` is True, the current
-profile is marked inactive.
-*)
+
 procedure TProfileArray.NextPlayer(disableCurrent: Boolean);
 
   function _Next(): Integer;
@@ -80,20 +49,7 @@ begin
     raise GetDebugLn('Profiles', 'No active Profiles to switch to.');
 end;
 
-(*
-## Profiles.Get
-```pascal
-function TProfileArray.Get(): TProfile;
-```
-Returns the currently selected TProfile.
-The currently selected TProfile is decided by `ProfileIndex` which
-is an index of the TProfileArray.
 
-Example:
-```pascal
-WriteLn Profiles.Get().Username;
-```
-*)
 function TProfileArray.Get(): TProfile;
 begin
   if Self = [] then
@@ -104,29 +60,7 @@ begin
   Result := Self[ProfileIndex];
 end;
 
-(*
-## Profiles.Update
-```pascal
-procedure TProfileArray.Update(const profile: TProfile);
-```
-Updates the currently selected TProfile.
-The currently selected TProfile is decided by `ProfileIndex` which
-is an index of the TProfileArray.
 
-The way this works is a little bit special as `Profiles[ProfileIndex]` is not
-not completely updated:
-
-- `Profiles[ProfileIndex].Active` is never changed.
-- `Profiles[ProfileIndex].Name`, `Profiles[ProfileIndex].Username`, `Profiles[ProfileIndex].Password` and `Profiles[ProfileIndex].Pin` are only updated if the values of the passed in profile are not `''`.
-- `Profiles[ProfileIndex].Worlds` is always set to `profile.Worlds`
-
-Example:
-```pascal
-WriteLn Profiles.Get();
-Profiles.Update(['', '', '', ''. [311, 312]]);
-WriteLn Profiles.Get();
-```
-*)
 procedure TProfileArray.Update(const profile: TProfile);
 begin
   if Self = [] then
@@ -145,19 +79,7 @@ begin
   Self[ProfileIndex].Worlds := profile.Worlds;
 end;
 
-(*
-## Profiles.GetPin
-```pascal
-function TProfileArray.GetPin(): String;
-```
-Get the current Player bank pin.
 
-Example:
-```pascal
-if BankPin.IsOpen() then
-  BankPin.Enter(Profiles.GetPin());
-```
-*)
 function TProfileArray.GetPin(): String;
 begin
   Result := Self.Get().Pin;
@@ -165,13 +87,7 @@ begin
     raise GetDebugLn('Profiles', 'Invalid bank pin.');
 end;
 
-(*
-## Profiles.Load
-```pascal
-procedure TProfileArray.Load();
-```
-Loads all account profiles from the accounts JSON files (0.json, 1.json, etc).
-*)
+
 procedure TProfileArray.Load();
 var
   i: Integer;
@@ -209,13 +125,7 @@ begin
   end;
 end;
 
-(*
-## TProfileArray.Contains
-```pascal
-function TProfileArray.Contains(name: String): Boolean;
-```
-Checks if a profile with the given name already exists.
-*)
+
 function TProfileArray.Contains(name: String): Boolean;
 var
   i: Integer;
@@ -227,8 +137,5 @@ begin
 end;
 
 var
-(*
-## Profiles variable
-Global {ref}`TProfileArray` variable.
-*)
+
   Profiles: TProfileArray;

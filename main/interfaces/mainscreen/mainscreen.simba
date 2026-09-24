@@ -1,7 +1,4 @@
-(*
-# MainScreen
-Methods to interact with the mainscreen.
-*)
+
 
 {$DEFINE WL_MAINSCREEN_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -10,10 +7,7 @@ Methods to interact with the mainscreen.
 {.$DEFINE WL_DEBUG_UPTEXT}
 
 type
-(*
-## TMainScreen
-Main record to handle the mainscreen and methods relating to it.
-*)
+
   TMainScreen = record
     Bounds: TBox;
     Center: TPoint;
@@ -28,16 +22,7 @@ Main record to handle the mainscreen and methods relating to it.
     Mask: TImage;
   end;
 
-(*
-## MainScreen.SetupInterface
-```pascal
-procedure TMainScreen.SetupInterface();
-```
-Internal setup method responsible for setting up the {ref}`TMainScreen` interface
-coordinates.
 
-This is called automatically for you on the {ref}`MainScreen variable`.
-*)
 procedure TMainScreen.SetupInterface();
 begin
   case Client.Mode of
@@ -84,34 +69,9 @@ begin
   Self.Mask.DrawAlpha := $FF;
 end;
 
-(*
-## UpText
-`UpText` refers to the text that shows up on the top left corner of the
-mainscreen describing what action you will perform if you click.
 
-The game uptext is one of the few texts that has a lot of randomization to
-combat bots and therefore you shouldn't rely on being able to read it 100%
-accurately because many times you won't.
 
-To debug uptext when uptext methods are used add the following compiler directive
-to your script **before** you include WaspLib:
-```pascal
-{$DEFINE WL_DEBUG_UPTEXT}
-```
-*)
 
-(*
-### MainScreen.UpText
-```pascal
-property TMainScreen.UpText: String;
-```
-Returns the {ref}`uptext` on the mainscreen.
-
-Example:
-```pascal
-WriteLn MainScreen.UpText;
-```
-*)
 property TMainScreen.UpText: String;
 var
   img: TImage;
@@ -124,22 +84,7 @@ begin
 end;
 
 
-(*
-### MainScreen._IsUpText
-```pascal
-function TMainScreen._IsUpText(
-  out upText: String;
-  strings: TStringArray;
-  matchCase: Boolean;
-  similarity: Single
-): Boolean;
-```
-Internal helper method used in {ref}`MainScreen.IsUpText`.
 
-`strings` casing must be lower case if `matchCase` is `False`.
-
-You probably won't ever need to call this method directly.
-*)
 function TMainScreen._IsUpText(
   out upText: String;
   strings: TStringArray;
@@ -188,38 +133,7 @@ begin
   end;
 end;
 
-(*
-### MainScreen.IsUpText
-```pascal
-function TMainScreen.IsUpText(
-  strings: TStringArray;
-  matchCase: Boolean = True;
-  similarity: Single = 0.85;
-  time: Integer = -1
-): Boolean;
 
-function TMainScreen.IsUpText(
-  text: String;
-  matchCase: Boolean = True;
-  similarity: Single = 0.85;
-  time: Integer = -1
-): Boolean; overload;
-```
-Compares `text` or `strings` with the {ref}`uptext` on the mainscreen.
-Returns True if the match above the threshold `similarity`.
-
-UpText is delayed by at least one frame, so this only returns true if the uptext
-doesn't change within 50ms. It also wait 25ms between each loop.
-By default it can wait anywhere from 85ms to 250ms total.
-
-If you cannot afford this delay on your script set a your own `timeout`.
-
-Example:
-```pascal
-if MainScreen.IsUpText('Walk here') then
-  Mouse.Click(EMouseButton.LEFT);
-```
-*)
 function TMainScreen.IsUpText(
   strings: TStringArray;
   matchCase: Boolean = True;
@@ -267,27 +181,9 @@ begin
 end;
 
 
-(*
-(server message)=
-## Server Messages
-"Server Messages" refers to the text that shows up on the top left corner of the
-mainscreen inside of a black box.
-These can only be seen when there's a message. An easy way to see this is to
-simply attempt to switch worlds.
-*)
 
-(*
-### MainScreen.ServerMessage
-```pascal
-property TMainScreen.ServerMessage: String;
-```
-Returns the {ref}`server message` if it's visible.
 
-Example:
-```pascal
-WriteLn MainScreen.GetServerMessage;
-```
-*)
+
 property TMainScreen.ServerMessage: String;
 var
   black: TPointArray;
@@ -297,22 +193,7 @@ begin
   Result := OCR.Recognize(black.Bounds(), Fonts.PLAIN_12, [$FFFFFF], 0);
 end;
 
-(*
-### MainScreen.IsServerMessage
-```pascal
-function TMainScreen.IsServerMessage(
-  text: String; matchCase: Boolean = True; similarity: Single = 0.85
-): Boolean; overload;
-```
-Compares `text` with the {ref}`server message` visible if any.
-Returns True if the match above the threshold `similarity`.
 
-Example:
-```pascal
-if MainScreen.IsServerMessage('Loading...') then
-  Sleep(2000, 4000);
-```
-*)
 function TMainScreen.IsServerMessage(
   text: String; matchCase: Boolean = True; similarity: Single = 0.85
 ): Boolean; overload;
@@ -372,21 +253,7 @@ begin
 end;
 
 
-(*
-## MainScreen.Contains
-```pascal
-function TMainScreen.Contains(const pt: TPoint): Boolean;
-function TMainScreen.AnyVisible(const tpa: TPointArray): Boolean;
-function TMainScreen.ContainsAll(const tpa: TPointArray): Boolean;
-```
-Returns `True` if a point `pt` is visible on the mainscreen.
-This also checks for open interfaces to check if the point is not behind them.
 
-Example:
-```pascal
-WriteLn MainScreen.Contains([100,100]);
-```
-*)
 function TMainScreen.Contains(const pt: TPoint): Boolean;
 begin
   Result := pt <> pt; //overriden, check overrides.
@@ -403,14 +270,7 @@ begin
 end;
 
 
-(*
-## MainScreen.Filter
-```pascal
-function TMainScreen.Filter(const tpa: TPointArray): TPointArray;
-```
-Filters a TPA returning only the points visible on the mainscreens.
-This also checks for open interfaces to check if the points are not behind them.
-*)
+
 function TMainScreen.Filter(const tpa: TPointArray): TPointArray;
 begin
   Result := tpa.Copy(); //overriden, check overrides.
@@ -430,19 +290,7 @@ begin
   Result := trgt.HasColor($0000FF, 0, 1) or trgt.HasColor($0401C8, 0, 1);
 end;
 
-(*
-## MainScreen.RedClicked
-```pascal
-function TMainScreen.RedClicked(): Boolean;
-```
-Returns `True` if a the red cross from clicking an entity is visible on the
-mainscreen.
 
-Example:
-```pascal
-WriteLn MainScreen.RedClicked();
-```
-*)
 function TMainScreen.RedClicked(): Boolean;
 var
   area: TBox;
@@ -451,19 +299,7 @@ begin
   Result := Self._RedClicked(area);
 end;
 
-(*
-## MainScreen.WaitRedClick
-```pascal
-function TMainScreen.WaitRedClick(time: Integer = 250): Boolean;
-```
-Returns `True` if a the red cross from clicking an entity is visible on the
-mainscreen within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn MainScreen.WaitRedClick();
-```
-*)
 function TMainScreen.WaitRedClick(time: Integer = 250): Boolean;
 var
   area: TBox;
@@ -477,19 +313,7 @@ begin
   Result := Target.HasColor($00FFFF, 0, 1, area);
 end;
 
-(*
-## MainScreen.YellowClicked
-```pascal
-function TMainScreen.YellowClicked(): Boolean;
-```
-Returns `True` if a the yellow cross from click to "walk here" is visible on the
-mainscreen.
 
-Example:
-```pascal
-WriteLn MainScreen.YellowClicked();
-```
-*)
 function TMainScreen.YellowClicked(): Boolean;
 var
   area: TBox;
@@ -498,19 +322,7 @@ begin
   Result := Self._YellowClicked(area);
 end;
 
-(*
-## MainScreen.WaitYellowClick
-```pascal
-function TMainScreen.WaitYellowClick(time: Integer = 250): Boolean;
-```
-Returns `True` if a the yellow cross from clicking to "walk here" is visible on the
-mainscreen within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn MainScreen.WaitYellowClick();
-```
-*)
 function TMainScreen.WaitYellowClick(time: Integer = 250): Boolean;
 var
   area: TBox;
@@ -519,21 +331,7 @@ begin
   Result := SleepUntil(Self._YellowClicked(area), 50, time);
 end;
 
-(*
-## MainScreen.Interact
-```pascal
-function TMainScreen.Interact(strings: TStringArray): Boolean;
-function TMainScreen.Interact(pt: TPoint; strings: TStringArray): Boolean; overload;
-```
-Attempts to interact with something on the mainscreen.
-If the uptext matches `strings` wasplib will left click, otherwise it will use
-{ref}`ChooseOption`.
 
-Example:
-```pascal
-WriteLn MainScreen.Interact('Pick-up');
-```
-*)
 function TMainScreen.Interact(strings: TStringArray): Boolean;
 begin
   if Self.IsUpText(strings) then
@@ -556,26 +354,10 @@ begin
 end;
 
 var
-(*
-## MainScreen variable
-Global {ref}`TMainScreen` variable.
-*)
+
   MainScreen: TMainScreen;
 
-(*
-## Biometrics.YellowClick
-```pascal
-function TBiometrics.YellowClick(
-  button: EMouseButton; clicks: UInt32 = 3
-): Boolean;
-```
-Basically the same as {ref}`Biometrics.Click` but returns true if we yellow clicked.
 
-Example:
-```pascal
-Biometrics.YellowClick(EMouseButton.LEFT);
-```
-*)
 function TBiometrics.YellowClick(
   button: EMouseButton; clicks: UInt32 = 3
 ): Boolean;
@@ -597,20 +379,7 @@ begin
   Result := MainScreen.YellowClicked() and not MainScreen.RedClicked();
 end;
 
-(*
-## Biometrics.RedClick
-```pascal
-function TBiometrics.RedClick(
-  button: EMouseButton; clicks: UInt32 = 3
-): Boolean;
-```
-Basically the same as {ref}`Biometrics.Click` but returns true if we red clicked.
 
-Example:
-```pascal
-Biometrics.RedClick(EMouseButton.LEFT);
-```
-*)
 function TBiometrics.RedClick(
   button: EMouseButton; clicks: UInt32 = 3
 ): Boolean;

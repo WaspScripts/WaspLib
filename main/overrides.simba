@@ -1,26 +1,9 @@
-(*
-# Overrides
-Several final overrides to add some final behaviour to certain methods.
-This is the very last file being included in the library.
-*)
+
 
 {$DEFINE WL_OVERRIDES_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
-(*
-## Options.GetTab override
-```pascal
-function TOptions.GetTab(): EOptionsTab; override;
-```
-Override that basically sets the cached zoom level when the display tab is open.
 
-E.g., when the bank is open, all gametab buttons are hidden but you have the inventory open.
-
-Example:
-```pascal
-WriteLn GameTabs.GetCurrent();
-```
-*)
 function TOptions.GetTab(): EOptionsTab; override;
 var
   z: Int32;
@@ -41,20 +24,7 @@ begin
   RSMouseZoom.ZoomLevel := -1;
 end;
 
-(*
-## GameTabs.GetCurrent override
-```pascal
-function TGameTabs.GetCurrent(): EGameTab; override;
-```
-Override that handles several scenarios where the "current" gametab is not visible.
 
-E.g., when the bank is open, all gametab buttons are hidden but you have the inventory open.
-
-Example:
-```pascal
-WriteLn GameTabs.GetCurrent();
-```
-*)
 function TGameTabs.GetCurrent(): EGameTab; override;
 begin
   Result := inherited();
@@ -72,13 +42,7 @@ begin
   end;
 end;
 
-(*
-## GameTabs.Open override;
-```pascal
-function TGameTabs.Open(tab: EGameTab): Boolean; override;
-```
-Overrides {ref}`GameTabs.Open` to close the bank if the bank open.
-*)
+
 function TGameTabs.Open(tab: EGameTab; fkeyProbability: Single = -1): Boolean; override;
 begin
   if Self.IsOpen(tab) then
@@ -88,20 +52,7 @@ begin
   Result := inherited(tab, fkeyProbability);
 end;
 
-(*
-## HouseOptions.Open override
-```pascal
-function THouseOptions.Open(): Boolean; override;
-```
-Attempts to open the house options on the options gametab.
 
-Since {ref}`HouseOptions` depends on {ref}`Options`, an override is necessary.
-
-Example:
-```pascal
-WriteLn HouseOptions.Open();
-```
-*)
 function THouseOptions.Open(): Boolean; override;
 begin
   if Self.IsOpen() then Exit(True);
@@ -111,20 +62,7 @@ begin
   Result := Self.WaitOpen();
 end;
 
-(*
-## WorldSwitcher.Open override
-```pascal
-function TWorldSwitcher.Open(waitLoad: Boolean = True): Boolean; override;
-```
-Attempts to open the world switcher.
 
-Since {ref}`WorldSwitcher` depends on {ref}`Logout`, this override is necessary.
-
-Example:
-```pascal
-WriteLn WorldSwitcher.Open();
-```
-*)
 function TWorldSwitcher.Open(waitLoad: Boolean = True): Boolean; override;
 begin
   if not GameTabs.Open(EGameTab.LOGOUT) then
@@ -261,14 +199,7 @@ begin
 end;
 {$R+}
 
-(*
-## Minimap.SetZoomToPoint override
-```pascal
-function TMinimap.SetZoomToPoint(pt: TPoint; randomness: Integer = 0): Boolean; override;
-```
-Overrides {ref}`Minimap.SetZoomToPoint` to truncate the minimum and maximum zoom
-at `Antiban.Zoom` level.
-*)
+
 function TMinimap.SetZoomToPoint(pt: TPoint; randomness: Integer = 0): Boolean; override;
 var
   level: Integer;
@@ -286,14 +217,7 @@ begin
   end;
 end;
 
-(*
-## Options.SetZoomLevel override
-```pascal
-function TOptions.SetZoomLevel(level: Int32): Boolean; override;
-```
-Overrides {ref}`Options.SetZoomLevel` to also set the {ref}`RSMouseZoom`
-`ZoomLevel`.
-*)
+
 function TOptions.SetZoomLevel(level: Int32): Boolean; override;
 begin
   Result := inherited();
@@ -304,14 +228,7 @@ begin
 end;
 
 
-(*
-## ScriptForm.OnStart override
-```pascal
-procedure TScriptForm.OnStart(sender: TLazObject); override;
-```
-Overrides TScriptForm.OnStart to perform certain tasks when the script starts
-running, e.g. start the `Simba Recorder`
-*)
+
 procedure TScriptForm.OnStart(sender: TLazObject); override;
 begin
   inherited();
