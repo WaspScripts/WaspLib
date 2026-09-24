@@ -11,7 +11,7 @@ to as `MM2MS` or `MS2MM`.
 
 There's 2 systems of projection:
 - MM2MS, original work done by [slacky](https://slacky.one/).
-- RSCamera, a reverse engineered projection from the client itself.
+- RSCamera, a reverse engineered projection from the client.
 
 It's thanks to these that we can project the following grid, in this example
 {ref}`MM2MS` is being used:
@@ -104,7 +104,7 @@ minimap to the mainscreen.
 You will likely not need to use this directly and will only interact with the
 `TMinimap` and `TMainScreen` extensions below.
 *)
-function TProjection.Run(arr: TVector3Array; roll: Single): TPointArray;
+function TProjection.Run(constref arr: TVector3Array; roll: Single): TPointArray;
 begin
   case Self.System of
     EProjector.CAMERA:
@@ -120,7 +120,7 @@ begin
   end;
 end;
 
-function TProjection.ReverseRun(arr: TVector3Array): TPointArray;
+function TProjection.ReverseRun(constref arr: TVector3Array): TPointArray;
 begin
   MM2MS.Update(Options.GetZoomLevel(True), 0);
   Result := MM2MS.ReverseRun(arr);
@@ -154,38 +154,42 @@ end.
 function TProjection.ProjectModelEx(model: TModel; minimapCoord: TVector3; heights: array [0..3] of Single; rotation, radians: Single): TPointArray;
 var
   i: Integer;
+  vertex: TVector3;
   vertices: TVector3Array;
   width, depth: Single;
 begin
   width := model.Width/2;
   depth := model.Depth/2;
 
+  SetLength(vertices, Length(model.Vertices));
+
   for i := 0 to High(model.Vertices) do
   begin
-    vertices += model.Vertices[i].Rotate(rotation, minimapCoord.X, minimapCoord.Y);
+    vertex := model.Vertices[i].Rotate(rotation, minimapCoord.X, minimapCoord.Y);
 
-    if vertices[i].X < width then
+    if vertex.X < width then
     begin
-      if vertices[i].Y < depth then vertices[i].Z += heights[0]
-      else if vertices[i].Y > depth then vertices[i].Z += heights[2]
-      else vertices[i].Z += (heights[0] + heights[2]) / 2;
+      if vertex.Y < depth then vertex.Z += heights[0]
+      else if vertex.Y > depth then vertex.Z += heights[2]
+      else vertex.Z += (heights[0] + heights[2]) / 2;
     end
-    else if vertices[i].X > width then
+    else if vertex.X > width then
     begin
-      if vertices[i].Y < depth then vertices[i].Z += heights[1]
-      else if vertices[i].Y > depth then vertices[i].Z += heights[3]
-      else vertices[i].Z += (heights[1] + heights[3]) / 2;
+      if vertex.Y < depth then vertex.Z += heights[1]
+      else if vertex.Y > depth then vertex.Z += heights[3]
+      else vertex.Z += (heights[1] + heights[3]) / 2;
     end
     else
     begin
-      if vertices[i].Y < depth then vertices[i].Z += (heights[0]+heights[1]) / 2
-      else if vertices[i].Y > depth then vertices[i].Z += (heights[2]+heights[3]) / 2
-      else vertices[i].Z += (heights[0] + heights[1] + heights[2] + heights[3]) / 4;
+      if vertex.Y < depth then vertex.Z += (heights[0]+heights[1]) / 2
+      else if vertex.Y > depth then vertex.Z += (heights[2]+heights[3]) / 2
+      else vertex.Z += (heights[0] + heights[1] + heights[2] + heights[3]) / 4;
     end;
 
-    vertices[i].X += minimapCoord.X;
-    vertices[i].Y += minimapCoord.Y;
-    vertices[i].Z += minimapCoord.Z;
+    vertex.X += minimapCoord.X;
+    vertex.Y += minimapCoord.Y;
+    vertex.Z += minimapCoord.Z;
+    vertices[i] := vertex;
   end;
 
   Result := Self.Run(vertices, radians);

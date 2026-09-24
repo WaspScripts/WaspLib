@@ -166,25 +166,27 @@ begin
   Result.Y := Self.ViewportOffset.Y + y2 * scale;
 end;
 
-function TCamera.RunEx(coordinates: TVector3Array): TVector2Array;
+function TCamera.RunEx(constref coordinates: TVector3Array): TVector2Array;
 var
   i: Integer;
 begin
+  SetLength(Result, Length(coordinates));
   for i := 0 to High(coordinates) do
-    Result += Self.Transform(Self.MinimapOffset(coordinates[i]));
+    Result[i] := Self.Transform(Self.MinimapOffset(coordinates[i]));
 end;
 
-function TCamera.Run(coordinates: TVector3Array): TPointArray;
+function TCamera.Run(constref coordinates: TVector3Array): TPointArray;
 var
   i: Integer;
 begin
+  SetLength(Result, Length(coordinates));
   for i := 0 to High(coordinates) do
-    Result += Self.Transform(Self.MinimapOffset(coordinates[i])).ToPoint();
+    Result[i] := Self.Transform(Self.MinimapOffset(coordinates[i])).ToPoint();
 end;
 
-function TCamera.Run(coordinate: TVector3): TPoint; overload;
+function TCamera.Run(constref coordinate: TVector3): TPoint; overload;
 begin
-  Result := Self.Run([coordinate]).First;
+  Result := Self.Transform(Self.MinimapOffset(coordinate)).ToPoint();
 end;
 
 {$R+}

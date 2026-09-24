@@ -323,16 +323,18 @@ function TMM2MS.Run(constref coords: TVector3Array): TVector2Array;
 var
   i: Integer;
 begin
+  SetLength(Result, Length(coords));
   for i := 0 to High(coords) do
-    Result += Self.Transform(Self.MinimapOffset(coords[i]), Self.TransformMatrix).ToVec2();
+    Result[i] := Self.Transform(Self.MinimapOffset(coords[i]), Self.TransformMatrix).ToVec2();
 end;
 
 function TMM2MS.Run(constref coords: TVector3Array): TPointArray; overload;
 var
   i: Integer;
 begin
+  SetLength(Result, Length(coords));
   for i := 0 to High(coords) do
-    Result += Self.Transform(Self.MinimapOffset(coords[i]), Self.TransformMatrix).ToPoint();
+    Result[i] := Self.Transform(Self.MinimapOffset(coords[i]), Self.TransformMatrix).ToPoint();
 end;
 
 
@@ -370,16 +372,18 @@ function TMM2MS.ReverseRun(constref coords: TVector3Array): TVector2Array;
 var
   i: Integer;
 begin
+  SetLength(Result, Length(coords));
   for i := 0 to High(coords) do
-    Result += Self.ReverseMinimapOffset(Self.ReverseTransform(coords[i], Self.InvertedTransformMatrix));
+    Result[i] := Self.ReverseMinimapOffset(Self.ReverseTransform(coords[i], Self.InvertedTransformMatrix));
 end;
 
 function TMM2MS.ReverseRun(constref coords: TVector3Array): TPointArray; overload;
 var
   i: Integer;
 begin
+  SetLength(Result, Length(coords));
   for i := 0 to High(coords) do
-    Result += Self.ReverseMinimapOffset(Self.ReverseTransform(coords[i], Self.InvertedTransformMatrix)).ToPoint();
+    Result[i] := Self.ReverseMinimapOffset(Self.ReverseTransform(coords[i], Self.InvertedTransformMatrix)).ToPoint();
 end;
 {$R+}
 
