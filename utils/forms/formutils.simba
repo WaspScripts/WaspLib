@@ -1,17 +1,9 @@
-(*
-# Form Utilities
-Forms and components extensions.
 
-The following contains custom components and methods to be used in a `TLazForm`.
-*)
 {$DEFINE WL_FORMUTILS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 type
-(*
-## TFormUtils
-Type that olds several method utilities for `TLazForms`.
-*)
+
   TFormUtils = record
     DPI: Integer;
     Scale: Single;
@@ -30,15 +22,7 @@ begin
 end;
 
 {$H-}
-(*
-## FormUtils.NumberField
-```pascal
-procedure TFormUtils.NumberField(sender: TLazObject; var key: Char);
-```
-Callback method to limit user input to numbers only and backspace.
-This numbers can be `Integers` only.
-For `Doubles` check {ref}`FormUtils.FloatField`
-*)
+
 procedure TFormUtils.NumberField(sender: TLazObject; var key: Char);
 begin
   case key of
@@ -47,15 +31,7 @@ begin
   end;
 end;
 
-(*
-## FormUtils.FloatField
-```pascal
-procedure TFormUtils.FloatField(sender: TLazObject; var key: Char);
-```
-Callback method to limit user input to numbers only and backspace.
-This numbers can be `Integers` or `Doubles` only.
-For `Integers` only check {ref}`FormUtils.FloatField`
-*)
+
 procedure TFormUtils.FloatField(sender: TLazObject; var key: Char);
 begin
   case key of
@@ -65,26 +41,13 @@ begin
   end;
 end;
 
-(*
-## FormUtils.MailField
-```pascal
-procedure TFormUtils.MailField({$H-}sender: TLazObject;{$H+} var key: Char);
-```
-Callback method to limit user input to characters used in email addresses.
-*)
+
 procedure TFormUtils.MailField(sender: TLazObject; var key: Char);
 begin
   if key = ' ' then key := #0;
 end;
 
-(*
-## FormUtils.TimeField
-```pascal
-procedure TFormUtils.TimeField(sender: TLazObject; var key: Char);
-```
-Callback method to limit user input to numbers only, backspace and a few
-characters used in time like ":", "-", "_", ",", etc.
-*)
+
 procedure TFormUtils.TimeField(sender: TLazObject; var key: Char);
 begin
   case key of
@@ -93,13 +56,7 @@ begin
   end;
 end;
 
-(*
-## FormUtils.NumberArrayField
-```pascal
-procedure TFormUtils.NumberArrayField(sender: TLazObject; var key: Char);
-```
-Callback method to limit user input to a `TIntegerArray`. Brackets not included.
-*)
+
 procedure TFormUtils.NumberArrayField(sender: TLazObject; var key: Char);
 begin
   case key of
@@ -109,13 +66,7 @@ begin
 end;
 {$H+}
 
-(*
-## FormUtils.OpenURL
-```pascal
-procedure TLazControl.OpenURL(sender: TLazObject);
-```
-Opens the URL in the control caption if there's any.
-*)
+
 procedure TFormUtils.OpenURL(sender: TLazObject);
 var
   url: String;
@@ -124,44 +75,19 @@ begin
   if url.IsURL() then URLOpenInBrowser(url);
 end;
 
-(*
-## FormUtils.OnMouseEnterURL
-```pascal
-procedure TFormUtils.OnMouseEnterURL(sender: TLazObject);
-```
-Mouse hover callback for URLs. Basically changes the control text color to blue.
-If you use this you should also use {ref}`FormUtils.OnMouseLeaveURL` to restore
-the color to the default when the mouse leaves the control.
-*)
+
 procedure TFormUtils.OnMouseEnterURL(sender: TLazObject);
 begin
   TLazControl(sender).Font.Color := $FF0000;
 end;
 
-(*
-## FormUtils.OnMouseLeaveURL
-```pascal
-procedure TFormUtils.OnMouseLeaveURL(sender: TLazObject);
-```
-Mouse leave callback for URLs. Basically changes the control text color to
-the default.
 
-This should only be used if you are also using {ref}`FormUtils.OnMouseEnterURL`
-to change the control text color to blue.
-*)
 procedure TFormUtils.OnMouseLeaveURL(sender: TLazObject);
 begin
   TLazControl(sender).Font.Color := $20000000;
 end;
 
-(*
-## FormUtils.OnCheckboxAnchorClick
-```pascal
-procedure TFormUtils.OnCheckboxAnchorClick(sender: TLazObject);
-```
-Made for components that are anchored to a `TLazCheckbox`,
-this makes it so clicking them toggles the checkbox.
-*)
+
 procedure TFormUtils.OnCheckboxAnchorClick(sender: TLazObject);
 var
   caption: TLazLabel;
@@ -185,14 +111,7 @@ begin
     Lapify(checkbox.OnChange)(checkbox);
 end;
 
-(*
-## FormUtils.OnCheckboxToggleParent
-```pascal
-procedure TFormUtils.OnCheckboxToggleParent(sender: TLazObject);
-```
-Made for `TLazCheckbox` so they can enable/disable all of their sibling
-components.
-*)
+
 procedure TFormUtils.OnCheckboxToggleParent(sender: TLazObject);
 var
   checkbox: TLazCheckBox;
@@ -357,13 +276,7 @@ begin
   Self.ScaleBy(Self.Font.PixelsPerInch, FormUtils.BASE_DPI);
 end;
 
-(*
-## TLazControl.SetFontColor
-```pascal
-procedure TLazControl.SetChildsFontColor(value: Integer);
-```
-Recursevely sets all childrens fonts colors to `value`.
-*)
+
 procedure TLazControl.SetChildsFontColor(value: TColor);
 var
   i: Integer;
@@ -379,13 +292,7 @@ begin
   Result := (Self <> nil) and (Self.Name = name);
 end;
 
-(*
-## TLazComponent.GetChild
-```pascal
-function TLazComponent.GetChild(name: String): TLazComponent;
-```
-Recursively search for a children with the specified name.
-*)
+
 function TLazComponent.GetChild(name: String): TLazComponent;
 var
   i: Integer;
@@ -402,17 +309,7 @@ begin
   end;
 end;
 
-(*
-## TLazComponent.RemoveChildren
-```pascal
-procedure TLazComponent.RemoveChildren(release: Boolean = False);
-```
-Recursively remove children from a parent.
 
-To also free the parent set **release** to true.
-
-All children are freed when using this.
-*)
 procedure TLazComponent.RemoveChildren(release: Boolean = False);
 var
   child: TLazComponent;
@@ -430,21 +327,7 @@ begin
 end;
 
 
-(*
-## TLazLabel.SetURL
-```pascal
-procedure TLazLabel.SetURL();
-```
-Makes a `TLazLabel` a clickable URL that will open in the browser.
 
-You must set the caption yourself.
-
-Example:
-```pascal
-lbl.Caption := 'https://waspscripts.dev';
-lbl.SetURL();
-```
-*)
 procedure TLazLabel.SetURL();
 begin
   Self.OnMouseEnter := @FormUtils.OnMouseEnterURL;
@@ -454,17 +337,7 @@ begin
 end;
 
 
-(*
-## CustomEdit.IsEmpty
-```pascal
-function TCustomEdit.IsEmpty(): Boolean;
-```
-Returns true or false if the `TCustomEdit` are empty.
-This includes:
-- `TCustomEdit`
-- `TLazEdit`
-- `TLazMemo`
-*)
+
 function TLazCustomEdit.IsEmpty(): Boolean;
 var
   txt: String;
@@ -476,14 +349,7 @@ begin
   Result := True;
 end;
 
-(*
-## CustomEdit.GetIntegerArray
-```pascal
-function TCustomEdit.GetIntegerArray(): TIntegerArray;
-```
-Returns the TIntegerArray in the TCustomEdit (TLazEdit and TLazMemo).
-It's probably a good idea to limit the TCustomEdit input with **TLazComponent.IntArrayField()**.
-*)
+
 function TLazCustomEdit.GetIntegerArray(min, max: Integer = 0): TIntegerArray;
 var
   str, s: String;
@@ -521,129 +387,7 @@ begin
 end;
 
 
-(*
-## TLazControl.CreateEx
-```pascal
-function TLazPanel.CreateEx(owner: Pointer): TLazPanel; static;
-function TLazPanel.CreateEx(
-  owner: Pointer; width, height: Integer
-): TLazPanel; static; overload;
 
-function TLazPageControl.CreateEx(owner: Pointer): TLazPageControl; static;
-function TLazPageControl.CreateEx(
-  owner: Pointer; left, top, width, height: Integer
-): TLazPageControl; static; overload;
-
-function TLazLabel.CreateEx(owner: Pointer): TLazLabel; static;
-function TLazLabel.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazLabel; static; overload;
-
-function TLazEdit.CreateEx(owner: Pointer): TLazEdit; static;
-function TLazEdit.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazEdit; static; overload;
-
-function TLazSpinEdit.CreateEx(owner: Pointer): TLazSpinEdit; static;
-function TLazSpinEdit.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazSpinEdit; static; overload;
-
-function TLazFloatSpinEdit.CreateEx(owner: Pointer): TLazFloatSpinEdit; static;
-function TLazFloatSpinEdit.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazFloatSpinEdit; static; overload;
-
-function TLazMemo.CreateEx(owner: Pointer): TLazMemo; static;
-function TLazMemo.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazMemo; static; overload;
-
-function TLazButton.CreateEx(owner: Pointer): TLazButton; static;
-function TLazButton.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazButton; static; overload;
-
-function TLazCheckBox.CreateEx(owner: Pointer): TLazCheckBox; static;
-function TLazCheckBox.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazCheckBox; static; overload;
-
-function TLazToggleBox.CreateEx(owner: Pointer): TLazToggleBox; static;
-function TLazToggleBox.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazToggleBox; static; overload;
-
-function TLazRadioButton.CreateEx(owner: Pointer): TLazRadioButton; static;
-function TLazRadioButton.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazRadioButton; static; overload;
-
-function TLazComboBox.CreateEx(owner: Pointer): TLazComboBox; static;
-function TLazComboBox.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazComboBox; static; overload;
-
-function TLazListBox.CreateEx(owner: Pointer): TLazListBox; static;
-function TLazListBox.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazListBox; static; overload;
-
-function TLazCheckListBox.CreateEx(owner: Pointer): TLazCheckListBox; static;
-function TLazCheckListBox.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazCheckListBox; static; overload;
-
-function TLazTrackBar.CreateEx(owner: Pointer): TLazTrackBar; static;
-function TLazTrackBar.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazTrackBar; static; overload;
-
-function TLazImage.CreateEx(owner: Pointer): TLazImage; static;
-function TLazImage.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazImage; static; overload;
-
-function TImageBox.CreateEx(owner: Pointer): TImageBox; static;
-function TImageBox.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TImageBox; static; overload;
-
-function TLazScrollBox.CreateEx(owner: Pointer): TLazScrollBox; static;
-function TLazScrollBox.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazScrollBox; static; overload;
-
-function TLazTimeEdit.CreateEx(owner: Pointer): TLazTimeEdit; static;
-function TLazTimeEdit.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazTimeEdit; static; overload;
-
-function TLazDateEdit.CreateEx(owner: Pointer): TLazDateEdit; static;
-function TLazDateEdit.CreateEx(
-  owner: Pointer; caption: String; hint: String = '';
-  left, top, width, height: Integer = 0
-): TLazDateEdit; static; overload;
-```
-Constructor functions for most `TLazControls`.
-*)
 function TLazPanel.CreateEx(owner: Pointer): TLazPanel; static;
 begin
   Result := TLazPanel.Create(TLazControl(owner));
@@ -1314,13 +1058,7 @@ begin
 end;
 
 
-(*
-## TLazPageControl.AddTabEx
-```pascal
-function TLazPageControl.AddTabEx(caption: String): TLazTabSheet;
-```
-Created a `TLazTabSheet` on the page control with the specified `caption`.
-*)
+
 function TLazPageControl.AddTabEx(caption: String): TLazTabSheet;
 begin
   Result := Self.AddTab();
@@ -1329,15 +1067,7 @@ begin
   Result.Height := Self.Height;
 end;
 
-(*
-## TLazControl.LoadImage
-```pascal
-procedure TLazControl.LoadImage(path: String);
-procedure TLazControl.LoadImage(img: TImage); overload;
-```
-Load a image file and set it as the background for a TLazControl.
-This can be used to set images for TLazPanels, TLazPageControls, TLazTabSheet, TLazButtons, etc.
-*)
+
 procedure TLazControl.LoadImage(path: String);
 var
   img: TLazImage;

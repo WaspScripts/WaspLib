@@ -1,11 +1,4 @@
-(*
-# RSCamera
-RSCamera is a 3D engine similar to {ref}`MM2MS`.
-It differs from it in that it uses the exact same math as the game client for
-projection and therefore is more accurate when doing "Minimap to MainScreen"
-projections specifically, where `MM2MS` is unrivaled when doing
-"MainScreen to Minimap" ironically.
-*)
+
 {$DEFINE WL_CAMERA_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -18,10 +11,7 @@ end;
 {$ENDIF}
 
 type
-(*
-## TCamera
-Record responsible of handling projection, similar to {ref}`MM2MS`.
-*)
+
   TCamera = record
     X, Y, Z, Pitch, Yaw, Scale, MinScale, MaxScale,
     ZOffset, MinZ, MaxZ, ReverseZ: Integer;
@@ -90,26 +80,14 @@ begin
   Self.ViewportOffset.Y := MainScreen.Bounds.Height div 2 + Self.Offset.Y;
 end;
 
-(*
-## RSCamera.SetPitch
-```pascal
-procedure TCamera.SetPitch(value: Integer);
-```
-Allows you the set the camera pitch.
-*)
+
 procedure TCamera.SetPitch(value: Integer);
 begin
   Self.Pitch := value;
   Self.Y := Self.Player.Y - 674 - Round(235 * (Self.MAX_PITCH - value) / (Self.MAX_PITCH - Self.MIN_PITCH));
 end;
 
-(*
-## RSCamera.Update
-```pascal
-procedure TCamera.Update(zoom: Integer; rads: Single);
-```
-Updates current zoom and rotation.
-*)
+
 procedure TCamera.Update(zoom: Integer; rads: Single);
 begin
   if Self.ZoomScale <> ZOOM2RSZOOM[zoom] then
@@ -190,8 +168,5 @@ end;
 {$R+}
 
 var
-(*
-## RSCamera variable
-Global {ref}`TCamera` variable.
-*)
+
   RSCamera: TCamera;

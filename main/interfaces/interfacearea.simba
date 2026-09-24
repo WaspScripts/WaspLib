@@ -1,26 +1,12 @@
-(*
-# InterfaceArea
-Interface area is the area where {ref}`MainScreen` interfaces can occupy.
-*)
+
 {$DEFINE WL_INTERFACE_AREA_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(EInterfaceType)=
-## EInterfaceType enum
-```pascal
-EInterfaceType = enum(CLASSIC, PAPER, ANY);
-```
-Enum representing the types of {ref}`MainScreen` interfaces.
-*)
+
   EInterfaceType = enum(CLASSIC, PAPER, ANY);
 
-(*
-(TInterfaceArea)=
-## TInterfaceArea type
-Type responsible to handle thefor handling general {ref}`MainScreen` interfaces.
-*)
+
   TInterfaceArea = type TInterface;
 
 procedure TInterfaceArea.SetupInterface();
@@ -60,13 +46,7 @@ begin
   Self.Quad := TQuad.CreateFromBox(Self.Bounds);
 end;
 
-(*
-## MSInterface.IsOpen
-```pascal
-function TInterfaceArea.IsOpen(typ: EInterfaceType = EInterfaceType.ANY): Boolean;
-```
-Returns True/False if any interface is found open.
-*)
+
 function TInterfaceArea.IsOpen(typ: EInterfaceType = EInterfaceType.ANY): Boolean;
 const
   CLASSIC: TColorTolerance = [$323E47, 0.75, EColorSpace.HSV, [0.778, 1.112, 1.112]];
@@ -80,17 +60,7 @@ begin
   end;
 end;
 
-(*
-## MSInterface.WaitOpen
-```pascal
-function TInterfaceArea.WaitOpen(
-  typ: EInterfaceType = EInterfaceType.ANY;
-  time: Integer = TICK;
-  interval: Integer = -1
-): Boolean;
-```
-Returns True/False if any interface is found open within `time` milliseconds.
-*)
+
 function TInterfaceArea.WaitOpen(
   typ: EInterfaceType = EInterfaceType.ANY;
   time: Integer = TICK;
@@ -102,20 +72,7 @@ begin
 end;
 
 
-(*
-## MSInterface.GetCloseButton
-function TInterfaceArea.GetCloseButton(): TBox;
-```
-Returns a TBox of the close button.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(MSInterface.GetCloseButton());
-end.
-```
-*)
 function TInterfaceArea.GetCloseButton(): TBox;
 var
   tpa: TPointArray;
@@ -162,19 +119,7 @@ begin
 end;
 
 
-(*
-## MSInterface.Close
-function TInterfaceArea.Close(escape: Boolean): Boolean;
-function TInterfaceArea.Close(escapeProbability: Single = -1): Boolean; overload;
-```
-Attempts to close any interface currently open, depending on `escape` or
-`escapeProbability the function will either click the button or press escape key.
 
-Example:
-```pascal
-WriteLn MSInterface.Close();
-```
-*)
 function TInterfaceArea.Close(escape: Boolean): Boolean;
 var
   b: TBox;
@@ -245,8 +190,5 @@ begin
 end;
 
 var
-(*
-## MSInterface variable
-Global {ref}`TInterfaceArea` variable.
-*)
+
   MSInterface: TInterfaceArea;

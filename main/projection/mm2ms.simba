@@ -1,55 +1,4 @@
-(*
-# MM2MS
-```{note}
-Originally created by [slacky](https://slacky.one/).
-This is basically the same thing with some pre-calculated math.
-```
 
-```{note}
-MM2MS inversion originally created by Bootje.
-```
-
-The MM2MS projector is usually used through {ref}`Projection`, but can be used
-by itself if you want and know what you are doing.
-
-By itself, the projector is basically a 3D engine, very similar to what the game
-uses:
-```{figure} ../../images/mm2ms_ape_rendered.png
-```
-
-It can be used to calculate the position of 3D coordinate and accurately display
-them in the right place in it's 3D space:
-```{figure} ../../images/mm2ms_ape.png
-```
-
-```{figure} ../../images/mm2ms_wireframes.gif
-```
-
-It's projection is so close to what the game uses that it can render it's models
-very accurately, for example, this is the model of the game cow being rendered
-without colors:
-```{figure} ../../images/rscow.gif
-```
-
-When playing with the projector it might be useful to image your head a 3D grid
-with infinity cross sections.
-
-Imagine a 2D grid like this:
-```{figure} ../../images/mm2ms.png
-```
-But imagine it with infinite crossings, so each pixel of the squares can have a
-X and Y crossing.
-
-Now imagine and infine amount of those grids stacked up on top of that one and
-below, with vertical lines creating Z axis intersections.
-
-That's what a 3D grid is.
-
-```{note}
-WaspLib also has {ref}`RSCamera`, an alternative projection engine which is more
-accurate for certain tasks.
-```
-*)
 {$DEFINE WL_MM2MS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -62,10 +11,7 @@ end;
 {$ENDIF}
 
 type
-(*
-## TMM2MS
-Main record responsible for {ref}`MM2MS` projection.
-*)
+
   TMM2MS = record
     Mode: EMode;
     RSZoom, Radians, ScaleMin, ScaleMax: Single;
@@ -78,50 +24,7 @@ Main record responsible for {ref}`MM2MS` projection.
     MinScaleMultiplier, MaxScaleMultiplier, FOV, ZNear, ZFar: Double;
   end;
 
-(*
-If you want to play with this and understand it better, you may need to override
-some functions like `TMM2MS.UpdateViewMatrix` and
-`TMM2MS.SetupProjection`.
 
-A good strategy is to create overrides and/or link some of the fields availble
-to the keyboard so you can edit them and see how the projection is affected in
-real time, e.g.:
-```pascal
-{$DEFINE WL_DISABLE_FAKE_INPUT}
-{$I WaspLib/main.simba}
-
-begin
-  Map.Setup([Chunk(Box(44,58,46,56), 0)]);
-  Projection.System := EProjector.MM2MS;
-
-  while True do
-  begin
-    Options.GetZoomLevel(False);
-
-    if Keyboard.IsKeyDown(EKeyCode.Q) then
-      EYE_Y_RESIZABLE[Options.ZoomLevel] += 1;
-
-    if Keyboard.IsKeyDown(EKeyCode.W) then
-      EYE_Y_RESIZABLE[Options.ZoomLevel] -= 1;
-
-    if Keyboard.IsKeyDown(EKeyCode.A) then
-      EYE_Z_RESIZABLE[Options.ZoomLevel] += 1;
-
-    if Keyboard.IsKeyDown(EKeyCode.S) then
-      EYE_Z_RESIZABLE[Options.ZoomLevel] -= 1;
-
-    WriteLn('EYE_Y_RESIZABLE: array [0..100] of Single = ' + ToStr(EYE_Y_RESIZABLE) + ';');
-    WriteLn('EYE_Z_RESIZABLE: array [0..100] of Single = ' + ToStr(EYE_Z_RESIZABLE) + ';');
-
-    MM2MS.Update(Options.ZoomLevel, Minimap.CompassRadians);
-    Map.DebugHeight();
-  end;
-end.
-```
-
-```{figure} ../../images/mm2ms_tweaking.gif
-```
-*)
 
 var
   ZOOM2RSZOOM:     array [0..100] of Single = [0.0000,0.0025,0.0065,0.0100,0.0130,0.0165,0.0205,0.0235,0.0280,0.0310,0.0350,0.0390,0.0430,0.0430,0.0465,0.0515,0.0555,0.0605,0.0645,0.0690,0.0740,0.0785,0.0835,0.0885,0.0935,0.0990,0.1045,0.1095,0.1150,0.1205,0.1260,0.1325,0.1385,0.1455,0.1505,0.1585,0.1635,0.1635,0.1705,0.1775,0.1845,0.1925,0.1995,0.2055,0.2145,0.2215,0.2305,0.2365,0.2465,0.2545,0.2635,0.2725,0.2825,0.2905,0.3005,0.3105,0.3195,0.3285,0.3405,0.3555,0.3615,0.3705,0.3825,0.3825,0.3945,0.4065,0.4185,0.4305,0.4425,0.4575,0.4695,0.4815,0.4980,0.5115,0.5265,0.5385,0.5535,0.5685,0.5835,0.5985,0.6165,0.6315,0.6495,0.6645,0.6825,0.7035,0.7215,0.7215,0.7395,0.7575,0.7815,0.7995,0.8175,0.8355,0.8595,0.8835,0.9015,0.9255,0.9495,0.9735,1.000];
@@ -384,8 +287,5 @@ end;
 {$R+}
 
 var
-(*
-## MM2MS variable
-Global {ref}`TMM2MS` variable.
-*)
+
   MM2MS: TMM2MS;
