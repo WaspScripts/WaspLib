@@ -1,31 +1,10 @@
-(*
-# Biometrics
-Biometrics related methods that are unique to the current player being used.
 
-For your convenience you can use {ref}`TBiometrics` methods through the {ref}`Biometrics variable`.
-*)
 
 {$DEFINE WL_BIOMETRICS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EBiometric
-```pascal
-EBiometric = enum(
-  MULTIPLIER,
-  SLEEP_H, SLEEP_M, SLEEP_S, SLEEP_LENGTH, BREAKS,
-  MIN_CLICKTIME, MAX_CLICKTIME, MOUSE_SPEED, MOUSE_GRAVITY, MOUSE_WIND,
-  FKEYS, ESCAPE, CHAT_KEYBOARD,
-  CHOOSEOPTION,
-  SPAM_CLICK,
-  PATTERN,
-  BANK_CONSUME,
-  RATING, LIKES, DISLIKES
-);
-```
-Enum that represents biometrics affected by the user's unique player seed.
-*)
+
   EBiometric = enum(
     MULTIPLIER,
     SLEEP_H, SLEEP_M, SLEEP_S, SLEEP_LENGTH, BREAKS,
@@ -38,31 +17,13 @@ Enum that represents biometrics affected by the user's unique player seed.
     RATING, LIKES, DISLIKES
   );
 
-(*
-## TBiometrics
-Record responsible for biometrics and biometric behaviour.
-*)
+
   TBiometrics = record
     Index: Integer;
     _Hash: TByteArray;
   end;
 
-(*
-## TBiometrics.Hash
-```pascal
-property TBiometrics.Hash: TByteArray;
-```
-Get the current unique hash generated for the current {ref}`TProfile` being used.
 
-Changing {ref}`ProfileIndex`, will reset the hash.
-
-If there's no {ref}`Profiles` available WaspLib will use a random hash.
-
-Example:
-```pascal
-WriteLn Biometrics.Hash;
-```
-*)
 property TBiometrics.Hash: TByteArray;
 var
   i: Integer;
@@ -93,21 +54,7 @@ begin
   Result := Self._Hash;
 end;
 
-(*
-## Biometrics.GetBiometric
-```pascal
-function TBiometrics.GetBiometric(biometric: EBiometric): Byte;
-function TBiometrics.GetBiometric(index: Integer): Byte; overload;
-```
-Get the value that corresponds to the specified `biometric`.
 
-The return value is a byte, so it's a value between 0 and 255.
-
-Example:
-```pascal
-WriteLn Biometrics.GetBiometric(EBiometric.FKEYS);
-```
-*)
 function TBiometrics.GetBiometric(biometric: EBiometric): Byte;
 begin
   Result := Self.Hash[biometric];
@@ -118,21 +65,7 @@ begin
   Result := Self.Hash[index];
 end;
 
-(*
-## Biometrics.GetProbability
-```pascal
-function TBiometrics.GetProbability(biometric: EBiometric): Single;
-function TBiometrics.GetProbability(index: Integer): Single; overload;
-```
-Get a probability from the current hash that is represented by `biometric` or `index`.
 
-The probability is between 0.0 and 1.0.
-
-Example:
-```pascal
-WriteLn Biometrics.GetProbability(EBiometric.FKEYS);
-```
-*)
 function TBiometrics.GetProbability(biometric: EBiometric): Single;
 begin
   Result := Self.GetBiometric(biometric) / 255;
@@ -144,19 +77,7 @@ begin
 end;
 
 
-(*
-## Biometrics.Random
-```pascal
-function TBiometrics.RandomDouble(input: Double): Double;
-function TBiometrics.RandomInteger(input: Integer): Integer;
-```
-These generate a unique random number based on your `input` and your current Hash.
 
-Example:
-```pascal
-FoodAmount := Biometrics.Random(7);
-```
-*)
 function TBiometrics.RandomDouble(input: Double): Double;
 const
   DEV: Double := input * Self.GetProbability(EBiometric.MULTIPLIER);
@@ -169,20 +90,7 @@ begin
   Result := Round(Self.RandomDouble(input));
 end;
 
-(*
-## Biometrics.RandomMode
-```pascal
-function TBiometrics.RandomModeDouble(input, minimum, maximum: Double): Double;
-function TBiometrics.RandomModeInteger(input, minimum, maximum: Integer): Integer; overload;
-```
-Generate a unique random number based on your `input` and your current Hash
-with a `minimum` minimum and `maximum` maximum value.
 
-Example:
-```pascal
-FoodAmount := Biometrics.RandomMode(7, 3, 15);
-```
-*)
 function TBiometrics.RandomModeDouble(input, minimum, maximum: Double): Double;
 const
   DEV: Double := input * Self.GetProbability(EBiometric.MULTIPLIER);
@@ -196,22 +104,7 @@ begin
 end;
 
 
-(*
-## Biometrics.RandomBoolean
-```pascal
-function TBiometrics.RandomBoolean(): Boolean;
-function TBiometrics.RandomBoolean(behaviour: EBiometric): Boolean; overload;
-function TBiometrics.RandomBoolean(index: Integer): Boolean; overload;
-function TBiometrics.RandomBoolean(probability: Double): Boolean; overload;
-```
-Returns a random boolean that is influenced by the current `TBiometrics.Hash`.
 
-Example:
-```pascal
-UseBankEarly := Biometrics.RandomBoolean();
-WriteLn UseBankEarly;
-```
-*)
 function TBiometrics.RandomBoolean(): Boolean;
 begin
   Result := RandomBoolean(Self.RandomDouble(0.5));
@@ -233,19 +126,7 @@ begin
 end;
 
 
-(*
-## Biometrics.GetSleepHour
-```pascal
-function TBiometrics.GetSleepHour(): String;
-```
-Gives you a unique sleep hour for the current player being used that can be
-anywhere from 23:00:00 to 04:00:00.
 
-Example:
-```pascal
-WriteLn Biometrics.SetSleepHour();
-```
-*)
 function TBiometrics.GetSleepHour(): String;
 var
   sleep: Double;
@@ -259,38 +140,14 @@ begin
   Result := FormatMilliseconds(Round(sleep), 'hh:mm:ss');
 end;
 
-(*
-## Biometrics.GetSleepLength
-```pascal
-function TBiometrics.GetSleepLength(): Single;
-```
-Gives you a unique sleep length for the current player being used that can be
-anywhere from 6 to 10 hours.
 
-Example:
-```pascal
-WriteLn Biometrics.GetSleepLength();
-```
-*)
 function TBiometrics.GetSleepLength(): Single;
 begin
   Result := Round(6 + 4 * Self.GetProbability(EBiometric.SLEEP_LENGTH), 2);
 end;
 
 
-(*
-## Biometrics.Sleep
-```pascal
-procedure TBiometrics.Sleep(time: UInt32);
-procedure TBiometrics.Sleep(minimum, maximum: UInt32; weight: ERandomDir = ERandomDir.MEAN); overload;
-```
-Halts the script for `time` milliseconds influenced by your current player.
 
-Example:
-```pascal
-Biometrics.Sleep(3000);
-```
-*)
 procedure TBiometrics.Sleep(time: UInt32);
 begin
   Sleep(Max(0, Self.RandomInteger(time)));
@@ -306,20 +163,7 @@ begin
 end;
 
 
-(*
-## Biometrics.Click
-```pascal
-procedure TBiometrics.Click(button: EMouseButton; clicks: UInt32 = 3);
-```
-Clicks with `button` and has a chance to spam click up to `clicks` times which
-by default is `3`.
-While spam clicking there's a chance to wiggle the mouse a little bit.
 
-Example:
-```pascal
-Biometrics.Click(EMouseButton.LEFT);
-```
-*)
 procedure TBiometrics.Click(button: EMouseButton; clicks: UInt32 = 3; probability: Single = 0.08);
 var
   i: Integer;
@@ -335,8 +179,5 @@ begin
 end;
 
 var
-(*
-## Biometrics variable
-Global {ref}`TBiometrics` variable.
-*)
+
   Biometrics: TBiometrics;
