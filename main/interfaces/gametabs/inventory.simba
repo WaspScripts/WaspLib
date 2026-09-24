@@ -1,18 +1,10 @@
-(*
-# Inventory
-Methods to interact with the inventory gametab.
-```{figure} ../../images/inventory.png
-```
-*)
+
 
 {$DEFINE WL_INVENTORY_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TInventory
-Main record responsible with handling the inventory gametab.
-*)
+
   TInventory = record
     Slots: TSlotInterface;
     Items: TItemInterface;
@@ -38,15 +30,7 @@ Main record responsible with handling the inventory gametab.
   ];
   end;
 
-(*
-## Inventory.SetupGameTab
-```pascal
-procedure TInventory.SetupGameTab();
-```
-Internal method used to setup the {ref}`TInventory` coordinates.
 
-This is automatically called for you on the {ref}`Inventory variable`.
-*)
 function TInventory.Open(): Boolean; forward;
 
 procedure TInventory.SetupGameTab();
@@ -56,72 +40,27 @@ begin
   Self.ShiftEnabled := True;
 end;
 
-(*
-## Inventory.IsOpen
-```pascal
-function TInventory.IsOpen(): Boolean;
-```
-Returns true/false if the inventory is open.
 
-Example:
-```pascal
-WriteLn Inventory.IsOpen();
-```
-*)
 function TInventory.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.INVENTORY);
 end;
 
-(*
-## Inventory.Open
-```pascal
-function TInventory.Open(): Boolean;
-```
-Attempts to open the inventory gametab.
 
-Example:
-```pascal
-WriteLn Inventory.Open();
-```
-*)
 function TInventory.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.INVENTORY);
 end;
 
 
-(*
-## Inventory.IsFull
-```pascal
-function TInventory.IsFull(): Boolean;
-```
-Returns true/false if the inventory is full.
 
-Example:
-```pascal
-WriteLn Inventory.IsFull();
-```
-*)
 function TInventory.IsFull(): Boolean;
 begin
   Result := Self.Slots.Count() > 27;
 end;
 
 
-(*
-## Inventory.IsSelected
-```pascal
-function TInventory.IsSelected(slot: TBox): Boolean;
-function TInventory.IsSelected(slot: Integer): Boolean; overload;
-```
-Returns true/false if the specified `slot` or `item` is currently selected.
 
-Example:
-```pascal
-WriteLn Inventory.IsSelected('Vial');
-```
-*)
 function TInventory.IsSelected(slot: TBox): Boolean;
 begin
   if not Self.Open() then Exit;
@@ -134,18 +73,7 @@ begin
   Result := Self.IsSelected(Self.Slots.Box(slot));
 end;
 
-(*
-## Inventory.GetSelected
-```pascal
-function TInventory.GetSelected(): Integer;
-```
-Returns the selected slot number if any. -1 is returned if no selected slot is found.
 
-Example:
-```pascal
-WriteLn Inventory.GetSelected();
-```
-*)
 function TInventory.GetSelected(): Integer;
 var
   slots: TBoxArray;
@@ -159,20 +87,7 @@ begin
 end;
 
 
-(*
-## Inventory.Select
-```pascal
-function TInventory.Select(slot: Integer; wait: Boolean = False): Boolean;
-function TInventory.Select(item: TItem; wait: Boolean = False): Boolean; overload;
-```
-Attempts to select the specified `slot` or `item`.
-If `wait` is set to true we wait for confirmation that we succeeded.
 
-Example:
-```pascal
-WriteLn Inventory.Select('Coins');
-```
-*)
 function TInventory.Select(slot: Integer; wait: Boolean = False): Boolean;
 var
   boxes: TBoxArray;
@@ -221,19 +136,7 @@ begin
 end;
 
 
-(*
-## Inventory.Combine
-```pascal
-function TInventory.Combine(slotA, slotB: Integer): Boolean;
-function TInventory.Combine(itemA, itemB: TItem): Boolean; overload;
-```
-Attempts to combine 2 slots or 2 items.
 
-Example:
-```pascal
-WriteLn Inventory.Combine('Coins', 'Asgarnian ale');
-```
-*)
 function TInventory.Combine(slotA, slotB: Integer): Boolean;
 begin
   if not Self.Open() then
@@ -298,53 +201,7 @@ begin
 end;
 
 
-(*
-## Slots.RandomPattern
-```pascal
-function TInventory.RandomPattern(): TIntegerArray;
-```
-Returns a random pattern of inventory slots.
 
-Here is example code to generate and visually debug patterns:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img, pimg: TImage;
-  slots: TBoxArray;
-  tpa: TPointArray;
-  pattern: TIntegerArray;
-  i: Integer;
-  a, b: TPoint;
-begin
-  img := Target.GetImage();
-  img.DrawColor := $00FFFF;
-
-  slots := Inventory.Slots.Boxes();
-  for i := 0 to High(slots) do
-    img.DrawBox(slots[i]);
-
-  while True do
-  begin
-    pimg := img.Copy();
-    pimg.DrawColor := $0000FF;
-    pattern := Inventory.RandomPattern();
-
-    b := slots[pattern[0]].RandomPointCenter();
-    for i := 0 to High(pattern)-1 do
-    begin
-      a := b;
-      b := slots[pattern[i+1]].RandomPointCenter();
-
-      pimg.DrawLine(a, b);
-      pimg.Show();
-      Sleep(50);
-    end;
-  end;
-end.
-```
-```{figure} ../../images/inventoryrandompattern.gif
-```
-*)
 function TInventory.RandomPattern(): TIntegerArray;
 var
   i: Integer;
@@ -358,19 +215,7 @@ begin
 end;
 
 
-(*
-## Inventory.Drop
-```pascal
-function TInventory.Drop(slots: TIntegerArray; attempts: Integer = 5): Boolean;
-function TInventory.Drop(items: TItemArray; pattern: TIntegerArray = []): Boolean; overload;
-```
-Attempts to drop the specified `slots` or `items`.
 
-Example:
-```pascal
-WriteLn Inventory.Drop('Oak logs');
-```
-*)
 function TInventory.Drop(slots: TIntegerArray; attempts: Integer = 5): Boolean;
 var
   boxes: TBoxArray;
@@ -414,21 +259,7 @@ begin
 end;
 
 
-(*
-## Inventory.ShiftDrop
-```pascal
-function TInventory.ShiftDrop(slots: TIntegerArray; attempts: Integer = 5): Boolean;
-function TInventory.ShiftDrop(slots, pattern: TIntegerArray): Boolean; overload;
-function TInventory.ShiftDrop(items: TItemArray; pattern: TIntegerArray): Boolean; overload;
-```
-Attempts to shift drop the specified `slots` or `items`.  You can optionally specify a "drop" pattern.
-If we determine that we can't shift drop because the setting is off, `TInventory.Drop()` is used as a fallback.
 
-Example:
-```pascal
-WriteLn Inventory.ShiftDrop('Maple logs');
-```
-*)
 function TInventory.ShiftDrop(slots: TIntegerArray; attempts: Integer = 5): Boolean;
 var
   boxes: TBoxArray;
@@ -492,8 +323,5 @@ begin
 end;
 
 var
-(*
-## Inventory variable
-Global {ref}`TInventory` variable.
-*)
+
   Inventory: TInventory;

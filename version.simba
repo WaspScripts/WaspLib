@@ -1,83 +1,24 @@
-(*
-# Version
-This page is about the internal WaspScripts versioning system.
 
-It's unlikely you need to touch any of the version values and this page is
-mostly for information purposes.
 
-The only information that should probably be useful to you is the following
-section {ref}`Loading script versions`.
-*)
 
-(*
-## Loading script versions
-You can specify which Simba and WaspLib version a script was designed for in 2
-ways:
-- Define `{$DEFINE SCRIPT_SIMBA_VERSION := 'COMMIT_SHORT_HASH'}` and `{$DEFINE SCRIPT_WASPLIB_VERSION := 'YYYY.MM.DD-COMMIT_SHORT_HASH'}`
-- Run Simba with the following environment variables `SCRIPT_SIMBA_VERSION=COMMIT_SHORT_HASH` and `SCRIPT_WASPLIB_VERSION=YYYY.MM.DD-COMMIT_SHORT_HASH`.
-
-Normally, during development you don't really need to care about any of this and
-when running scripts, it's assumed you will be using
-[wasp-launcher](https://github.com/WaspScripts/wasp-launcher) which takes care
-of this for you by launching simba with the environment variables required.
-
-If for some reason you need this during local development, it's recommended to
-define the compiler directives, just make sure you remove them before you
-release the script as it will interfere with the environment variables the
-launcher will run Simba with.
-*)
 
 const
-(*
-## Version Date Constants
-```pascal
-WL_VERSION_YEAR
-WL_VERSION_MONTH
-WL_VERSION_DAY
-```
-Should be self explanatory but each holds a part of the data of the current
-WaspLib version.
-*)
+
   WL_VERSION_YEAR: Integer = 2026;
   WL_VERSION_MONTH: Integer = 09;
   WL_VERSION_DAY: Integer = 24;
-(*
-## Commit Hash Constants
-```pascal
-WL_VERSION_COMMIT_HASH
-```
-Should be self explanatory but holds the shortened hash of the commit that has
-created the current WaspLib version.
-*)
+
   WL_VERSION_COMMIT_HASH: String = '5df39e6';
 
 
-(*
-## Current Versions
-```pascal
-SIMBA_VERSION
-WASPLIB_VERSION
-```
-Holds the full Simba and WaspLib versions.
-- For WaspLib and WaspScripts, the Simba commit short hash is treated as it's
-version.
-*)
+
   SIMBA_VERSION: String = {$MACRO SIMBACOMMIT};
   WASPLIB_VERSION: String := ToStr(WL_VERSION_YEAR) + '.' +
                              PadL(ToStr(WL_VERSION_MONTH), 2, '0') + '.' +
                              PadL(ToStr(WL_VERSION_DAY), 2, '0') + '-' +
                              WL_VERSION_COMMIT_HASH;
 
-(*
-## Script versions
-```pascal
-SCRIPT_SIMBA_VERSION
-SCRIPT_WASPLIB_VERSION
-```
-Holds the required full Simba and WaspLib versions for the current script.
-- For WaspLib and WaspScripts, the Simba commit short hash is treated as it's
-version.
-*)
+
   SCRIPT_SIMBA_VERSION: String := {$IFDEF SCRIPT_SIMBA_VERSION}
                                   {$MACRO SCRIPT_SIMBA_VERSION}
                                   {$ELSE}
