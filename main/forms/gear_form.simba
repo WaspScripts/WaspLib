@@ -48,8 +48,7 @@ Do feel free to read the source code though if you so desire.
     const SLOT_NAMES: TStringArray = ['Head', 'Cape', 'Necklace', 'Ammunition', 'Weapon', 'Body', 'Shield', 'Legs', 'Hands', 'Feet', 'Ring', 'Secondary Ammunition'];
     //where the equipment interface sits on the gametab background
     const SLOTS_ORIGIN: TPoint = [9, 35];
-    const SLOT_IMG: TImage = ImageFromString('IMG:AQAAACQAAAAkAAAAAAAAAAgAAAAAAAAAAQAAAAAAAAAoWFABAAAAAPDVPwEAAAAAwLpRAQAAAAAA9UkAAQAAAJDXPwEAAAAAAYA4AAEAAAABAAAAAAAAAGo/PQABAAAAMNY/AQAAAAAukjgAAQAAACQAAAAAAAAAopA1AAEAAAAaHyIAMzxF/9Bn7gYAiVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAIAAABuYg/PAAAC3klEQVR4nMWXvWrkQBCE92EuOxxdahwcbGCDAi9sYIOTxU/g9w9c8B0fpdbgyHcHgxhJrf6pru4enc73v1h3P3/8paWJUxv7eH/+9rUwhgt59/R4fni437bH8/l3rpfLxv56fc4+mwj4/OX1yiYrAjzhQ/YY097JYHEkompEafZZ0XW7vXHL86y4lWteZUU1buEZtwbHOjV6Ecr3WWhkb5TtQZ7kGo0s8MASZkAiq/H8Y0wbLGEhSuACMYLDkuEipgD2uMXqzlj7i3TnLIpUB6RtPvuRZt+qbRrrZBAWTgEdtyYmm8TELfY6GpS0uztjWGo0xNMNudFZ3AdMI26PJfYCRnEw5/AKypkJuSdRdY6HUl97E0ayhRzx4alB6K8xYfIoI8jUxiIy60ago8WiIcrOIkntwlLGyvmKIEBhbjsTaAeoZgF4DBkBl1YzMgARaH3vMvBjC9bcDJlOOU8WbGyiy3IfSj/jW8p06FJmZ0wXTL7uWw+476tBim4ruYXDZmcShJSIoX1PrEzPkRQtI8JKThjtIHbSwfIRypEUY1B0IUZm0RvpQHY8EMP9EcoghZaape6nMbyWgXapbhYdyiCFaNvhKDgpszOWmAboUcfDJb8HKWx1bGwOeDyLur1DaZfBkd+DOHLKIWUKFnVGVsyt3cSeMkIR2zbZIY6RtuiNtig+6zkyQmmv7ZCXGq2dlFnUeZcMZWEpm/7mGIpvxQBjnrH0bFHUXdEdCopGAjqgvrXmOpeLnHU3Q/VWc7LB6aqSFNJHY2hjci6G50BMjnGEGqH0+WCro5gP+ZzZNnMGjLZEU9156lA6Kw6UMcFts4t51sQj/B4TI5Qu9m0/dTthEnuOGLmEJQ33QcHuZRNp2xRiMG+TxLczxuq+Lk36QDEKjs5kG+wUYoZs7Y7f/WOhaM9+wTQrtr4eYO49F80fi/HL5AfHQ4Cn1Sb3Zf8XY13CkfnL9B9+Bv/Nb+4n1nh/wtuIW5MAAAAASUVORK5CYII=');
-    BackgroundImg: TImage;
+    BackgroundImg, SlotImg: TImage;
   end;
 
 (*
@@ -112,6 +111,8 @@ begin
 
   boxes := Equipment.GetSlots(Self.SLOTS_ORIGIN);
   img := Self._Sprite(FRAME).ToImage();
+
+  Self.SlotImg := img;
 
   for slot := Low(EEquipment) to High(EEquipment) do
     Self.BackgroundImg.DrawImage(img, boxes[Ord(slot)].TopLeft);
@@ -223,7 +224,7 @@ var
   img, item: TImage;
 begin
   id := ItemFinder.Database.Get(Self.Gear.Items[slot].ToLower(), 'item', 'id');
-  img := Self.SLOT_IMG.Copy();
+  img := Self.SlotImg.Copy();
   item := ItemFinder.GetImage(id);
 
   img.DrawImage(item, [2,2]);
