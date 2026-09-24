@@ -49,7 +49,7 @@ WL_VERSION_COMMIT_HASH
 Should be self explanatory but holds the shortened hash of the commit that has
 created the current WaspLib version.
 *)
-  WL_VERSION_COMMIT_HASH: String = 'ac24012';
+  WL_VERSION_COMMIT_HASH: String = 'bb2c7d9';
 
 
 (*
