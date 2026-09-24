@@ -3,14 +3,15 @@
 function TVector3Array.NearestVec(vec: TVector3 = [0,0,0]): TVector3;
 var
   i, nearest: Int32;
-  dist: Double;
+  dist, current: Double;
 begin
   dist := $FFFFFF;
   for i:=0 to High(Self) do
   begin
-    if Self[i].Distance(vec) < dist then
+    current := Self[i].Distance(vec);
+    if current < dist then
     begin
-      dist := Self[i].Distance(vec);
+      dist := current;
       nearest := i;
     end;
   end;
