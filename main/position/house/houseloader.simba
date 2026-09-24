@@ -1,18 +1,4 @@
-(*
-# HouseLoader
-{ref}`HouseLoader` is what's responsible for mapping a user's {ref}`House` for
-WaspLib to be able to interact with it.
 
-All {ref}`THouseLoader` methods are helper methods for the {ref}`THouse` and
-you shouldn't have to call them for anything.
-
-When loaded either by {ref}`HouseFormTab` or via the
-{ref}`HouseViewer`, it's map should look something like this:
-```{figure} ../../images/houseloadermap.png
-```
-And this map should look like whatever the account's POH looks like on the
-minimap as that's how we will be able to navigate it.
-*)
 {$DEFINE WL_HOUSELOADER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -25,10 +11,7 @@ end;
 {$ENDIF}
 
 type
-(*
-## THouseLoader
-Helper record used by the {ref}`THouse` to load and/or map a POH.
-*)
+
   THouseLoader = record
     Downscale, LayoutIndex: Integer;
     Map, Collision, HalfMap: TImage;
@@ -104,14 +87,7 @@ begin
   Self.Redraw();
 end;
 
-(*
-## THouseLoader.Init
-```pascal
-procedure THouseLoader.Init();
-```
-Internal method automatically called for your when you use `TScriptForm.CreateHouseBuilder()`.
-You don't usually have to call it yourself.
-*)
+
 procedure THouseLoader.Init();
 begin
   Self.Map := new TImage(Self.SIZE * Self.AMOUNT, Self.SIZE * Self.AMOUNT);
@@ -150,25 +126,7 @@ begin
   Result := Self.Colors.Indoors;
 end;
 
-(*
-## THouseLoader.GetRoomImageBox
-```pascal
-function THouseLoader.GetRoomImageBox(room: EHouseRoom): TBox;
-```
-Internal method used to get the box of the {ref}`EHouseRoom` you pass in.
 
-This box is a box of the following image:
-```{figure} ../../images/rooms_image.png
-```
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn House.Loader.GetRoomImageBox(EHouseRoom.SUPERIOR_GARDEN);
-end;
-```
-*)
 function THouseLoader.GetRoomImageBox(room: EHouseRoom): TBox;
 var
   i: Integer;
@@ -177,26 +135,7 @@ begin
   Result := [i * Self.SIZE, 0, i * Self.SIZE + Self.SIZE - 1, Self.SIZE-1];
 end;
 
-(*
-## THouseLoader.GetRoomImage
-```pascal
-function THouseLoader.GetRoomImage(room: EHouseRoom): TImage;
-```
-Internal method used to retrieve a image of the {ref}`EHouseRoom` you pass in.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-begin
-  img := House.Loader.GetRoomImage(EHouseRoom.ACHIEVEMENT_GALLERY);
-  img.Show();
-end;
-```
-```{figure} ../../images/achievement_gallery_img.png
-```
-*)
 function THouseLoader.GetRoomImage(room: EHouseRoom): TImage;
 begin
   if Self.RoomImages[room] = nil then
@@ -206,30 +145,7 @@ begin
   Result.ReplaceColor($FFFFFF, Self.GetColor(room));
 end;
 
-(*
-## THouseLoader.GetIconImage
-```pascal
-function THouseLoader.GetIconImage(room: EHouseRoom): TImage;
-```
-Internal method used to retrieve a image of the {ref}`EHouseRoom` with it's
-icons.
-The only purpose of this is for debugging or displaying a room for a user as
-having a room with it's icons drawn makes it much easier to identify the room
-visually for a human.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-begin
-  img := House.Loader.GetIconImage(EHouseRoom.ACHIEVEMENT_GALLERY);
-  img.Show();
-end;
-```
-```{figure} ../../images/achievement_gallery_icons.png
-```
-*)
 function THouseLoader.GetIconImage(room: EHouseRoom): TImage;
 begin
   if Self.IconImages[room] = nil then
@@ -240,27 +156,7 @@ begin
 end;
 
 
-(*
-## THouseLoader.WriteRoom
-```pascal
-procedure THouseLoader.WriteRoom(room: EHouseRoom; index: TPoint);
-```
-Internal method used to write a room to `THouseLoader.Rooms` cache.
-This uses an `TPoint` as a room `index` in a 2D array of {ref}`EHouseRoom`.
 
-Unless you know what you are doing, you definitly should not use this for
-anything.
-
-If you do use this for some reason, keep in mind that `THouseLoader.Map` won't
-get updated. The easier way is to updated it is to call
-{ref}`THouseLoader.Redraw` which will redraw the whole map.
-Read it's documentation for more information about it.
-
-Example:
-```pascal
-House.Loader.WriteRoom(EHouseRoom.SUPERIOR_GARDEN, [3,3]);
-```
-*)
 procedure THouseLoader.WriteRoom(room: THouseRoom; index: TPoint);
 begin
   Self.Rooms[index.Y,index.X] := room;
@@ -275,47 +171,13 @@ begin
   Self.Config.Save();
 end;
 
-(*
-## THouseLoader.ReadRoom
-```pascal
-function THouseLoader.ReadRoom(index: TPoint): EHouseRoom;
-```
-Internal method used to read a cached room in `THouseLoader.Rooms`.
-This uses an `TPoint` as a room `index`.
 
-Unless you know what you are doing, you don't need this, but there's no harm in using it.
-
-Example:
-```pascal
-WriteLn House.Loader.ReadRoom([3,3]);
-```
-*)
 function THouseLoader.ReadRoom(index: TPoint): THouseRoom;
 begin
   Result := Self.Rooms[index.Y,index.X];
 end;
 
-(*
-## THouseLoader.PrintRooms
-```pascal
-procedure THouseLoader.PrintRooms();
-```
-Debugging helper method used to read a cached rooms in `THouseLoader.Rooms`.
-This will print the whole cache nicely formated in a way that is human friendly like you were looking at the house map.
 
-Unless you know what you are doing, you don't need this, but there's no harm in using it.
-
-```{note}
-:class: dropdown
-It's a extremely useful debugging tool when paired with `House.Loader.Map.Show()`.
-```
-
-Example:
-```pascal
-House.Setup();
-House.Loader.PrintRooms();
-```
-*)
 procedure THouseLoader.PrintRooms();
 var
   str: String;
@@ -341,21 +203,7 @@ begin
 end;
 
 
-(*
-## THouseLoader.DrawMap
-```pascal
-procedure THouseLoader.DrawMap(img: TImage; room: EHouseRoom; p: TPoint);
-procedure THouseLoader.DrawMap(room: EHouseRoom; color: Integer; p: TPoint); overload;
-```
-Methods used to draw the POH map and cache the rooms drawn in `THouseLoader.Rooms`.
 
-Example:
-```pascal
-House.Loader.DrawMap(EHouseRoom.SUPERIOR_GARDEN, POH.GrassColor, [3,3]);
-House.Loader.Show();
-House.Loader.PrintRooms();
-```
-*)
 procedure THouseLoader.DrawMap(img: TImage; room: THouseRoom; index: TPoint); overload;
 begin
   Self.WriteRoom(room, index);
@@ -390,26 +238,7 @@ begin
 end;
 
 
-(*
-## THouseLoader.Redraw
-```pascal
-procedure THouseLoader.Redraw();
-```
-Redraws `THouseLoader.Map` based on the information being held at
-`THouseLoader.Rooms`.
-This redraws the the whole house map from scratch so if you just want to draw a
-single room, there's lighter ways to do do it, such as:
-```pascal
-var
-  index: TPoint;
-  img: TImage;
-begin
-  index := [5,5];
-  img := House.Loader.GetRoomImage(EHouseRoom.ACHIEVEMENT_GALLERY).RotateClockWise(3);
-  House.Loader.Map.DrawImage(img, [House.Loader.SIZE * index.X, House.Loader.SIZE * index.Y]);
-end;
-```
-*)
+
 procedure THouseLoader.Redraw();
 var
   img: TImage;
