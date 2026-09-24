@@ -1,74 +1,10 @@
-(*
-# Discord
-A library for sending messages and files to Discord channels via webhooks.
 
-Credits: Developed by TazE
-
-## Discord Getting Started
-
-Basic example for sending a message to Discord:
-
-```pascal
-var
-  Discord: TDiscordClient;
-begin
-  // Setup the Discord client
-  Discord.Setup();
-
-  // Set your webhook URL
-  if Discord.SetWebhook('https://discord.com/api/webhooks/your_webhook_id/your_webhook_token') then
-  begin
-    // Send a simple message
-    Discord.Webhook.Content := 'Hello from Simba!';
-    if Discord.Send() then
-      WriteLn('Message sent successfully');
-  end;
-end;
-```
-
-Example with embeds:
-
-```pascal
-var
-  Discord: TDiscordClient;
-  EmbedIdx: Integer;
-begin
-  Discord.Setup();
-  Discord.SetWebhook('https://discord.com/api/webhooks/your_webhook_id/your_webhook_token');
-
-  // Add an embed
-  EmbedIdx := Discord.Webhook.AddEmbed();
-  with Discord.Webhook.Embeds[EmbedIdx] do
-  begin
-    Title := 'Status Report';
-    Description := ':white_check_mark: Script completed successfully';
-    Color := $00FF00; // Green color
-  end;
-
-  Discord.Send();
-end;
-```
-*)
 
 {$DEFINE WL_DISCORD_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 type
-(*
-(TDiscordEmbed)=
-## type TDiscordEmbed
-```pascal
-TDiscordEmbed = record
-  Title: String;
-  Description: String;
-  Color: Integer;
-  Footer: String;
-  ImageURL: String;
-  ThumbnailURL: String;
-end;
-```
-Represents a Discord embed object that can be attached to messages.
-*)
+
   TDiscordEmbed = record
     Title: String;
     Description: String;
@@ -78,20 +14,7 @@ Represents a Discord embed object that can be attached to messages.
     ThumbnailURL: String;
   end;
 
-(*
-(TDiscordWebhook)=
-## type TDiscordWebhook
-```pascal
-TDiscordWebhook = record
-  URL: String;
-  Username: String;
-  AvatarURL: String;
-  Content: String;
-  Embeds: array of TDiscordEmbed;
-end;
-```
-Represents a Discord webhook configuration with content and embeds.
-*)
+
   TDiscordWebhook = record
     URL: String;
     Username: String;
@@ -100,25 +23,7 @@ Represents a Discord webhook configuration with content and embeds.
     Embeds: array of TDiscordEmbed;
   end;
 
-(*
-(TDiscordClient)=
-## type TDiscordClient
-```pascal
-TDiscordClient = record
-  Name: String;
-  Webhook: TDiscordWebhook;
-  Config: TConfigJSON;
-  HTTPClient: THTTPClient;
-  Logger: TLogger;
-  LastResponse: String;
-  LastError: String;
-  RetryCount: Integer;
-  RetryDelay: Integer;
-  ScreenshotPath: String;
-end;
-```
-Main client for interacting with Discord webhooks.
-*)
+
   TDiscordClient = record
     Name: String;
     Webhook: TDiscordWebhook;
@@ -132,37 +37,14 @@ Main client for interacting with Discord webhooks.
     ScreenshotPath: String;
   end;
 
-(*
-## TDiscordWebhook.Setup
-```pascal
-procedure TDiscordWebhook.Setup(URL: String);
-```
-Setup a webhook with the given URL.
 
-Example:
-```pascal
-MyWebhook.Setup('https://discord.com/api/webhooks/your_webhook_id/your_webhook_token');
-```
-*)
 procedure TDiscordWebhook.Setup(URL: String);
 begin
   Self.URL := URL;
   Self.Embeds := [];
 end;
 
-(*
-## TDiscordWebhook.AddEmbed
-```pascal
-function TDiscordWebhook.AddEmbed: Integer;
-```
-Adds a new embed to the webhook and returns its index.
 
-Example:
-```pascal
-EmbedIdx := MyWebhook.AddEmbed();
-MyWebhook.Embeds[EmbedIdx].Title := 'Status Report';
-```
-*)
 function TDiscordWebhook.AddEmbed: Integer;
 var
   NewEmbed: TDiscordEmbed;
@@ -173,38 +55,20 @@ begin
   Result := High(Self.Embeds);
 end;
 
-(*
-## TDiscordWebhook.ClearEmbeds
-```pascal
-procedure TDiscordWebhook.ClearEmbeds;
-```
-Removes all embeds from the webhook.
-*)
+
 procedure TDiscordWebhook.ClearEmbeds;
 begin
   Self.Embeds := [];
 end;
 
-(*
-## TDiscordWebhook.ClearAll
-```pascal
-procedure TDiscordWebhook.ClearAll;
-```
-Clears both content and embeds from the webhook.
-*)
+
 procedure TDiscordWebhook.ClearAll;
 begin
   Self.Content := '';
   Self.ClearEmbeds();
 end;
 
-(*
-## TDiscordWebhook.ToJSON
-```pascal
-function TDiscordWebhook.ToJSON: String;
-```
-Converts the webhook to a JSON string for API requests.
-*)
+
 function TDiscordWebhook.ToJSON: String;
 var
   JSON: TJSONObject;
@@ -274,13 +138,7 @@ begin
   end;
 end;
 
-(*
-## TDiscordClient.Free
-```pascal
-procedure TDiscordClient.Free;
-```
-Cleans up resources used by the Discord client.
-*)
+
 procedure TDiscordClient.Free;
 begin
   Self.Config.Save();
@@ -290,19 +148,7 @@ begin
     Self.HTTPClient.Destroy();
 end;
 
-(*
-## TDiscordClient.Setup
-```pascal
-procedure TDiscordClient.Setup(ConfigPath: String = '');
-```
-Setup the Discord client from a configuration file.
 
-Example:
-```pascal
-MyDiscord.Setup(); // Uses default 'discord.json'
-MyDiscord.Setup('my_config.json'); // Uses specified file
-```
-*)
 procedure TDiscordClient.Setup(ConfigPath: String = '');
 var
   Path: String;
@@ -349,18 +195,7 @@ begin
   AddOnTerminate(@Self.Free);
 end;
 
-(*
-## TDiscordClient.SetWebhook
-```pascal
-function TDiscordClient.SetWebhook(WebhookURL: String): Boolean;
-```
-Sets and validates the webhook URL for the Discord client.
 
-Example:
-```pascal
-MyDiscord.SetWebhook('https://discord.com/api/webhooks/your_webhook_id/your_webhook_token');
-```
-*)
 function TDiscordClient.SetWebhook(WebhookURL: String): Boolean;
 var
   response: String;
@@ -457,18 +292,7 @@ begin
   end;
 end;
 
-(*
-## TDiscordClient.SetUsername
-```pascal
-procedure TDiscordClient.SetUsername(Username: String);
-```
-Sets the username that appears for webhook messages.
 
-Example:
-```pascal
-MyDiscord.SetUsername('Timmy the botter');
-```
-*)
 procedure TDiscordClient.SetUsername(Username: String);
 begin
   Self.Webhook.Username := Username;
@@ -480,18 +304,7 @@ begin
   Self.Logger.Info('Username set to: ' + Username);
 end;
 
-(*
-## TDiscordClient.SetAvatar
-```pascal
-procedure TDiscordClient.SetAvatar(AvatarURL: String);
-```
-Sets the avatar image URL for webhook messages.
 
-Example:
-```pascal
-MyDiscord.SetAvatar('https://example.com/avatar.png');
-```
-*)
 procedure TDiscordClient.SetAvatar(AvatarURL: String);
 begin
   Self.Webhook.AvatarURL := AvatarURL;
@@ -503,20 +316,7 @@ begin
   Self.Logger.Info('Avatar URL set to: ' + AvatarURL);
 end;
 
-(*
-## TDiscordClient.Send
-```pascal
-function TDiscordClient.Send: Boolean;
-```
-Sends the current webhook content and embeds to Discord.
 
-Example:
-```pascal
-MyDiscord.Webhook.Content := 'Hello from Simba!';
-if MyDiscord.Send() then
-  WriteLn('Message sent successfully');
-```
-*)
 function TDiscordClient.Send: Boolean;
 var
   Payload: String;
@@ -595,19 +395,7 @@ begin
   Result := False;
 end;
 
-(*
-## TDiscordClient.SendFile
-```pascal
-function TDiscordClient.SendFile(FilePath: String): Boolean;
-```
-Sends a file to the Discord channel.
 
-Example:
-```pascal
-if MyDiscord.SendFile('C:\path\to\image.png') then
-  WriteLn('File sent successfully');
-```
-*)
 function TDiscordClient.SendFile(FilePath: String): Boolean;
 var
   Boundary, FileContents, Ext, MimeType: String;
@@ -708,19 +496,7 @@ begin
   Result := False;
 end;
 
-(*
-## TDiscordClient.SendScreenshot
-```pascal
-function TDiscordClient.SendScreenshot(): Boolean;
-```
-Takes a screenshot of the client and sends it to Discord.
 
-Example:
-```pascal
-if MyDiscord.SendScreenshot() then
-  WriteLn('Screenshot sent successfully');
-```
-*)
 function TDiscordClient.SendScreenshot(): Boolean;
 var
   fileName: String;
@@ -732,18 +508,7 @@ begin
   FileDelete(fileName);
 end;
 
-(*
-## TDiscordClient.MentionUser
-```pascal
-function TDiscordClient.MentionUser(UserID: String): String;
-```
-Returns a formatted mention for a Discord user.
 
-Example:
-```pascal
-Discord.Webhook.Content := 'Alert! ' + Discord.MentionUser('123456789012345678');
-```
-*)
 function TDiscordClient.MentionUser(UserID: String): String;
 begin
   Result := '<@' + UserID + '>';
