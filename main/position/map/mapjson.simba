@@ -1,10 +1,4 @@
-(*
-# Map JSONs
-Utilities to help load and parse json files related to {ref}`Map`.
 
-Only NPCs still come from json, since their positions are crowdsourced. Objects are read from the
-game cache by {ref}`Map Objects`.
-*)
 {$DEFINE WL_MAPJSON_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -70,14 +64,7 @@ begin
   Async.FileUnZip(filename, Self.CacheDir, @Self.Unzipped);
 end;
 
-(*
-## MapJSON.GetFile
-```pascal
-function MapJSON.GetFile(cachedir: String; chunk: TPoint; plane: Integer): TJSONArray;
-```
-Internal function to return a `JSONArray` of npcs associated with the
-specified `chunk` and `plane`.
-*)
+
 function TMapJSON.GetFile(cacheDir: String; chunk: TPoint; plane: Integer): TJSONArray;
 var
   filename, cachename: String;
@@ -92,14 +79,7 @@ begin
   TJSONParser(Result).Load(cachename);
 end;
 
-(*
-## MapJSON.Load
-```pascal
-procedure TMapJSON.Load(regions: array of TMapRegion = []);
-```
-Internal method to load all npcs JSON data associated with the
-specified `regions` merged into a single `TJSONArray`.
-*)
+
 procedure TMapJSON.Load(regions: array of TMapRegion = []);
 var
   region: TMapRegion;
@@ -120,17 +100,7 @@ begin
 end;
 
 
-(*
-## MapJSON.GetByName
-```pascal
-function TMapJSON.GetByName(name: String; amount: Integer = 0): TJSONArray;
-```
-Returns a `TJSONArray` of `JSONObjects` of an npc that matches the
-specified `name`.
 
-By default you get all entries that match the `name`, however, if you want you
-can specify how many unique IDs you want through `amount`.
-*)
 function TMapJSON.GetByName(name: String; amount: Integer = 0): TJSONArray;
 var
   i, idx, id: Integer;
@@ -165,13 +135,7 @@ begin
       Result.AddObject('result', Self.Data.Item[i].Clone());
 end;
 
-(*
-## MapJSON.GetByID
-```pascal
-function TMapJSON.GetByID(id: Integer): TJSONObject;
-```
-Returns a `TJSONObject` of an npc that matches the specified `id`.
-*)
+
 function TMapJSON.GetByID(id: Integer): TJSONObject;
 var
   i, idx: Integer;
@@ -203,17 +167,7 @@ begin
       end;
 end;
 
-(*
-## MapJSON.GetByAction
-```pascal
-function TMapJSON.GetByAction(action: String; amount: Integer = 0): TJSONArray;
-```
-Returns a `TJSONArray` of `JSONObjects` of an npc that has an
-action that matches the specified `action`.
 
-By default you get all entries that match the `action`, however, if you want
-you can specify how many unique IDs you want through `amount`.
-*)
 function TMapJSON.GetByAction(action: String; amount: Integer = 0): TJSONArray;
 var
   i, j, idx, id: Integer;
@@ -250,17 +204,7 @@ begin
       Result.AddObject('result', Self.Data.Item[i].Clone());
 end;
 
-(*
-## MapJSON.GetByAllActions
-```pascal
-function TMapJSON.GetByAllActions(actions: TStringArray; amount: Integer = 0): TJSONArray;
-```
-Returns a `TJSONArray` of `JSONObjects` of an npc that has all the specified
-`actions`.
 
-By default you get all entries that match the `actions`, however, if you want
-you can specify how many unique IDs you want through `amount`.
-*)
 function TMapJSON.GetByAllActions(actions: TStringArray; amount: Integer = 0): TJSONArray;
 var
   i, j, l, idx, id: Integer;

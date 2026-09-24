@@ -1,14 +1,4 @@
-(*
-# CacheParser
-CacheParser as the name implies is a record made to parse information from certain files that are part of the game cache.
-- preferences.dat is where most client settings are stored.
-- preferences2.dat I have no idea? some values in address 00000020 seem to change after some times has passed randomly. (related to 6h log maybe!?!?)
-- random.dat in the user home directory seems to be a random identifier generated the first time you open a client if it doesn't exist.
-    while it exists, it seems to never change unless the user deletes it.
-```{note}
-For more information check this file: https://github.com/open-osrs/runelite/blob/dd4478eff7d90fcb3e85584171d5836809eb150a/runescape-client/src/main/java/ClientPreferences.java
-```
-*)
+
 
 {$DEFINE WL_CACHEPARSER_INCLUDED}
 {$I WaspLib/main.simba}
@@ -24,10 +14,7 @@ type
     Data: array of TIndexData;
   end;
 
-(*
-## TCacheParser
-Type responsible for handling cache parsing.
-*)
+
   TCacheParser = record
     Disabled: Boolean;
     Directory: String;
@@ -36,15 +23,7 @@ Type responsible for handling cache parsing.
     const PREFERENCES2:  String = PATH_SEP + 'jagexcache' + PATH_SEP + 'oldschool' + PATH_SEP + 'LIVE' + PATH_SEP + 'preferences2.dat';
   end;
 
-(*
-## CacheParser.Setup
-```pascal
-procedure TCacheParser.Setup();
-```
-Internal method responsible for setting up the {ref}`TCacheParser`.
 
-This is automatically called for you on the {ref}`CacheParser variable`.
-*)
 procedure TCacheParser.Setup();
 {$IFDEF WINDOWS}
 var
@@ -82,41 +61,9 @@ begin
 end;
 
 
-(*
-## Preferences
-This section is about reading the game preferences that get cached.
-There's 2 preferences files:
-- `preferences.dat`
-- `preferences2.dat`
 
-The second file is actually not used for anything at the moment but the first one
-specifically has a lot of useful client information, things such as:
-- Brightness level
-- Roofs state
-- Window mode (fixed or resizable)
-- Sound volumes
-- ...
 
-All this information is stored in binary, but with the following methods you can read it easily and
-this is very useful because you can do things like:
-- Check brightness level without opening the options gametab nor the display tab.
-- Know if the roofs are hidden, this is something that can break scripts big time and is notoriously hard to know with color alone.
-*)
 
-(*
-### CacheParser.ReadPreference
-```pascal
-function TCacheParser.ReadPreference(pref: Integer = 1): TByteArray;
-```
-Internal method to returns the bytes of the preferences file.
-Returns the bytes of the preferences file which can only be 1 or 2.
-It's also useful for debugging
-
-Example:
-```pascal
-WriteLn CacheParser.ReadPreference(1);
-```
-*)
 function TCacheParser.ReadPreference(pref: Integer = 1): TByteArray;
 begin
   case pref of
@@ -126,22 +73,7 @@ begin
 end;
 
 
-(*
-### CacheParser.CountOptions
-```pascal
-function TCacheParser.CountOptions(bytes: TByteArray = []): Integer;
-```
-Returns the number of options saved in the cache.
-Only used for debugging, you probably don't need this at all.
 
-This is not very useful, AFAIK there's only 2 possible values for this: 0 and 11.
-0 is only if you haven't accepted the EULA in the client.
-
-Example:
-```pascal
-WriteLn CacheParser.CountOptions();
-```
-*)
 function TCacheParser.CountOptions(bytes: TByteArray = []): Integer;
 begin
   if bytes = [] then
@@ -150,18 +82,7 @@ begin
 end;
 
 
-(*
-### CacheParser.RoofsHidden
-```pascal
-function TCacheParser.RoofsHidden(bytes: TByteArray = []): Boolean;
-```
-Returns whether the roofs are hidden or not.
 
-Example:
-```pascal
-WriteLn CacheParser.RoofsHidden();
-```
-*)
 function TCacheParser.RoofsHidden(bytes: TByteArray = []): Boolean;
 begin
   if bytes = [] then
@@ -169,18 +90,7 @@ begin
   if Length(bytes) > 0 then Result := Boolean(bytes[1]);
 end;
 
-(*
-### CacheParser.LoginMusicDisabled
-```pascal
-function TCacheParser.LoginMusicDisabled(bytes: TByteArray = []): Boolean;
-```
-Checks if the music is enabled on the login screen.
 
-Example:
-```pascal
-WriteLn CacheParser.LoginMusicDisabled();
-```
-*)
 function TCacheParser.LoginMusicDisabled(bytes: TByteArray = []): Boolean;
 begin
   if bytes = [] then
@@ -188,19 +98,7 @@ begin
   if Length(bytes) > 1 then Result := Boolean(bytes[2]);
 end;
 
-(*
-### CacheParser.WindowMode
-```pascal
-function TCacheParser.WindowMode(bytes: TByteArray = []): Integer;
-```
-Returns 1 for fixed mode and 2 for resizable mode.
-Resizable modern and resizable classic make no difference here.
 
-Example:
-```pascal
-WriteLn CacheParser.WindowMode();
-```
-*)
 function TCacheParser.WindowMode(bytes: TByteArray = []): Integer;
 begin
   if bytes = [] then
@@ -209,22 +107,7 @@ begin
 end;
 
 
-(*
-### CacheParser.CountAuthenticators
-```pascal
-function TCacheParser.CountAuthenticators(bytes: TByteArray = []): Integer;
-```
-Internal helper method that returns the number of authenticators saved for the next 30 days.
 
-If this is more than 0, you will have 8 bytes for each of the saved authenticators.
-
-This is important to know so we know how many bytes we have to skip to continue reading the preferences file.
-
-Example:
-```pascal
-WriteLn CacheParser.CountAuthenticators();
-```
-*)
 function TCacheParser.CountAuthenticators(bytes: TByteArray = []): Integer;
 begin
   if bytes = [] then
@@ -232,24 +115,7 @@ begin
   if Length(bytes) > 4 then Result := bytes[4];
 end;
 
-(*
-### CacheParser.GetAuthenticators
-```pascal
-function TCacheParser.GetAuthenticators(): TStringArray;
-```
-No real use other than debugging.
 
-Returns each authenticator saved in a TStringArray.
-
-Each string is 8 bytes like mentioned in {ref}`CacheParser.CountAuthenticators` documentation.
-
-Also, you can't just use this to login as someone, don't bother trying.
-
-Example:
-```pascal
-WriteLn CacheParser.GetAuthenticators();
-```
-*)
 function TCacheParser.GetAuthenticators(bytes: TByteArray = []): TStringArray;
 var
   i, count: Int32;
@@ -271,16 +137,7 @@ begin
   end;
 end;
 
-(*
-### CacheParser.GetUsernameIndex
-```pascal
-function TCacheParser.GetUsernameIndex(bytes: TByteArray = []): Integer;
-```
-Internal helper function that returns byte index where the saved username starts.
 
-This is required because depending on whether we have authenticators saved or not,
-the bytes shift like mentioned in {ref}`CacheParser.CountAuthenticators`.
-*)
 function TCacheParser.GetUsernameIndex(bytes: TByteArray = []): Integer;
 begin
   if bytes = [] then
@@ -289,19 +146,7 @@ begin
   Result := 5 + Self.CountAuthenticators(bytes) * 8;
 end;
 
-(*
-### CacheParser.GetUsername
-```pascal
-function TCacheParser.GetUsername(bytes: TByteArray = []): String;
-```
-Returns the saved username in the game cache.
-This is the username you clicked to save on the client when logging in.
 
-Example:
-```pascal
-WriteLn CacheParser.GetUsername();
-```
-*)
 function TCacheParser.GetUsername(bytes: TByteArray = []): String;
 var
   i, startIdx: Int32;
@@ -318,18 +163,7 @@ begin
   end;
 end;
 
-(*
-### CacheParser.UsernameEndIndex
-```pascal
-function TCacheParser.UsernameEndIndex(bytes: TByteArray = []): Int32;
-```
-Internal helper function used to get the index of the byte of where the username ends.
-We can know the index of the byte by know where it starts with
-{ref}`CacheParser.GetUsernameIndex` and iterating all next bytes until we
-find one that is `0` which marks the end of the username.
 
-This is required so we can keep reading the preferences file.
-*)
 function TCacheParser.UsernameEndIndex(bytes: TByteArray = []): Int32;
 var
   i: Int32;
@@ -343,18 +177,7 @@ begin
   Result := i + 1;
 end;
 
-(*
-### CacheParser.LoginHideUsername
-```pascal
-function TCacheParser.LoginHideUsername(bytes: TByteArray = []): Boolean;
-```
-Returns true or false if we have the username hidden on the loginscreen.
 
-Example:
-```pascal
-WriteLn CacheParser.LoginHideUsername();
-```
-*)
 function TCacheParser.LoginHideUsername(bytes: TByteArray = []): Boolean;
 begin
   if bytes = [] then
@@ -363,19 +186,7 @@ begin
   Result := Boolean(bytes[Self.UsernameEndIndex(bytes)]);
 end;
 
-(*
-### CacheParser.Brightness
-```pascal
-function TCacheParser.Brightness(bytes: TByteArray = []): Integer;
-```
-Returns the brightness value converted to a 0-100 value (the value in cache
-is between 50-100 in a byte format).
 
-Example:
-```pascal
-WriteLn CacheParser.Brightness();
-```
-*)
 function TCacheParser.Brightness(bytes: TByteArray = []): Integer;
 var
   i: Int32;
@@ -388,18 +199,7 @@ begin
     Result := (Int32(bytes[i]) - 100) * -2;
 end;
 
-(*
-### CacheParser.MusicVolume
-```pascal
-function TCacheParser.MusicVolume(bytes: TByteArray = []): Integer;
-```
-Returns the music volume value converted to a 0-100 value.
 
-Example:
-```pascal
-WriteLn CacheParser.MusicVolume();
-```
-*)
 function TCacheParser.MusicVolume(bytes: TByteArray = []): Integer;
 var
   i: Integer;
@@ -412,18 +212,7 @@ begin
     Result := Round(Integer(bytes[i]) / 2.55);
 end;
 
-(*
-### CacheParser.SoundEffectsVolume
-```pascal
-function TCacheParser.SoundEffectsVolume(bytes: TByteArray = []): Integer;
-```
-Returns the sound effects volume value converted to a 0-100 value.
 
-Example:
-```pascal
-WriteLn CacheParser.SoundEffectsVolume();
-```
-*)
 function TCacheParser.SoundEffectsVolume(bytes: TByteArray = []): Integer;
 var
   i: Integer;
@@ -436,18 +225,7 @@ begin
     Result := Round(Integer(bytes[i]) / 1.27);
 end;
 
-(*
-### CacheParser.AreaSoundVolume
-```pascal
-function TCacheParser.AreaSoundVolume(bytes: TByteArray = []): Integer;
-```
-Returns the area sound volume value converted to a 0-100 value.
 
-Example:
-```pascal
-WriteLn CacheParser.AreaSoundVolume();
-```
-*)
 function TCacheParser.AreaSoundVolume(bytes: TByteArray = []): Integer;
 var
   i: Integer;
@@ -460,19 +238,7 @@ begin
     Result := Round(Integer(bytes[i]) / 1.27);
 end;
 
-(*
-### CacheParser.Field1247
-```pascal
-function TCacheParser.Field1247(bytes: TByteArray = []): Integer;
-```
-I have absolutely no idea what this is.
-It's supposedly something, but AFAIK it's always 0.
 
-Example:
-```pascal
-WriteLn CacheParser.Field1247();
-```
-*)
 function TCacheParser.Field1247(bytes: TByteArray = []): Integer;
 var
   i: Integer;
@@ -486,63 +252,22 @@ begin
 end;
 
 
-(*
-## CacheParser Indices
-This section is dedicated at reading the cache `idx` files.
 
-This has no use yet and might not be working properly but does seem like it is.
 
-There's very little resources online about this but some useful ones can be found here:
-- [OSRSBox](https://www.osrsbox.com/osrs-cache/)
-- [OpenRS](https://github.com/kfricilone/OpenRS/tree/master/source/net/openrs/cache)
 
-`idx` files are basically pointers to data on the `main_file_cache.dat2` where
-pretty much all the game cache information is stored.
-
-An `idx` file will tell you where on that file the data you want is, and it's size.
-*)
-
-(*
-### CacheParser.ReadMediumInt
-```pascal
-function TCacheParser.ReadMediumInt(const bytes: TByteArray; offset: Integer): Integer;
-```
-Internal helper method to partially read a sector of an `idx` file that are stored in big endian format.
-*)
 function TCacheParser.ReadMediumInt(const bytes: TByteArray; offset: Integer): Integer;
 begin
   Result := (bytes[offset] shl 16) or (bytes[offset + 1] shl 8) or bytes[offset + 2]; //Read 3 byte big endian int
 end;
 
-(*
-### CacheParser.DecodeIndexSector
-```pascal
-function TCacheParser.DecodeIndexSector(const bytes: TByteArray; offset: Integer): TIndexData;
-```
-Internal helper method to read a sector of an `idx` file.
 
-`idx` files are split into "sectors" of 6 bytes each. Each sector contains information about:
-- size of the data this sector points to
-- where that data starts.
-*)
 function TCacheParser.DecodeIndexSector(const bytes: TByteArray; offset: Integer): TIndexData;
 begin
   Result.Size := Self.ReadMediumInt(bytes, offset);
   Result.Sector := Self.ReadMediumInt(bytes, offset + 3);
 end;
 
-(*
-### CacheParser.ReadIdx
-```pascal
-function TCacheParser.ReadIdx(idx: Integer): TIndex;
-```
-Read an `idx` file and return it's information as a `TIndex`.
 
-Example:
-```pascal
-WriteLn CacheParser.ReadIndex(255);
-```
-*)
 function TCacheParser.ReadIndex(idx: Integer): TIndex;
 var
   bytes: TByteArray;
@@ -556,8 +281,5 @@ begin
 end;
 
 var
-(*
-## CacheParser variable
-Global {ref}`TCacheParser` variable.
-*)
+
   CacheParser: TCacheParser;

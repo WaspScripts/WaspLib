@@ -1,7 +1,4 @@
-(*
-# Antiban
-Methods to handle antiban.
-*)
+
 
 {$DEFINE WL_ANTIBAN_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -39,10 +36,7 @@ type
     Next: Double;
   end;
 
-(*
-## TAntiban
-Main record to handle the built-in WaspLib antiban.
-*)
+
   TAntiban = record
     WalkCameraAdjustments, DoingAntiban, Debugging, DebugRandoms: Boolean;
 
@@ -159,29 +153,7 @@ begin
 end;
 
 
-(*
-## Antiban.AddTask
-```pascal
-procedure TAntiban.AddTask(method: TAntibanMethod; interval: Double; randomness: Double = 0.2);
-```
-Schedule a antiban task.
-An antiban task can be any procedure but they should be short actions that won't
-break your main script.
 
-`method` is a pointer to the task you want to perform. WaspLib includes a couple
-of them but you may make your own if you want.
-
-`interval` is the aproximate interval of time that has to pass for the antiban
-task to occur and it will be repeated everytime that the interval has passed
-and the antiban is checked with {ref}`Antiban.DoAntiban`.
-
-This task will only occur when **TAntiban.DoAntiban** is called.
-
-Example:
-```pascal
-Antiban.AddTask(@Antiban.HoverSkills, 15 * MINUTE); //Every 15 minutes the script will run Antiban.HoverSkills().
-```
-*)
 procedure TAntiban.AddTask(method: TAntibanMethod; interval: Double; randomness: Double = 0.2);
 var
   idx: Integer;
@@ -191,28 +163,7 @@ begin
   Self._UpdateTask(idx, @method, interval, randomness);
 end;
 
-(*
-## Antiban.AddBreak
-```pascal
-procedure TAntiban.AddBreak(interval, length: Double; randomness: Double = 0.2; logoutChance: Double = 0.33);
-```
-Schedule a break. Breaks can be of short or medium length and should be shorter
-than any sleep breaks.
 
-`interval` is the aproximate interval of time that has to pass for the break to
-occur and it will be repeated everytime that interval passes and the antiban is
-checked either with {ref}`Antiban.DoBreak` or {ref}`Antiban.DoAntiban`.
-
-`length`, `randomness` and `logoutChance` are the same as
-{ref}`Antiban.AddSleep`.
-
-This break will only occur when {ref}`Antiban.DoAntiban` is called.
-
-Example:
-```pascal
-Antiban.AddBreak(30 * MINUTE, 5 * MINUTE); //Every 30 minutes the script will take a 5 minute break, subject to variance from the randomness variable.
-```
-*)
 procedure TAntiban.AddBreak(interval, length: Double; randomness: Double = 0.2; logoutChance: Double = 0.33);
 var
   idx: Integer;
@@ -222,35 +173,7 @@ begin
   Self._UpdateBreak(idx, interval, length, randomness, logoutChance);
 end;
 
-(*
-## Antiban.AddSleep
-```pascal
-procedure TAntiban.AddSleep(time: String; length: Double; randomness: Double = 0.1; logoutChance: Double = 0.5);
-```
-Schedule a sleep break. A sleep break is a large break, it can be any length but
-it's usually the several hours and also the largest one/ones.
 
-`time` is the aproximate time you want the break to occur and should be written
-in a "bare" time format (00:00:00) which is a 24H format.
-
-`length` is how long we will sleep for in milliseconds.
-
-`randomness` is self explanatory, gives variance to the time our script will
-sleep at and it's length too.
-One thing to keep in mind is that randomness only affects time past `time`.
-In other words, you will never sleep before `time`.
-
-`logoutChance` is the probability of logging out for the sleep break or to
-simply afk and logout from inactivity.
-
-This sleep break will only occur when {ref}`Antiban.DoAntiban` is called and our
-sleep break is due.
-
-Example:
-```pascal
-Antiban.AddSleep('01:30:45', 8*HOUR, 0.1, 0.8); //At 01:30:45 on our computer time the script will take a break for 8 hours, subject to variance from the randomness variable.
-```
-*)
 procedure TAntiban.AddSleep(time: String; length: Double; randomness: Double = 0.1; logoutChance: Double = 0.5);
 var
   idx: Integer;
@@ -260,29 +183,7 @@ begin
   Self._UpdateSleep(idx, time, length, randomness, logoutChance);
 end;
 
-(*
-## Antiban.AddWalkTask
-```pascal
-procedure TAntiban.AddWalkTask(method: TAntibanMethod; interval: Double; randomness: Double = 0.2);
-```
-Schedule a walking antiban task.
-An antiban task can be any procedure but they should be short actions that won't
-break your main script.
 
-`method` is a pointer to the task you want to perform.
-WaspLib includes a couple of them but you may make your own if you want.
-
-`interval` is the aproximate interval of time that has to pass for the antiban
-task to occur and it will be repeated everytime that the interval has passed
-and the antiban is checked with {ref}`Antiban.DoAntiban`.
-
-This task will only occur when **TAntiban.DoAntiban** is called.
-
-Example:
-```pascal
-Antiban.AddWalkTask(@Antiban.HoverSkills, 15 * MINUTE); //Every 15 minutes the script will run Antiban.HoverSkills().
-```
-*)
 procedure TAntiban.AddWalkTask(method: TAntibanMethod; interval: Double; randomness: Double = 0.2);
 var
   idx: Integer;
@@ -293,78 +194,10 @@ begin
 end;
 
 
-(*
-## Antiban Callbacks
-{ref}`TAntiban` has the following callbacks to handle specific antiban events
-(Task/Break/Sleep):
-```pascal
-OnStartTask,  OnFinishTask:  procedure(task: PAntibanTask) of object;
-OnStartBreak, OnFinishBreak: procedure(task: PBreakTask)   of object;
-OnStartSleep, OnFinishSleep: procedure(task: PSleepTask)   of object;
-OnBreaking: procedure(task: PBreakTask; var countdown: TCountdown) of object;
-OnSleeping: procedure(task: PSleepTask; var countdown: TCountdown) of object;
-```
-Their names are self explanatory when you understand them but:
- - `OnStart` callbacks are ran only once per event at the start.
- - `OnFinish` callbacks are ran only once per event at the end.
- - `OnBreaking` callbacks are ran every 5 seconds during a `Break` event.
- - `OnSleeping` callbacks are ran every 5 minutes during a `Sleep` event.
-
-The usage of these is up to your creativity and they can be very useful for
-things like:
-- Letting you know an event has started or finished. This can be useful if you
-need to go to a safe place before you go on a break for example.
-- Doing misc tasks during breaks or sleeps, for example, you could have a script
-occasionally hover stats during a break. Or login and do stuff during sleeps.
-You could for example, have a timer on your script for farm runs and login
-during a break or sleep to do the farm run and log back out.
-
-Example usage from Wasp Wintertodt which walks you to safety before breaks and
-sleeps:
-```pascal
-procedure TWintertodt.SafeBreak(task: PBreakTask);
-begin
-  if not Client.IsLoggedIn() then
-    Exit;
-
-  if not Self.HallTiles.Contains(Map.Position()) then
-    Map.Walker.WebWalk(Self.HallTiles.RandomPoint(), 8, 0.2);
-end;
-
-procedure TWintertodt.SafeSleep(task: PSleepTask);
-begin
-  if not Client.IsLoggedIn() then
-    Exit;
-
-  if not Self.HallTiles.Contains(Map.Position()) then
-    Map.Walker.WebWalk(Self.HallTiles.RandomPoint(), 8, 0.2);
-end;
-
-procedure TWintertodt.Init();
-begin
-  //...
-  //...
-  Antiban.OnStartBreak := @Self.SafeBreak;
-  Antiban.OnStartSleep := @Self.SafeSleep;
-  //...
-  Self.HallTiles := [6508, 34490, 6532, 34514];
-  //...
-end;
-```
-With the code above accounts will always walk to safety at the start of breaks
-and sleeps if they are logged in.
-*)
 
 
-(*
-## Antiban.TakeBreak
-```pascal
-procedure TAntiban.TakeBreak(var task: TBreakTask);
-```
-Internal function used by {ref}`Antiban.DoAntiban` and is responsible for
-performing the specified break `task`.
-In other words, this is what makes the script take the break.
-*)
+
+
 procedure TAntiban.TakeBreak(var task: TBreakTask);
 var
   countdown: TCountDown;
@@ -419,15 +252,7 @@ begin
   task.Next := GetTimeRunning() + Abs(GaussRand(task.Interval, task.Interval * task.StdVar));
 end;
 
-(*
-## Antiban.TakeSleep
-```pascal
-procedure TAntiban.TakeSleep(var task: TSleepTask);
-```
-Internal function used by {ref}`Antiban.DoAntiban` and is responsible for
-performing the specified sleep `task`.
-In other words, this is what makes the script take the sleep break.
-*)
+
 procedure TAntiban.TakeSleep(var task: TSleepTask);
 var
   countdown: TCountDown;
@@ -482,22 +307,7 @@ begin
 end;
 
 
-(*
-## Antiban.DoTask
-```pascal
-function TAntiban.DoTask(): Boolean;
-```
-Checks for scheduled antiban tasks, if any is due it will do it.
 
-You should only call this when doing an antiban task won't break your script.
-
-Returns true if a task was performed.
-
-Example:
-```pascal
-Antiban.DoTask();
-```
-*)
 function TAntiban.DoTask(): Boolean;
 var
   i: Integer;
@@ -536,22 +346,7 @@ begin
     active[i]^.Countdown.Resume();
 end;
 
-(*
-## Antiban.DoBreak
-```pascal
-function TAntiban.DoBreak(): Boolean;
-```
-Checks for scheduled breaks, if any is due it will take it.
 
-You should only call this when taking a break won't break your script.
-
-Returns true if a break was taken.
-
-Example:
-```pascal
-Antiban.DoBreak();
-```
-*)
 function TAntiban.DoBreak(): Boolean;
 var
   i: Integer;
@@ -569,22 +364,7 @@ begin
     end;
 end;
 
-(*
-## Antiban.DoSleep
-```pascal
-function TAntiban.DoSleep(): Boolean;
-```
-Checks for scheduled sleep breaks, if any is due it will take it.
 
-You should only call this when taking a sleep break won't break your script.
-
-Returns true if a sleep break was taken.
-
-Example:
-```pascal
-Antiban.DoSleep();
-```
-*)
 function TAntiban.DoSleep(): Boolean;
 var
   i: Integer;
@@ -602,23 +382,7 @@ begin
     end;
 end;
 
-(*
-## Antiban.DoWalkTask
-```pascal
-function TAntiban.DoWalkTask(): Boolean;
-```
-Checks for scheduled walking antiban tasks, if any is due it will do it.
 
-You should only call this when walking and doing an antiban task won't break
-your script.
-
-Returns true if a task was performed.
-
-Example:
-```pascal
-Antiban.DoWalkTask();
-```
-*)
 function TAntiban.DoWalkTask(): Boolean;
 var
   i: Integer;
@@ -658,27 +422,7 @@ begin
 end;
 
 
-(*
-## Antiban.DoAntiban
-```pascal
-function TAntiban.DoAntiban(checkTasks, checkBreaks, checkSleeps: Boolean = True): Boolean;
-```
-This should be called in your script when antiban sleeps, breaks or tasks won't
-break your script.
 
-When this is called, the setup sleep breaks, breaks and tasks will be checked,
-if enough time has passed to perform any of them
-(subject to the parameters you pass in too), they will be performed, otherwise,
-nothing will happen.
-
-Example:
-```pascal
-Antiban.AddTask(15 * MINUTE, @Antiban.HoverSkills);
-
-while True do        //Infinite loop
-  Antiban.DoAntiban(); //Antiban.HoverSkills will be called every time 15 minutes passed when this is called.
-```
-*)
 function TAntiban.DoAntiban(checkTasks, checkBreaks, checkSleeps: Boolean = True): Boolean;
 begin
   if Self.DoingAntiban then
@@ -708,18 +452,7 @@ begin
   Self.TimeRunning.Pause();
 end;
 
-(*
-## Antiban.DoWalkingAntiban
-```pascal
-function TAntiban.DoWalkingAntiban(): Boolean;
-```
-This should be called in your script when walking and walking tasks won't break
-your script.
 
-When this is called, the setup walking tasks will be checked, if enough time has
-passed to perform any of them, they will be performed, otherwise,
-nothing will happen.
-*)
 function TAntiban.DoWalkingAntiban(): Boolean;
 begin
   if Self.DoingAntiban then
@@ -736,50 +469,19 @@ begin
 end;
 
 
-(*
-## Antiban.TimeUntilBreak
-```pascal
-function TAntiban.TimeUntilBreak(constref task: TBreakTask; fmt: String = TIME_FORMAL): String;
-```
-Returns a string of how much time is left until the specified break `task`
-should be taken.
 
-Useful to show information to users.
-*)
 function TAntiban.TimeUntilBreak(constref task: TBreakTask; fmt: String = MS_TIME_FORMAL): String;
 begin
   Result := FormatMilliseconds(Max(0, Round(task.Next - GetTimeRunning())), fmt);
 end;
 
-(*
-## Antiban.TimeUntilSleep
-```pascal
-function TAntiban.TimeUntilSleep(constref task: TSleepTask; fmt: String = TIME_FORMAL): String;
-```
-Returns a string of how much time is left until the specified sleep break `task`
-should be taken.
 
-Useful to show information to users.
-*)
 function TAntiban.TimeUntilSleep(constref task: TSleepTask; fmt: String = MS_TIME_FORMAL): String;
 begin
   Result := FormatMilliseconds(Max(0, Round(task.Next - GetTimeRunning())), fmt);
 end;
 
-(*
-## Antiban.SimulateBreaks
-```pascal
-procedure TAntiban.SimulateBreaks(bottingDays: UInt64 = 1000);
-```
-Performs a simulation of `bottingDays` amount of days with the currently setup
-breaks and prints the results.
 
-Example
-```pascal
-Antiban.AddBreak(30*MINUTE, 5*MINUTE);
-Antiban.SimulateBreaks();
-```
-*)
 procedure TAntiban.SimulateBreaks(bottingDays: UInt64 = 1000);
 var
   active, inactive, len, prev: Double;
@@ -810,8 +512,5 @@ begin
 end;
 
 var
-(*
-## Antiban variable
-Global {ref}`TAntiban` variable.
-*)
+
   Antiban: TAntiban;

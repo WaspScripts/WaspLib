@@ -1,31 +1,16 @@
-(*
-# Inventory Layouts
-The `Inventory Layouts` is a handler for the game inventory.
 
-You can configure the layouts manually but the recommended way is to use
-{ref}`Inventory Form`.
-*)
 
 {$DEFINE WL_INVENTORY_LAYOUTS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TInventoryLayoutItem
-Type that represents a single inventory layout item.
-*)
+
   TInventoryLayoutItem = record
     Item: TItem;
     Amount: Integer;
   end;
 
-(*
-## TInventoryLayoutItem.ToJSON
-```pascal
-function TInventoryLayoutItem.ToJSON(): TJSONItem;
-```
-Convert the `TInventoryLayoutItem` into a `TJSONItem`.
-*)
+
 function TInventoryLayoutItem.ToJSON(): TJSONItem;
 begin
   Result := new TJSONObject();
@@ -34,22 +19,13 @@ begin
 end;
 
 type
-(*
-## TInventoryLayoutSlots
-Type that represents an entire inventory layout.
-*)
+
   TInventoryLayoutSlots = record
     Name: String;
     Items: array [0..27] of TInventoryLayoutItem;
   end;
 
-(*
-## TInventoryLayout.ToJSON
-```pascal
-function TInventoryLayout.ToJSON(): TJSONItem;
-```
-Convert the `TInventoryLayout` into a `TJSONItem`.
-*)
+
 function TInventoryLayoutSlots.ToJSON(): TJSONItem;
 var
   i: Integer;
@@ -60,24 +36,14 @@ begin
 end;
 
 type
-(*
-## TInventoryLayout
-Main type to user {ref}`Inventory Layouts`.
-*)
+
   TInventoryLayout = record
     Layout: TInventoryLayoutSlots;
     Holding: array [0..27] of TInventoryLayoutItem;
     BankItems: TBankItemArray;
   end;
 
-(*
-## InventoryLayout.SetupBankItems
-```pascal
-procedure TInventoryLayout.SetupBankItems();
-```
-Internal function used to setup the `TInventoryLayout` {ref}`TBankItem`s.
-This is automatically called for you when it's needed.
-*)
+
 procedure TInventoryLayout.SetupBankItems();
 var
   items: array of TInventoryLayoutItem;
@@ -114,19 +80,7 @@ begin
   end;
 end;
 
-(*
-## InventoryLayout.IsValid
-```pascal
-function TInventoryLayout.IsValid(): Boolean;
-```
-Returns true/false if whatever is inr you current {ref}`Inventory` is valid for
-your {ref}`TInventoryLayout`.
 
-Example:
-```pascal
-WriteLn layout.IsValid();
-```
-*)
 function TInventoryLayout.IsValid(): Boolean;
 var
   i: Integer;
@@ -141,20 +95,7 @@ begin
   Result := True;
 end;
 
-(*
-## InventoryLayout.DepositDiff
-```pascal
-function TInventoryLayout.DepositDiff(): Boolean;
-```
-Assuming the {ref}`Bank` is open, this will deposit every item in your inventory
-that doesn't match your {ref}`TInventoryLayout`.
 
-Example:
-```pascal
-if Bank.Open() then
-  layout.DepositDiff();
-```
-*)
 function TInventoryLayout.DepositDiff(): Boolean;
 var
   i, j, n, stack: Integer;
@@ -212,20 +153,7 @@ begin
 end;
 
 
-(*
-## InventoryLayout.Withdraw
-```pascal
-function TInventoryLayout.Withdraw(): Boolean;
-```
-Assuming the {ref}`Bank` is open, this will withdraw anything necessay so your
-{ref}`Inventory` contents match your `TInventoryLayout`.
 
-Example:
-```pascal
-if Bank.Open() then
-  layout.Withdraw();
-```
-*)
 function TInventoryLayout.Withdraw(attempts: Integer = 3): Boolean;
 var
   arr: TBankItemArray;
@@ -264,19 +192,7 @@ begin
   Result := Self.IsValid() or Self.Withdraw(Dec(attempts));
 end;
 
-(*
-## InventoryLayout.Reorder
-```pascal
-function TInventoryLayout.Reorder(): Boolean;
-```
-Attempts to reorder the items in your {ref}`Inventory` to it matches your
-`TInventoryLayout`.
 
-Example:
-```pascal
-layout.Reorder();
-```
-*)
 function TInventoryLayout.Reorder(): Boolean;
 var
   i, j: Integer;
