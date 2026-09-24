@@ -119,18 +119,32 @@ begin
   Result := AStarTPA(Self, start, goal, diagonalTravel);
 end;
 
+(*
+## T2DPointArray.InSameTPA
+```pascal
+function T2DPointArray.InSameTPA(a, b: TPoint): Boolean;
+```
+Tells you whether `a` and `b` both belong to the same inner `TPointArray`.
+*)
 function T2DPointArray.InSameTPA(a, b: TPoint): Boolean;
 var
-  i: Integer;
+  i, n: Integer;
 begin
   for i := 0 to High(Self) do
     with Self[i].Bounds() do
       if Contains(a) and Contains(b) then
-        case Length(Self[i].Intersection([a, b])) of
+      begin
+        n := 0;
+        if Self[i].Contains(a) then Inc(n);
+        if (a <> b) and Self[i].Contains(b) then Inc(n);
+
+        case n of
           1: if a = b then Exit(True) else Exit;
           2: Exit(True);
         end;
+      end;
 end;
+
 
 function TPointArray.NearestIndex(pt: TPoint): Integer;
 var

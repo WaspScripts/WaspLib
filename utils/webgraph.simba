@@ -212,16 +212,22 @@ var
   i, ref: Integer;
   pt, near: TPoint;
   items: TKDItems;
-  tpa: TPointArray;
+  tpa, subset: TPointArray;
+  b: TBox;
 begin
   ref := item.Ref;
   items := Self.KDTree.KNearest(item.Vector, amount, [ETreeSetting.NotEqual, ETreeSetting.RefSensitive, ETreeSetting.IgnoreHidden], ref);
   pt := Point(Round(item.Vector[0]), Round(item.Vector[1]));
 
+  b := Box(pt, pt);
+  for i := 0 to High(items) do
+    b := b.Combine(Box(pt, Point(Round(items[i].Vector[0]), Round(items[i].Vector[1]))));
+  subset := Self.WalkableClusters[ref].ExtractBox(b);
+
   for item in items do
   begin
     near := Point(Round(item.Vector[0]), Round(item.Vector[1]));
-    tpa := Self.WalkableClusters[ref].ExtractBox(Box(pt, near));
+    tpa := subset.ExtractBox(Box(pt, near));
 
     if not tpa.Cluster(1).InSameTPA(pt, near) then
       Continue;
@@ -231,7 +237,7 @@ begin
       Result += i;
   end;
 
-  if Result = [] then
+  if Result.IsEmpty then
     raise GetDebugLn('WebGraph', 'There''s no nodes near [' + ToStr(pt.X) + ',' + ToStr(pt.Y) + '] on the same cluster (' + ToStr(ref) + ').');
 end;
 
@@ -266,40 +272,105 @@ This is basically a weighted BFS algorithm.
 For more information on the algorithm read the [wikipedia page on breadth-first search](https://en.wikipedia.org/wiki/Breadth-first_search).
 *)
 function TWebGraph.FindPath(start, finish: Integer; rnd: Double = 0): TIntegerArray;
-type TNode = record Indices: TIntegerArray; Score: Double; end;
-var queue: array of TNode;
+type
+  TStep = record Node, Parent: Integer; Score: Double; end;
+var
+  steps: array of TStep;
+  heap: TIntegerArray;
+  stepCount, heapCount: Integer;
 
-  function GetNextShortest(): TNode;
-  var
-    i, node: Integer;
+  function Cheaper(a, b: Integer): Boolean;
   begin
-    Result := queue[0];
-    for i := 1 to High(queue) do
-      if queue[i].Score < Result.Score then
-      begin
-        node   := i;
-        Result := queue[i];
-      end;
-    Delete(queue, node, 1);
+    if steps[a].Score = steps[b].Score then
+      Exit(a < b);
+    Result := steps[a].Score < steps[b].Score;
+  end;
+
+  function AddStep(node, parent: Integer; score: Double): Integer;
+  begin
+    if stepCount = Length(steps) then
+      SetLength(steps, 2*stepCount + 64);
+
+    steps[stepCount].Node := node;
+    steps[stepCount].Parent := parent;
+    steps[stepCount].Score := score;
+
+    Result := stepCount;
+    Inc(stepCount);
+  end;
+
+  procedure Push(step: Integer);
+  var
+    child, parent, tmp: Integer;
+  begin
+    if heapCount = Length(heap) then
+      SetLength(heap, 2*heapCount + 64);
+
+    heap[heapCount] := step;
+    child := heapCount;
+    Inc(heapCount);
+
+    while child > 0 do
+    begin
+      parent := (child-1) div 2;
+      if not Cheaper(heap[child], heap[parent]) then
+        Break;
+
+      tmp := heap[parent];
+      heap[parent] := heap[child];
+      heap[child] := tmp;
+      child := parent;
+    end;
+  end;
+
+  function Pop(): Integer;
+  var
+    child, parent, tmp: Integer;
+  begin
+    Result := heap[0];
+    Dec(heapCount);
+    heap[0] := heap[heapCount];
+
+    parent := 0;
+    while True do
+    begin
+      child := 2*parent + 1;
+      if child >= heapCount then
+        Break;
+      if (child+1 < heapCount) and Cheaper(heap[child+1], heap[child]) then
+        Inc(child);
+      if not Cheaper(heap[child], heap[parent]) then
+        Break;
+
+      tmp := heap[parent];
+      heap[parent] := heap[child];
+      heap[child] := tmp;
+      parent := child;
+    end;
   end;
 
 var
-  visited: TBooleanArray;
-  cIdx, pathIdx, i: Integer;
-  current, node: TNode;
+  visited, queued: TBooleanArray;
+  best: TDoubleArray;
+  cIdx, pathIdx, i, current, len: Integer;
   p, q: TPoint;
-  hyp: Double;
+  hyp, score: Double;
 begin
-  queue   := [[[start],0]];
   SetLength(visited, Length(Self.Nodes));
+  SetLength(best, Length(Self.Nodes));
+  SetLength(queued, Length(Self.Nodes));
 
   for i in Self.Blocking do
     visited[i] := True;
 
-  while Length(queue) <> 0 do
+  queued[start] := True;
+  best[start] := 0;
+  Push(AddStep(start, -1, 0));
+
+  while heapCount > 0 do
   begin
-    current := GetNextShortest();
-    cIdx := current.Indices[High(current.Indices)];
+    current := Pop();
+    cIdx := steps[current].Node;
 
     if visited[cIdx] then
       Continue;
@@ -307,7 +378,26 @@ begin
     visited[cIdx] := True;
 
     if cIdx = finish then
-      Exit(current.Indices);
+    begin
+      len := 0;
+      i := current;
+      while i > -1 do
+      begin
+        Inc(len);
+        i := steps[i].Parent;
+      end;
+
+      SetLength(Result, len);
+      i := current;
+      while i > -1 do
+      begin
+        Dec(len);
+        Result[len] := steps[i].Node;
+        i := steps[i].Parent;
+      end;
+
+      Exit;
+    end;
 
     p := Self.Nodes[cIdx];
 
@@ -316,12 +406,17 @@ begin
       if visited[pathIdx] then
         Continue;
 
-      node.Indices := current.Indices + pathIdx;
-
       q := Self.Nodes[pathIdx];
       hyp := Hypot(p.X-q.X, p.Y-q.Y);
-      node.Score := current.Score + hyp + (hyp*Random()*rnd-rnd/2) + 1;
-      queue += node;
+
+      score := steps[current].Score + hyp + (hyp*Random()*rnd-rnd/2) + 1;
+
+      if queued[pathIdx] and (score >= best[pathIdx]) then
+        Continue;
+
+      queued[pathIdx] := True;
+      best[pathIdx] := score;
+      Push(AddStep(pathIdx, current, score));
     end;
   end;
 end;
@@ -349,7 +444,7 @@ begin
   if intsA[0] = intsB[0] then
     Exit([a, b]);
 
-  if (Length(intsB) = 1) and (Self.Paths[intsB[0]] = []) then
+  if (Length(intsB) = 1) and Self.Paths[intsB[0]].IsEmpty then
     raise GetDebugLn('WebGraph', 'Points ' + ToStr(a) + ' and ' + ToStr(b) + ' don''t connect! No paths available.');
 
   for i := 0 to High(intsA) do
@@ -362,7 +457,7 @@ begin
         Break(2);
     end;
 
-  if indices = [] then
+  if indices.IsEmpty then
     raise GetDebugLn('WebGraph', 'Points ' + ToStr(a) + ' and ' + ToStr(b) + ' don''t connect!');
 
   Result += a;
@@ -401,7 +496,7 @@ begin
       Continue;
     end;
 
-    if path = [] then
+    if path.IsEmpty then
       Continue;
 
     pathDist := 0;
@@ -736,11 +831,7 @@ begin
   if Self.Nodes.IsEmpty then
     Exit;
 
-  //A connection reaching into `view` has both of its nodes within `margin` of
-  //it, so anything further out can be skipped without losing a single pixel.
   wide := view.Expand(margin);
-
-  //nodes are drawn as a 3x3 box, so one just outside of `view` still paints in it
   nodeView := view.Expand(1);
 
   for i := 0 to High(Self.Paths) do
