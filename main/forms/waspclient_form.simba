@@ -1,27 +1,9 @@
-(*
-# WaspClient Form
-This page is about {ref}`WaspClient` dedicated `TLazForm` utilities.
 
-This is meant to be used with {ref}`TScriptForm` and you normally don't have to
-use this directly, you can just use {ref}`TScriptForm.CreateMiscTab` and it will
-setup both this with several {ref}`Misc` controls to configure:
-```{figure} ../../images/waspclientform.png
-```
-*)
 {$DEFINE WL_WASPCLIENT_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TWaspClientFormHelper
-The `TWaspClientFormHelper` type is, as it's name implies a helper type for the
-`WaspClient Form`.
 
-It has a lot of methods and callbacks that are hidden by default and won't be
-mentioned on this page because they are internal methods you shouldn't touch.
-
-Do feel free to read the source code though if you so desire.
-*)
   TWaspClientFormHelper = record
     LoginPanel, ClientPanel: TLazPanel;
     EmailEdit, PasswordEdit: TLazEdit;
@@ -152,8 +134,5 @@ begin
 end;
 
 var
-(*
-## WaspClientForm variable
-Global {ref}`TWaspClientFormHelper` variable.
-*)
+
   WaspClientForm: TWaspClientFormHelper;
