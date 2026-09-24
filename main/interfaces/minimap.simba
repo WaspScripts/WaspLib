@@ -1172,7 +1172,7 @@ So do have that in mind when writing your scripts.
 *)
 function TMinimap._GetDots(dot: EDot; img: TImage; offset: TPoint): TPointArray; static;
 const
-  COLORS: array [EClient] of array [EDot] of array [0..1] of TColor = [
+  COLORS: array of T2DIntegerArray = [
     //PLAYER              NPC                 ITEM
     [[$FEFEFE, $ECECEC], [$02FCFC, $00EDED], [$0606FC, $0000F1]], //UNKNOWN
     [[$FEFEFE, $ECECEC], [$02FCFC, $00EDED], [$0606FC, $0000F1]], //LEGACY
@@ -1180,23 +1180,25 @@ const
     [[$FEFEFE, $ECECEC], [$00F1FE, $00DFEC], [$0000FE, $0000EC]]  //OFFICIAL
   ];
 var
-  y,x: Integer;
-  color0, color1: TColor;
+  w, h: Integer;
+  color: TColor;
+  tpa: TPointArray;
+  pt: TPoint;
 begin
-  color0 := COLORS[Client.Typ][dot][0];
-  color1 := COLORS[Client.Typ][dot][1];
+  w := img.Width-2;
+  h := img.Height-2;
 
-  for y := 0 to img.Height-2 do
-    for x := 0 to img.Width-2 do
-    begin
-      if img.Pixel[x,y] <> color0 then
-        Continue;
-      if img.Pixel[x+1,y] <> color1 then
-        Continue;
-      //TODO: maybe confirm dot shadow or confirm other dots in range.
-      //Some dots are detected twice, especially players.
-      Result += [x + offset.X, y + offset.Y-1];
-    end;
+  tpa := img.FindColor(COLORS[Client.Typ][dot][0], 0, [0,1,w,h]);
+  color := COLORS[Client.Typ][dot][1];
+
+  for pt in tpa do
+  begin
+    if img.Pixel[pt.X+1, pt.Y] <> color then
+      Continue;
+    //TODO: maybe confirm dot shadow or confirm other dots in range.
+    //Some dots are detected twice, especially players.
+    Result += [pt.X + offset.X, pt.Y + offset.Y-1];
+  end;
 end;
 
 function TMinimap.GetDots(dot: EDot; bounds: TBox): TPointArray;
