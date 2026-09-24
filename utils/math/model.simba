@@ -405,18 +405,24 @@ end.
 ```{figure} ../../images/modelgetarea.png
 ```
 *)
-function TModel.GetArea(projection: TPointArray): TPointArray;
+function TModel.GetArea(constref projection: TPointArray): TPointArray;
 var
-  i, j: Integer;
+  i, j, n: Integer;
   polygon: TPolygon;
+  atpa: T2DPointArray;
 begin
+  n := Length(Self.Faces);
+  SetLength(atpa, n);
+  SetLength(polygon, 3);
+
   for i := High(Self.Faces) downto 0 do
   begin
     for j := 0 to 2 do
-      polygon += projection[Self.Faces[i].Vertices[j]];
-    Result += polygon.Connect().ShapeFill();
-    polygon := [];
+      polygon[j] := projection[Self.Faces[i].Vertices[j]];
+    atpa[n-1-i] := polygon.Connect().ShapeFill();
   end;
+
+  Result := atpa.Merge();
 end;
 
 (*
@@ -446,7 +452,7 @@ end.
 ```{figure} ../../images/modelgetedges.png
 ```
 *)
-function TModel.GetEdges(projection: TPointArray): TPointArray;
+function TModel.GetEdges(constref projection: TPointArray): TPointArray;
 begin
   Result := Self.GetArea(projection).Edges();
 end;
@@ -477,46 +483,53 @@ end.
 ```{figure} ../../images/modeldraw.png
 ```
 *)
-procedure TModel.DrawModel(img: TImage; projection: TPointArray; outline: Boolean = True);
+procedure TModel.DrawModel(img: TImage; constref projection: TPointArray; outline: Boolean = True);
 var
-  i, j: Integer;
+  i, j, n: Integer;
   polygon: TPolygon;
-  triangle, triangles, edge: TPointArray;
+  triangle, edge: TPointArray;
+  edges, tris: T2DPointArray;
 begin
+  n := Length(Self.Faces);
+  SetLength(edges, n);
+  SetLength(polygon, 3);
+
   if Self.Materials <> [] then
   begin
     for i := High(Self.Faces) downto 0 do
     begin
       for j := 0 to High(Self.Faces[i].Vertices) do
-        polygon += projection[Self.Faces[i].Vertices[j]];
+        polygon[j] := projection[Self.Faces[i].Vertices[j]];
       img.DrawAlpha := Self.Alphas[Self.Faces[i].Material];
       img.DrawColor := Self.Materials[Self.Faces[i].Material];
       img.DrawPolygonFilled(polygon);
-      edge += polygon.Connect().ShapeFill();
-      polygon := [];
+      edges[n-1-i] := polygon.Connect().ShapeFill();
     end;
     if outline then
     begin
+      edge := edges.Merge();
       img.DrawColor := $FFFFFF;
       img.DrawTPA(edge.Edges());
     end;
     Exit;
   end;
 
+  SetLength(tris, n);
+
   for i := High(Self.Faces) downto 0 do
   begin
     for j := 0 to High(Self.Faces[i].Vertices) do
-      polygon += projection[Self.Faces[i].Vertices[j]];
+      polygon[j] := projection[Self.Faces[i].Vertices[j]];
     triangle := polygon.Connect();
-    triangles += triangle;
-    edge += triangle.ShapeFill();
-    polygon := [];
+    tris[n-1-i] := triangle;
+    edges[n-1-i] := triangle.ShapeFill();
   end;
 
   img.DrawColor := $00FFFF;
-  img.DrawTPA(triangles);
+  img.DrawTPA(tris.Merge());
   if outline then
   begin
+    edge := edges.Merge();
     img.DrawColor := $FFFFFF;
     img.DrawTPA(edge.Edges());
   end;
