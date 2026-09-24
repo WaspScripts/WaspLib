@@ -81,17 +81,31 @@ begin
   Self.MinSpace := minSpace;
 end;
 
+(*
+## WebGraphGenerator.BuildGraph
+```pascal
+function TWebGraphGenerator.BuildGraph(name: String; map: TImage): TWebGraph;
+```
+Builds a {ref}`TWebGraph` out of the collision image `map`.
+
+```{note}
+Several steps read the collision image directly with `TImage.FindColor` and a
+bounds box instead of filtering a previously found `TPointArray`. Both return
+the very same points in the very same order but the first one only ever looks at
+the pixels inside the box while the second one walks the whole array, which for
+a full map is well over a million points per lookup.
+```
+*)
 function TWebGraphGenerator.BuildGraph(name: String; map: TImage): TWebGraph;
 var
-  white, gray, walls, tpa, nodes, tmp, subset: TPointArray;
-  i, hiY, hiX, size, y, x, start, n, mX, mY: Int32;
+  white, gray, tpa, nodes, means, subset: TPointArray;
+  i, hiY, hiX, size, y, x, start, n, j, len, count, area: Int32;
   t: UInt64;
   pt, adjacent: TPoint;
   wClusters, clusters: T2DPointArray;
-  matrix: TIntegerMatrix;
   kdtree: TKDTree;
   items, query: TKDItems;
-  itemA, itemB: TKDItem;
+  itemA: TKDItem;
   b: TBox;
 begin
   WriteLn GetDebugLn('WebGraphGenerator', 'Generating webgraph: ' + name + ' this can take a few seconds.');
@@ -100,31 +114,33 @@ begin
   if Self.Spacing mod 4 <> 0 then
     raise GetDebugLn('WebGraphGenerator', 'Spacing should be a multiple of 4.');
 
-  matrix := map.ToMatrix();
-
-  hiY := matrix.Height - 1 - Self.Spacing;
-  hiX := matrix.Width -1 - Self.Spacing;
+  hiY := map.Height - 1 - Self.Spacing;
+  hiX := map.Width  - 1 - Self.Spacing;
 
   size := Self.Spacing + (Self.Spacing div 2);
 
   for y := Self.Spacing to hiY with Self.Spacing do
     for x := Self.Spacing to hiX with Self.Spacing do
     begin
-      for mY := y to y+Self.Spacing-1 do
-        for mX := x to x+Self.Spacing-1 do
-          if matrix[mY, mX] = $FFFFFF then
-            tmp += Point(mX, mY);
-
-      if tmp = [] then
+      subset := map.FindColor($FFFFFF, 0, TBox.Create(x, y, x+Self.Spacing-1, y+Self.Spacing-1));
+      if subset = [] then
         Continue;
 
-      tpa += tmp.Cluster(1).Means();
-      tmp := [];
+      means := subset.Cluster(1).Means();
+
+      //grow `tpa` in chunks, appending to it directly reallocates on every cell
+      len := Length(means);
+      if count + len > Length(tpa) then
+        SetLength(tpa, Max(count + len, 2 * Length(tpa) + 256));
+
+      for j := 0 to len-1 do
+        tpa[count+j] := means[j];
+      count += len;
     end;
+  SetLength(tpa, count);
 
   white := map.FindColor($FFFFFF, 0);
   gray := map.FindColor($333333, 0);
-  walls := map.FindColor($0, 0) + map.FindColor($FF, 0);
   wClusters := white.Cluster(1).SortBySize(True).ExcludeSize(Self.MinSpace, EComparator.__LE__);
 
   for i := 0 to High(wClusters) do
@@ -137,11 +153,11 @@ begin
     Result.Nodes += nodes;
     SetLength(Result.Paths, Length(Result.Nodes));
 
-    items := [];
+    SetLength(items, Length(nodes));
     for n := start to High(Result.Nodes) do
     begin
       pt := Result.Nodes[n];
-      items += [n, [pt.X, pt.Y]];
+      items[n-start] := [n, [pt.X, pt.Y]];
     end;
     kdtree := TKDTree.Create(items);
 
@@ -157,16 +173,28 @@ begin
         Continue;
 
       pt := Point(Round(itemA.Vector[0]), Round(itemA.Vector[1]));
-      subset := wClusters[i].ExtractBox(Box(pt, size, size));
 
-      for itemB in query do
+      for j := 0 to High(query) do
       begin
-        adjacent := Point(Round(itemB.Vector[0]), Round(itemB.Vector[1]));
-        if subset.ExtractBox(Box(pt, adjacent)).AStar(pt, adjacent, False) = [] then
-          Continue;
+        adjacent := Point(Round(query[j].Vector[0]), Round(query[j].Vector[1]));
+        b := Box(pt, adjacent);
 
-        Result.Paths[itemA.Ref] += itemB.Ref;
-        Result.Paths[itemB.Ref] += itemA.Ref;
+        //white of other clusters can't help here, they are never 4-connected to
+        //this cluster, which is the connectivity both `Cluster(1)` and
+        //`AStar(..., False)` use, so reading the image is the same as filtering
+        //the cluster and it doesn't depend on the cluster's size.
+        subset := map.FindColor($FFFFFF, 0, b);
+        area := (b.X2 - b.X1 + 1) * (b.Y2 - b.Y1 + 1);
+
+        //a box that is entirely walkable always has an L shaped path in it, no
+        //need to search for one. `b` is the bounds of 2 nodes so it's always
+        //inside the image and `area` is never clipped.
+        if Length(subset) < area then
+          if subset.AStar(pt, adjacent, False) = [] then
+            Continue;
+
+        Result.Paths[itemA.Ref] += query[j].Ref;
+        Result.Paths[query[j].Ref] += itemA.Ref;
       end;
     end;
   end;
@@ -174,8 +202,8 @@ begin
   for i := 0 to High(wClusters) do
   begin
     b := wClusters[i].Bounds().Expand(80);
-    subset := gray.ExtractBox(b) + walls.ExtractBox(b);
-    tpa := wClusters[i] + subset;
+    tpa := wClusters[i] + map.FindColor($333333, 0, b) +
+           map.FindColor($0, 0, b) + map.FindColor($FF, 0, b);
     clusters := tpa.Cluster(1);
 
     for n := 0 to High(clusters) do
@@ -191,6 +219,7 @@ begin
 
   DebugLn('WebGraphGenerator', 'Generating webgraph took ' + ToStr(Round(((GetTimeRunning()-t)/1000), 2)) + ' seconds.', ELogLevel.SUCCESS);
 end;
+
 {$R+}
 
 (*
