@@ -1,7 +1,4 @@
-(*
-# SpellFinder
-Methods to find and compare spell images
-*)
+
 
 {$DEFINE WL_SPELLFINDER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -29,30 +26,13 @@ type
   end;
 
 const
-(*
-## SpellFinder constants
-The spell icons come straight from the game cache.
-Every spellbook is an enum listing one item per spell, and each of those items carries the spell's name and
-icons as params:
-- `SPELLBOOK_ENUMS` are the enums of the standard, ancient, lunar and arceuus spellbooks.
-- `JEWELLERY_ENCHANT_ENUM` is the standard spellbook's jewellery enchantment menu, with the
-  `Lvl-1` to `Lvl-7 Enchant` spells and its `Back` button.
-- `SPELL_NAME_PARAM` is the param holding the spell's name.
-- `SPELL_SPRITE_PARAMS` are the params holding the large and the small castable icon.
-*)
+
   SPELLBOOK_ENUMS: array [0..3] of Integer = [1982, 1983, 1984, 1985];
   JEWELLERY_ENCHANT_ENUM: Integer = 5285;
   SPELL_NAME_PARAM: Integer = 601;
   SPELL_SPRITE_PARAMS: array [0..1] of Integer = [599, 597];
 
-(*
-## ESpell.Spellbook
-```pascal
-function ESpell.Spellbook(): Integer;
-```
-Index of the spellbook `spell` belongs to in `SPELLBOOK_ENUMS`: `0` standard, `1` ancient,
-`2` lunar and `3` arceuus. `ESpell.UNKNOWN` gives `-1`.
-*)
+
 function ESpell.Spellbook(): Integer;
 begin
   case Self of
@@ -64,14 +44,7 @@ begin
   end;
 end;
 
-(*
-## ESpell.CacheName
-```pascal
-function ESpell.CacheName(): String;
-```
-The spell's name the way the game cache has it, lowercased and without apostrophes or dashes so
-`Fenkenstrain's` and `Lvl-1` compare to `FENKENSTRAINS` and `LVL1`.
-*)
+
 function ESpell.CacheName(): String;
 begin
   case Self of
@@ -98,18 +71,7 @@ begin
   Self.IsSetup := True;
 end;
 
-(*
-## SpellFinder.Resolve
-```pascal
-procedure TSpellFinder.Resolve();
-```
-Internal method that reads every spellbook enum out of the cache and fills `SpriteIDs` with the
-icons of each {ref}`ESpell`, matched by name within its own spellbook. The ape atoll teleports of
-the standard and arceuus spellbooks share a name, which is why the spellbook matters.
 
-A spell the cache no longer has, like the removed `BOUNTY_TELEPORT`, is left at `-1`.
-It runs once, the first time a spell image is needed.
-*)
 procedure TSpellFinder.Resolve();
 var
   book, i, j, id: Integer;
@@ -161,16 +123,7 @@ begin
   Self.IsResolved := True;
 end;
 
-(*
-## SpellFinder.GetImages
-```pascal
-function TSpellFinder.GetImages(spell: ESpell): array [0..1] of TImage;
-```
-The large and the small icon of `spell`, as the magic tab draws them when the spell can be cast.
-They are read from the game cache the first time they are asked for and kept in memory after that.
 
-A spell the cache has no icons for gives `nil` images, which {ref}`SpellFinder.Find` skips.
-*)
 function TSpellFinder.GetImages(spell: ESpell): array [0..1] of TImage;
 var
   i: Integer;

@@ -1,18 +1,10 @@
-(*
-# RSTranslator
-This file is responsible for conversions or internal game values to values
-that can be used by Simba and back.
-*)
+
 
 {$DEFINE WL_TRANSLATOR_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 type
-(*
-## TTranslator
-Record responsible for conversions or internal game values to values
-that can be used by Simba and back.
-*)
+
   TTranslator = record
     RSMap: record
       const ChunkSide: Int32 = 64;
@@ -24,54 +16,20 @@ that can be used by Simba and back.
     const MAP_CHUNK_SIZE: Int32 = 256;
   end;
 
-(*
-## RSTranslator.MapWidth
-```pascal
-property TTranslator.MapWidth: UInt32;
-```
-Returns the full width in pixels of the game map.
 
-Example:
-```pascal
-WriteLn RSTranslator.MapWidth;
-```
-*)
 property TTranslator.MapWidth: Int32;
 begin
   Result := Self.RSMap.Scope.Width * Self.MAP_CHUNK_SIZE;
 end;
 
-(*
-## RSTranslator.MapHeight
-```pascal
-property TTranslator.MapHeight: Int32;
-```
-Returns the full height in pixels of the game map.
 
-Example:
-```pascal
-WriteLn RSTranslator.MapHeight;
-```
-*)
 property TTranslator.MapHeight: Int32;
 begin
   Result := Self.RSMap.Scope.Height * Self.MAP_CHUNK_SIZE;
 end;
 
 
-(*
-## RSTranslator.Global2Chunk
-```pascal
-function TTranslator.Global2Chunk(pt: TPoint): TPoint;
-function TTranslator.Global2Chunk(b: TBox): TBox; overload;
-```
-Converts a "Global" coordinate to a chunk number.
 
-Example:
-```pascal
-WriteLn RSTranslator.Global2Chunk(Point(2000, 2000));
-```
-*)
 function TTranslator.Global2Chunk(pt: TPoint): TPoint;
 begin
   pt.X := pt.X mod Self.MapWidth;
@@ -89,19 +47,7 @@ begin
 end;
 
 
-(*
-## RSTranslator.Chunk2Coordinate
-```pascal
-function TTranslator.Chunk2Coordinate(p: TPoint): TPoint;
-function TTranslator.Chunk2Coordinate(b: TBox): TBox; overload;
-```
-Converts a "Chunk" number to the top left "Global" coordinate of that chunk.
 
-Example:
-```pascal
-WriteLn RSTranslator.Chunk2Coordinate(Point(53, 50));
-```
-*)
 function TTranslator.Chunk2Coordinate(pt: TPoint; plane: Int32 = 0): TPoint;
 begin
   Result.X := pt.X * Self.MAP_CHUNK_SIZE;
@@ -127,22 +73,7 @@ begin
 end;
 
 
-(*
-## TTranslator.GetChunks
-```pascal
-function TTranslator.GetChunks(lo, hi: TPoint): TPointArray; static;
-```
-Simple methods that will return all chunks in between a `lo` and `hi` chunks.
-This will also fix their order if required, as game chunks are oddly numbered
-from bottom to top on the Y axis.
 
-Example:
-```pascal
-WriteLn RSTranslator.GetChunks([20,20], [22,22]);
-//This will return:
-//[[20, 20], [20, 21], [20, 22], [21, 20], [21, 21], [21, 22], [22, 20], [22, 21], [22, 22]];
-```
-*)
 function TTranslator.GetChunks(lo, hi: TPoint): TPointArray; static;
 var
   y, x: Int32;
@@ -156,8 +87,5 @@ begin
 end;
 
 var
-(*
-## RSTranslator variable
-Global {ref}`TTranslator` variable.
-*)
+
   RSTranslator: TTranslator;
