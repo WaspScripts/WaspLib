@@ -1,27 +1,13 @@
-(*
-# FairyRing
-Methods to interact with the Fairy rings interface:
-```{figure} ../../images/fairyring.png
-```
-*)
+
 
 {$DEFINE WL_FAIRYRING_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EFairyRingDial
-```pascal
-EFairyRingDial = enum(LEFT, MIDDLE, RIGHT);
-```
-Enum representing the {ref}`FairyRing` dials available.
-*)
+
   EFairyRingDial = enum(LEFT, MIDDLE, RIGHT);
 
-(*
-## TFairyRing
-Record responsible with interacting with the {ref}`FairyRing`.
-*)
+
   TFairyRing = record
     Bounds: TBox;
     Title: TInterfaceTitle;
@@ -35,17 +21,7 @@ Record responsible with interacting with the {ref}`FairyRing`.
     FairyRings: TObjectArray;
   end;
 
-(*
-## FairyRing.Setup
-```pascal
-procedure FairyRing.Setup();
-```
-Initializes TFairyRing variables.
 
-```{note}
-This is automatically called on the `FairyRing` variable.
-```
-*)
 procedure TFairyRing.Setup();
 begin
   Self.Dials[EFairyRingDial.LEFT] := 'ADCB';
@@ -99,18 +75,7 @@ begin
 end;
 
 
-(*
-## FairyRing.IsOpen
-```pascal
-function TFairyRing.IsOpen(): Boolean;
-```
-Returns true/false whether the FairyRing interface is open or not.
 
-Example:
-```pascal
-WriteLn FairyRing.IsOpen();
-```
-*)
 function TFairyRing.IsOpen(): Boolean;
 begin
   Result := InRange(
@@ -120,18 +85,7 @@ begin
   );
 end;
 
-(*
-## FairyRing.WaitOpen
-```pascal
-function TFairyRing.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
-```
-Returns true if the fairy ring interface is open within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn FairyRing.WaitOpen();
-```
-*)
 function TFairyRing.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -139,22 +93,7 @@ begin
 end;
 
 
-(*
-## FairyRing.Close
-```pascal
-function TFairyRing.Close(escape: Boolean): Boolean;
-function TFairyRing.Close(escapeProbability: Double = BioHash): Boolean; overload;
-```
-Closes the {ref}`FairyRing` interface, depending on `escape` the function will either
-press escape or click the close button:
-```{figure} ../../images/fairyring_closebtn.png
-```
 
-Example:
-```pascal
-WriteLn FairyRing.Close();
-```
-*)
 function TFairyRing.Close(escape: Boolean): Boolean;
 begin
   Result := Self.Title.Close(escape);
@@ -166,20 +105,7 @@ begin
 end;
 
 
-(*
-## FairyRing.HandleItem
-```pascal
-function TFairyRing.HandleItem(): Boolean;
-```
-Magically finds, caches for next usages and equips dramen or lunar staff with the minimum tab opening possible.
-If no item is found, we will assume the user has the elite lumbridge and draynor diary complete for next uses.
 
-Example:
-```pascal
- if FairyRing.HandleItem() then
-WriteLn FairyRing.Item;
-```
-*)
 function TFairyRing.HandleItem(attempts: Int32 = 2): Boolean;
 begin
   Result := attempts = 2; //Todo...
@@ -187,18 +113,7 @@ end;
 
 
 
-(*
-## FairyRing.Open
-```pascal
-function TFairyRing.Open(cuboid: TCuboid): Boolean;
-```
-Attempts to open the closest fairy ring RSObject.
 
-Example:
-```pascal
- WriteLn FairyRing.Open();
-```
-*)
 function TFairyRing.Open(cuboid: TCuboid): Boolean;
 begin
   if MSInterface.IsOpen() and not MSInterface.Close() then
@@ -217,35 +132,13 @@ begin
   Result := SleepUntil(Self.IsOpen(), RandomMode(100, 50, 1500), 2000);
 end;
 
-(*
-## FairyRing.IsLetterValid
-```pascal
-function TFairyRing.IsLetterValid(letter: Char; dial: EFairyRingDial): Boolean;
-```
-Checks if the `letter` passed on is valid for the given `dial`.
 
-Example:
-```pascal
-WriteLn FairyRing.IsLetterValid('z', EFairyRingDial.LEFT);
-```
-*)
 function TFairyRing.IsLetterValid(letter: Char; dial: EFairyRingDial): Boolean;
 begin
   Result := Self.Dials[dial].Contains(letter);
 end;
 
-(*
-## FairyRing.IsCodeValid
-```pascal
-function TFairyRing.IsCodeValid(fairyCode: String): Boolean;
-```
-Checks if the a given `fairyCode` is a valid fairy ring code.
 
-Example:
-```pascal
-WriteLn FairyRing.IsCodeValid('abc');
-```
-*)
 function TFairyRing.IsCodeValid(fairyCode: String): Boolean;
 var
   i: Int32;
@@ -261,30 +154,7 @@ begin
 end;
 
 
-(*
-## FairyRing.Spin
-```pascal
-procedure TFairyRing.SpinLeft(dial: EFairyRingDial);
-procedure TFairyRing.SpinRight(dial: EFairyRingDial);
-```
-Spins the given `dial` left or right.
 
-Example:
-```pascal
-WriteLn FairyRing.SpinLeft(EFairyRingDial.LEFT);
-```
-
-If you want, you can see the left and right dial blick boxes with the following
-code:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(FairyRing.RotateLeftBoxes + FairyRing.RotateRightBoxes);
-end.
-```
-```{figure} ../../images/fairyring_dialspinboxes.png
-```
-*)
 procedure TFairyRing.SpinLeft(dial: EFairyRingDial);
 begin
   Mouse.Click(Self.RotateLeftBoxes[dial], EMouseButton.LEFT);
@@ -296,32 +166,7 @@ begin
 end;
 
 
-(*
-## FairyRing.Letter
-```pascal
-property TFairyRing.Letter(dial: EFairyRingDial): Char;
-property TFairyRing.Letter(character: Char; dial: EFairyRingDial): Boolean;
-```
-Returns or sets the letter of a fairy ring dial.
 
-Example:
-```pascal
-WriteLn FairyRing.Letter[EFairyRingDial.RIGHT];
-WriteLn FairyRing.Letter['p', EFairyRingDial.RIGHT];
-WriteLn FairyRing.Letter[EFairyRingDial.RIGHT];
-```
-
-The letter in question that will be read or set is the one that is in the dial
-"hole":
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(FairyRing.DialHoles);
-end.
-```
-```{figure} ../../images/fairyring_dialholes.png
-```
-*)
 property TFairyRing.Letter(dial: EFairyRingDial): Char;
 var
   count: integer;
@@ -407,21 +252,7 @@ begin
 end;
 
 
-(*
-## FairyRing.Code
-```pascal
-property TFairyRing.Code: String;
-property TFairyRing.Code(code: String): Boolean;
-```
-Returns the current fairy ring code or sets the new one in the dials.
 
-Example:
-```pascal
-WriteLn FairyRing.Code;
-WriteLn FairyRing.Code['DLP'];
-WriteLn FairyRing.Code;
-```
-*)
 property TFairyRing.Code: String;
 var
   dial: EFairyRingDial;
@@ -455,20 +286,7 @@ begin
   end;
 end;
 
-(*
-## FairyRing.ClickTeleport
-```pascal
-function TFairyRing.ClickTeleport(): Boolean;
-```
-Clicks the fairy ring the teleport button:
-```{figure} ../../images/fairyring_teleportbtn.png
-```
 
-Example:
-```pascal
-WriteLn FairyRing.ClickTeleport();
-```
-*)
 function TFairyRing.ClickTeleport(): Boolean;
 begin
   if not Self.IsOpen() then
@@ -477,39 +295,9 @@ begin
   Result := SleepUntil(not Self.IsOpen(), 300, 3000);
 end;
 
-(*
-## FairyRing TravelLog
-This next section is about the fairy ring travel log {ref}`GameTab` menu:
-```{figure} ../../images/fairyring_travellog.png
-```
-*)
 
-(*
-### FairyRing.GetLogCodes
-```pascal
-function TFairyRing.GetLogCodes(out boxes: TBoxArray): TStringArray;
-function TFairyRing.GetLogCodes(): TStringArray; overload;
-```
-Returns the visible codes in the fairy ring travel log.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  logs: TStringArray;
-  boxes: TBoxArray;
-begin
-  logs := FairyRing.GetLogCodes(boxes);
-  if logs <> [] then
-  begin
-    WriteLn logs;
-    ShowOnTarget(boxes);
-  end;
-end.
-```
-```{figure} ../../images/fairyring_logs.png
-```
-*)
+
 function TFairyRing.GetLogCodes(out boxes: TBoxArray): TStringArray;
 var
   tpa: TPointArray;
@@ -546,28 +334,7 @@ begin
 end;
 
 
-(*
-### FairyRing.FindLogCode
-```pascal
-function TFairyRing.FindLogCode(code: String; out b: TBox): Boolean;
-function TFairyRing.FindLogCode(code: String): Boolean; overload;
-```
-Finds the code specified in the travel log. Codes casing is ignored.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  b: TBox;
-begin
-  if FairyRing.FindLogCode('ALQ', b) then
-    ShowOnTarget(b);
-end.
-```
-```{figure} ../../images/fairyring_findlog.png
-```
-*)
 function TFairyRing.FindLogCode(fairyCode: String; out bounds: TBox): Boolean;
   function _DoScrolling(fairyCode: String; direction: Boolean; out bounds: TBox): Boolean;
   var
@@ -627,19 +394,7 @@ begin
 end;
 
 
-(*
-### FairyRing.ClickLogCode
-```pascal
-function TFairyRing.ClickLogCode(fairyCode: String): Boolean;
-```
-Finds and clicks the `fairyCode` specified in the travel log.
-Codes casing is ignored.
 
-Example:
-```pascal
-WriteLn FairyRing.ClickLogCode('cip');
-```
-*)
 function TFairyRing.ClickLogCode(fairyCode: String): Boolean;
 var
   b: TBox;
@@ -656,19 +411,7 @@ begin
 end;
 
 
-(*
-## FairyRing.HandleInterface
-```pascal
-function TFairyRing.HandleInterface(code: String): Boolean;
-```
-Completely handles the fairy ring interface to set a code and teleport.
-Will use both the log and the dials depending on the user biohash.
 
-Example:
-```pascal
-WriteLn FairyRing.HandleInterface('cip');
-```
-*)
 function TFairyRing.HandleInterface(fairyCode: String): Boolean;
 begin
   if Biometrics.RandomBoolean(0.6) then  //use travel log or dial code...
@@ -688,22 +431,7 @@ begin
   Self.FairyRings := TObjectArray.Create(Map.Walker, MapObjects.GetByName('Fairy ring'));
 end;
 
-(*
-## FairyRing.Teleport
-```pascal
-function TFairyRing.Teleport(fairyCode: String; obj: TObject; walk: Boolean = True): Boolean;
-function TFairyRing.Teleport(fairyCode: String; walk: Boolean = True): Boolean; overload;
-```
-Teleports the user to the specified fairy ring code.
-If the fairy ring interface is not open, the `RSObject` will be used to find the closest one and open it.
-If the code is on the right click context menu, it will be used.
-You can also optional pass in "Zanaris" or "BKS" to go to zanaris.
 
-Example:
-```pascal
-WriteLn FairyRing.Teleport('cip');
-```
-*)
 function TFairyRing.Teleport(fairyCode: String; obj: TObject; walk: Boolean = True): Boolean;
 var
   hover: function(action: TStringArray = []; attempts: Integer = 2): Boolean of object;
@@ -763,8 +491,5 @@ begin
 end;
 
 var
-(*
-## FairyRing variable
-Global {ref}`TFairyRing` variable.
-*)
+
   FairyRing: TFairyRing;
