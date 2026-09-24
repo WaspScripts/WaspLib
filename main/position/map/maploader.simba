@@ -176,11 +176,8 @@ For points in bulk from the same region specifying it is better as you save Simb
 The specified `pt` is returned unmodified if not region index matching the point is found.
 *)
 function TMapLoader.GetGlobal(regionIdx: Integer; pt: TPoint; offset: TPoint = [0,0]): TPoint;
-var
-  reg: TMapRegion;
 begin
-  reg := Self.Regions[regionIdx];
-  Result := pt + reg.Offset - [reg.Region.X1, reg.Region.Y1] + offset;
+  Result := pt + Self.Regions[regionIdx].Offset - Self.Regions[regionIdx].Region.TopLeft + offset;
 end;
 
 function TMapLoader.GetGlobal(pt: TPoint; offset: TPoint = [0,0]): TPoint; overload;
@@ -195,7 +192,7 @@ end;
 function TMapLoader.GetGlobal(tpa: TPointArray; offset: TPoint = [0,0]): TPointArray; overload;
 var
   i: Integer;
-  reg: TMapRegion;
+  delta: TPoint;
 begin
   if tpa.IsEmpty then
     Exit;
@@ -203,10 +200,10 @@ begin
   if i = -1 then
     Exit(tpa);
 
-  reg := Self.Regions[i];
+  delta := Self.Regions[i].Offset - Self.Regions[i].Region.TopLeft + offset;
   SetLength(Result, Length(tpa));
   for i := 0 to High(tpa) do
-    Result[i] := tpa[i] + reg.Offset - [reg.Region.X1, reg.Region.Y1] + offset;
+    Result[i] := tpa[i] + delta;
 end;
 
 
@@ -250,10 +247,11 @@ end;
 
 function TMapLoader.GetLocal(tpa: TPointArray; offset: TPoint = [0,0]): TPointArray; overload;
 var
-  pt: TPoint;
+  i: Integer;
 begin
-  for pt in tpa do
-    Result += Self.GetLocal(pt, offset);
+  SetLength(Result, Length(tpa));
+  for i := 0 to High(tpa) do
+    Result[i] := Self.GetLocal(tpa[i], offset);
 end;
 
 
