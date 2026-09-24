@@ -239,7 +239,7 @@ end;
 
 function TMainScreen.Filter(const tpa: TPointArray): TPointArray; override;
 var
-  i: Integer;
+  i, count: Integer;
   tabNone, xpbarClosed, chatClosed, msInterfaceClosed: Boolean;
 begin
   tabNone := GameTabs.GetCurrent() = EGameTab.NONE;
@@ -255,9 +255,14 @@ begin
       Self._ApplyResizableMasks();
   end;
 
+  SetLength(Result, Length(tpa));
   for i := 0 to High(tpa) do
     if Self._Contains(tpa[i], tabNone, xpbarClosed, chatClosed, msInterfaceClosed) then
-      Result += tpa[i];
+    begin
+      Result[count] := tpa[i];
+      Inc(count);
+    end;
+  SetLength(Result, count);
 end;
 {$R+}
 

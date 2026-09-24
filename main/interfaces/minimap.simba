@@ -52,7 +52,7 @@ Main record used to interact with the {ref}`Minimap`.
     Bounds, _PolyBounds: TBox;
     Center: TPoint;
     Radius: Integer;
-    Polygon: TPolygon;
+    Polygon, _InnerPolygon: TPolygon;
 
     Compass: record
       Circle: TCircle;
@@ -158,6 +158,7 @@ begin
 
   Self.Center := Self.Bounds.Center;
   Self.Polygon := tpa.Offset(Self.Center);
+  Self._InnerPolygon := Self.Polygon.Expand(-1);
   Self._PolyBounds := Self.Polygon.Bounds();
   MainScreen.Mask.DrawPolygonFilled(Self.Polygon.Expand(9));
   MainScreen.Mask.DrawCircleFilled(Self.Center.Offset(63,56), 14);

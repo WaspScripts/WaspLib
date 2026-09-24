@@ -184,15 +184,12 @@ begin
 end;
 
 function TWalker.FilterToMM(me: TPoint; const dotFilter: TDotFilter; radians: Single): TDotFilter; static;
-var
-  pt: TPoint;
 begin
   if dotFilter.Circle <> Default(TCircle) then
     with TWalker.Point2MM(me, dotFilter.Circle.Center, radians) do
       Result.Circle := [X, Y, dotFilter.Circle.Radius];
 
-  for pt in TWalker.Points2MM(me, dotFilter.Poly, radians) do
-    Result.Poly += pt;
+  Result.Poly := TWalker.Points2MM(me, dotFilter.Poly, radians);
   Result.Inside  := dotFilter.Inside;
   Result.Timeout := dotFilter.Timeout;
   Result.Timer   := dotFilter.Timer;
@@ -265,7 +262,7 @@ function TWalker.GetCuboidMS(me, mapPoint: TPoint; size: TVector3; radians: Sing
 var
   vector: TVector2;
   corners: TVector3Array;
-  h: Single;
+  h, h0, h1, h2, h3: Single;
   pt, currLoc: TPoint;
   arr: TPointArray;
 begin
@@ -284,16 +281,21 @@ begin
   size.X := size.X*2;
   size.Y := size.Y*2;
 
-  corners := [
-    [vector.X-size.X, vector.Y-size.Y, Self.Height(currLoc + [-1,-1], False) - h],
-    [vector.X+size.X, vector.Y-size.Y, Self.Height(currLoc + [1,-1],  False) - h],
-    [vector.X+size.X, vector.Y+size.Y, Self.Height(currLoc + [1,1],   False) - h],
-    [vector.X-size.X, vector.Y+size.Y, Self.Height(currLoc + [-1,1],  False) - h],
+  h0 := Self.Height(currLoc + [-1,-1], False) - h;
+  h1 := Self.Height(currLoc + [1,-1],  False) - h;
+  h2 := Self.Height(currLoc + [1,1],   False) - h;
+  h3 := Self.Height(currLoc + [-1,1],  False) - h;
 
-    [vector.X-size.X, vector.Y-size.Y, Self.Height(currLoc + [-1,-1], False) - h + size.Z],
-    [vector.X+size.X, vector.Y-size.Y, Self.Height(currLoc + [1,-1],  False) - h + size.Z],
-    [vector.X+size.X, vector.Y+size.Y, Self.Height(currLoc + [1,1],   False) - h + size.Z],
-    [vector.X-size.X, vector.Y+size.Y, Self.Height(currLoc + [-1,1],  False) - h + size.Z]
+  corners := [
+    [vector.X-size.X, vector.Y-size.Y, h0],
+    [vector.X+size.X, vector.Y-size.Y, h1],
+    [vector.X+size.X, vector.Y+size.Y, h2],
+    [vector.X-size.X, vector.Y+size.Y, h3],
+
+    [vector.X-size.X, vector.Y-size.Y, h0 + size.Z],
+    [vector.X+size.X, vector.Y-size.Y, h1 + size.Z],
+    [vector.X+size.X, vector.Y+size.Y, h2 + size.Z],
+    [vector.X-size.X, vector.Y+size.Y, h3 + size.Z]
   ];
 
   arr := Projection.Run(corners, radians);
@@ -686,7 +688,7 @@ var
 begin
   mmPoint := Self.Point2MM(me, mapPoint, radians);
   if not Self.ScreenWalk then
-    Exit(Minimap.Polygon.Expand(-1).Contains(mmPoint));
+    Exit(Minimap._InnerPolygon.Contains(mmPoint));
 
   tile := Self.GetQuadMS(me, mapPoint, [0.9,0.9], radians).Corners.Connect().ShapeFill();
   count := Length(tile);
