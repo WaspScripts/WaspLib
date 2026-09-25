@@ -10,21 +10,9 @@ tab and allows a user to select prayers to be used.
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TPrayerForm
-The `TPrayerForm` type contains all of the components to build the button and
-form used for prayer selection settings.
-*)
-  TPrayerForm = record
-    OpenFormButton: TLazButton;
-    SelectedPrayers, AllowedPrayers: TPrayerSet;
-    Form: TLazForm;
-    PrayerImages: array of TLazImage;
-    const BACKGROUND_IMAGE = 'IMG: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';
-    const SAVE_IMAGE = 'IMG:AQAAAIwAAAAbAAAAAAAAAGjrGgoAAAAAQjg4AAEAAACw/C4HAAAAAEAkMQwAAAAAME9oAAEAAAAQR6gKAAAAADD8pAYAAAAAPaEAAAEAAAAw/KQGAAAAANmROAABAAAAAAAAAAAAAAAQ9FkLAAAAAGjrGgoAAAAAQpM4AAEAAABAJDEMAAAAADBPaAABiVBORw0KGgoAAAANSUhEUgAAAIwAAAAbCAIAAAAhwfCSAAAETUlEQVR4nO2av2rcQBDG9TDpQqp0xrg4cJGYLSy4woE0Jk+Q9wdn8Bf9/GlWd+xpZVvFicWM1vPNaOe/bA33t98fDjfx89vXL9e1qxVO0RqgYvfvn8fr2slacJJcF797+nUs5Ues+/vDOJYgfgb5Sh+Pj0E4Hb8Vj/aDUztON6J6NO4B63DoBAxRMo7TbjTJCRfISfhpILnkQDHpydAXxPPz79hMtG4lmuU7jagejTvBLh6fHUkI/hCoW6dxUmwqSUgmrcGrXLAqdvQQKUwUDom+u7uNBQ8hJroR1aNxJ9j67KJB1QLhkYfkHmVYLK97/53kWSkmnoCo8QjyMNGtUCniGlE9GveD9bzhtzK6G4SGAo2HhPIiOXOStsLnriCQmF5SFCNOQ5CFOknNeQbVo3EnWHhkAaQ5UMyJFqc7KTaVfMqnNycFEx4qU0tUKJHX9ZECsliXy7Uz2fgQDGGo2hnUN6UU6YifmCByJumZKLVB4BI9q9O6lYOvnWmxM8l6spUmBd1CY2FlhfZPZpLAdUdhHwWe7ygo1vSUYdCLQaQoc1QqO9pJ2JfpWoHt0TtODVvW59RUM9GS4IO1o2oDYvC6+Ul7Hhw8T4kpPwOJCZ009Z9BQNWQxI+HhmEQcRG2Ry9Vq1jbqKO5tM0aNBEPgmKvSi55wUnKX+979CRc5TSxOb7/jIeH4opbiBbsJjPeJvMRD+AzHpGBZGpm7knuapKJiqn2KP9Bi/DH6jxDXXycX36qsS92gSXbACY5uvzU49m6vcl8lAw4znuSn32c3pbenMTrEWZCx3H6GwlegaayUROQ4NLGadQhinm+S7FYNjlDiSVa8tn3LDzF31K3N5mPFi2Jnb0FSu/MSV6s5STKFNHBC4EXcbnTgWSe06niw7ACS8aAfZlfckbKGHklUNxCN9bt83nWPh8lY2JkzO6heXJwIISlgFa02JMIPXTTGJ2mzmrK9MlqBdYHhzozgtBbRHKSZNYebazbm8xHqSeJAOX237gnhUV4Si9laYbxVy6eex0W+5IuKUs4iLswlUGuxrq9yXz0OT3J8xQUpQzaTV+mwfciLNmTytdiuWNq8nRBYOJvrNubzEef05N8+GHIUbF2mqgkxAirdmxqMGDjkYb5Vewvm9oJUSFQ+0E7c2PdPp9njfPRB/Wk1J+Q7gFCL2lE9WjsxzbW7a3mI+8pF/ck75CrZ7Zx+lOeB9GKk3zAlAhDY7RtVdV5WkoomYc0KkHOpKfXedGduWLuooIRJi2oHo39WIyVUh+jewZ0VvXFKsqYzlnoajMnaXHOi1p66p8o6wm3HWLPu5As9GxOjk+FyocFmPFZ/s9s+sZhvLylEzhlPrO+3xCxN6wXfEyRgGl4EV3sv+HwL3zj4F8LeYln9ig2cjg92qyS3t1I2BZUj8adYL1ZlOnFlmqGkEUVtEmM718LPRxuBr4bun53t6t18uPI69rV4uPif2O06OaVRlEHAAAAAElFTkSuQmCC';
-    const BACKGROUND_COLOR = $333C45;
-    const HIGHLIGHT_COLOR = $6DB3CE;
-  end;
+  EPrayerGroup = (
+    NONE, ATTACK, STRENGTH, DEFENCE, RANGED, MAGIC, COMBO, OVERHEAD
+  );
 
 (*
 ## EPrayer.GetInterfering
@@ -40,11 +28,6 @@ WriteLn EPrayer.PIETY.GetInterfering();
 ```
 *)
 function EPrayer.GetInterfering(): TPrayerSet;
-{$SCOPEDENUMS OFF}
-type
-  EPrayerGroup = (
-    pgNone, pgAttack, pgStrength, pgDefence, pgRanged, pgMagic, pgCombo, pgOverhead
-  );
 const
   PRAYER_GROUPS: array[EPrayerGroup] of TPrayerSet = [
     [EPrayer.RAPID_HEAL, EPrayer.RAPID_RESTORE],
@@ -59,338 +42,42 @@ const
 var
   group: EPrayerGroup;
 begin
-  if Self in PRAYER_GROUPS[pgNone] then
+  if Self in PRAYER_GROUPS[EPrayerGroup.NONE] then
     Exit;
 
-  for group := pgAttack to pgOverhead do
+  for group := EPrayerGroup.ATTACK to EPrayerGroup.OVERHEAD do
     if Self in PRAYER_GROUPS[group] then
       Break;
 
-  if group > pgOverhead then
+  if group > EPrayerGroup.OVERHEAD then
     Exit;
 
   case group of
-    pgAttack:   Result += PRAYER_GROUPS[pgRanged]
-                       +  PRAYER_GROUPS[pgMagic]
-                       +  PRAYER_GROUPS[pgCombo];
-    pgStrength: Result += PRAYER_GROUPS[pgRanged]
-                       +  PRAYER_GROUPS[pgMagic]
-                       +  PRAYER_GROUPS[pgCombo];
-    pgDefence:  Result += PRAYER_GROUPS[pgCombo];
-    pgRanged:   Result += PRAYER_GROUPS[pgAttack]
-                       +  PRAYER_GROUPS[pgStrength]
-                       +  PRAYER_GROUPS[pgMagic]
-                       +  PRAYER_GROUPS[pgCombo];
-    pgMagic:    Result += PRAYER_GROUPS[pgAttack]
-                       +  PRAYER_GROUPS[pgStrength]
-                       +  PRAYER_GROUPS[pgRanged]
-                       +  PRAYER_GROUPS[pgCombo];
-    pgCombo:    Result += PRAYER_GROUPS[pgAttack]
-                       +  PRAYER_GROUPS[pgStrength]
-                       +  PRAYER_GROUPS[pgDefence]
-                       +  PRAYER_GROUPS[pgRanged]
-                       +  PRAYER_GROUPS[pgMagic];
+    EPrayerGroup.ATTACK:   Result += PRAYER_GROUPS[EPrayerGroup.RANGED] +
+                                     PRAYER_GROUPS[EPrayerGroup.MAGIC] +
+                                     PRAYER_GROUPS[EPrayerGroup.COMBO];
+    EPrayerGroup.STRENGTH: Result += PRAYER_GROUPS[EPrayerGroup.RANGED] +
+                                     PRAYER_GROUPS[EPrayerGroup.MAGIC] +
+                                     PRAYER_GROUPS[EPrayerGroup.COMBO];
+    EPrayerGroup.DEFENCE:  Result += PRAYER_GROUPS[EPrayerGroup.COMBO];
+    EPrayerGroup.RANGED:   Result += PRAYER_GROUPS[EPrayerGroup.ATTACK] +
+                                     PRAYER_GROUPS[EPrayerGroup.STRENGTH] +
+                                     PRAYER_GROUPS[EPrayerGroup.MAGIC] +
+                                     PRAYER_GROUPS[EPrayerGroup.COMBO];
+    EPrayerGroup.MAGIC:    Result += PRAYER_GROUPS[EPrayerGroup.ATTACK] +
+                                     PRAYER_GROUPS[EPrayerGroup.STRENGTH] +
+                                     PRAYER_GROUPS[EPrayerGroup.RANGED] +
+                                     PRAYER_GROUPS[EPrayerGroup.COMBO];
+    EPrayerGroup.COMBO:    Result += PRAYER_GROUPS[EPrayerGroup.ATTACK] +
+                                     PRAYER_GROUPS[EPrayerGroup.STRENGTH] +
+                                     PRAYER_GROUPS[EPrayerGroup.DEFENCE] +
+                                     PRAYER_GROUPS[EPrayerGroup.RANGED] +
+                                     PRAYER_GROUPS[EPrayerGroup.MAGIC];
   end;
 
   Result += PRAYER_GROUPS[group];
-  {$SCOPEDENUMS ON}
 end;
 
-procedure TPrayerForm._DrawPrayerCircle(p: EPrayer; color: TColor);
-var
-  img: TImage;
-  sprite: TPointArray;
-  highlight: TPointArray;
-begin
-  img := new TImage();
-  img.FromLazBitmap(Self.PrayerImages[p].Picture.Bitmap);
-  sprite := img.FindColor(TPrayerForm.BACKGROUND_COLOR, 0)
-    + img.FindColor(TPrayerForm.HIGHLIGHT_COLOR, 0);
-  sprite := sprite.Invert([0,0,img.Width-1, img.Height-1]);
-
-  highlight := TPointArray.CreateFromCircle([img.Width div 2, img.Height div 2], img.Width div 2, True);
-  highlight := highlight.Difference(sprite);
-
-  img.DrawColor := color;
-  img.DrawTPA(highlight);
-
-  Self.PrayerImages[p].Picture.Bitmap := img.ToLazBitmap();
-end;
-
-procedure TPrayerForm._UpdateHint();
-var
-  hint: String;
-  prayer: EPrayer;
-begin
-  for prayer in Self.SelectedPrayers do
-    hint += ToString(prayer).After('.').ToLower().Capitalize().Replace('_', ' ') + ', ';
-
-  if hint.Length > 2 then
-    SetLength(hint, hint.Length - 2);
-  Self.OpenFormButton.Hint := hint;
-end;
-
-procedure TPrayerForm._Select(prayer: EPrayer);
-begin
-  if not (prayer in Self.AllowedPrayers) then
-    Exit;
-  Self._DrawPrayerCircle(prayer, TPrayerForm.HIGHLIGHT_COLOR);
-  Self.SelectedPrayers += prayer;
-  Self._UpdateHint();
-end;
-
-procedure TPrayerForm._Deselect(prayer: EPrayer);
-begin
-  Self._DrawPrayerCircle(prayer, TPrayerForm.BACKGROUND_COLOR);
-  Self.SelectedPrayers := Self.SelectedPrayers - [prayer];
-  Self._UpdateHint();
-end;
-
-procedure TPrayerForm._OnPrayerClick(sender: TLazObject);
-var
-  prayerClicked, prayer: EPrayer;
-begin
-  prayerClicked :=  EPrayer(Self.PrayerImages.IndexOf(TLazImage(sender)));
-
-  if prayerClicked in Self.SelectedPrayers then
-    Self._Deselect(prayerClicked)
-  else
-  begin
-    for prayer in prayerClicked.GetInterfering() do
-      Self._Deselect(prayer);
-    Self._Select(prayerClicked);
-  end;
-end;
-
-{$H-}
-procedure TPrayerForm._OnOpenFormButtonClick(sender: TLazObject);
-begin
-  Self.Form.Show();
-  Self.Form.BringToFront();
-end;
-
-procedure TPrayerForm._OnSaveButtonClick(sender: TLazObject);
-begin
-  Self.Form.Hide();
-end;
-{$H+}
-
-(*
-## TPrayerForm.Selected
-```pascal
-property TPrayerForm.Selected(prayers: TPrayerSet);
-property TPrayerForm.Selected: TPrayerSet;
-```
-Get/Set the defined prayers as a set of selected prayers.
-
-Useful for saving user settings between sessions.
-
-Selected prayers from a previous session could be saved and then reset on the
-next session by setting them with the procedure upon building the form.
-
-Getting example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  form: TScriptForm;
-  tab: TTabSheet;
-  prayerForm: TPrayerForm;
-
-begin
-  form.Setup('Script settings');
-  tab := TLazTabSheet.Create(form.PageControl);
-  prayerForm.Setup(tab, 50, 50);
-  prayerForm.SetAllowedPrayers([EPrayer.EAGLE_EYE, EPrayer.RIGOUR]);
-  form.Run();
-  WriteLn(prayerForm.Selected);
-end.
-```
-
-Setting example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  prayerForm: TPrayerForm;
-  config: TJSONParser;
-  savedPrayers: TJSONItem;
-  i: Integer;
-  selected: TPrayerSet;
-begin
-  ...
-  config := new TJSONParser();
-  config.Load('my_script_config.json');
-  if config.GetArray('prayers', savedPrayers) then
-    for i := 0 to savedPrayers.Count - 1 do
-      selected += EPrayer(savedPrayers.Item[i].AsInt);
-
-  prayerForm.SetSelected(selected);
-end;
-```
-*)
-property TPrayerForm.Selected(prayers: TPrayerSet);
-var
-  prayer: EPrayer;
-begin
-
-  for prayer in EPrayer do
-    Self._Deselect(prayer);
-
-  for prayer in prayers do
-   Self._Select(prayer);
-end;
-
-property TPrayerForm.Selected: TPrayerSet;
-begin
-  Result := Self.SelectedPrayers;
-end;
-
-(*
-## TPrayerForm SetAllowedPrayers
-```pascal
-procedure TPrayerForm.SetAllowedPrayers(prayers: TPrayerSet);
-```
-Set's the defined prayers as the only selectable prayers. Prayers that
-arent defined here will be greyed out and unselectable. Use to narrow
-the selection for example, selections for offensive range prayer.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  form: TScriptForm;
-  tab: TTabSheet;
-  prayerForm: TPrayerForm;
-
-begin
-  form.Setup('Script settings');
-  tab := TLazTabSheet.Create(form.PageControl);
-  prayerForm.Setup(tab, 50, 50);
-  prayerForm.SetAllowedPrayers([EPrayer.EAGLE_EYE, EPrayer.RIGOUR]);
-  form.Run();
-end.
-```
-*)
-procedure TPrayerForm.SetAllowedPrayers(prayers: TPrayerSet);
-  function Blend(bg, fg: TColor; a: Byte): TColor;
-  begin
-    Result := ((fg shr 16 * a + bg shr 16 * (255 - a)) div 255 and $FF) shl 16 +
-      ((fg shr 8 and $FF * a + bg shr 8 and $FF * (255 - a)) div 255 and $FF) shl 8 +
-      ((fg and $FF * a + bg and $FF * (255 - a)) div 255 and $FF);
-  end;
-
-var
-  prayer: EPrayer;
-  img: TImage;
-  sprite: TPointArray;
-  p: TPoint;
-begin
-  for prayer in EPrayer do
-  begin
-    if (not (prayer in prayers)) and (prayer in Self.Selected) then
-      Self._Deselect(prayer);
-
-    img := new TImage();
-    writeln prayer;
-    img.FromLazBitmap(Self.PrayerImages[prayer].Picture.Bitmap);
-    sprite := img.FindColor(TPrayerForm.BACKGROUND_COLOR, 0).Invert([0, 0, img.Width-1, img.Height-1]);
-    if not (prayer in prayers) then
-      for p in sprite do
-        img.Pixel[p.X, p.Y] := Blend(0, img.Pixel[p.X, p.Y], 64);
-    Self.PrayerImages[prayer].Picture.Bitmap := img.ToLazBitmap();
-  end;
-
-  Self.AllowedPrayers := prayers;
-end;
-
-(*
-## TPrayerForm Setup
-```pascal
-procedure TPrayerForm.Setup(buttonParent: Pointer; buttonLeft, buttonTop: Integer);
-```
-Setup the prayer form and add the select button to the defined parent
-at the defined position.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  form: TScriptForm;
-  tab: TTabSheet;
-  prayerForm: TPrayerForm;
-begin
-  form.Setup('Script settings');
-  tab := TLazTabSheet.Create(form.PageControl);
-  prayerForm.Setup(tab, 50, 50)
-  form.Run();
-end;
-```
-*)
-procedure TPrayerForm.Setup(parent: Pointer; buttonLeft, buttonTop: Integer);
-var
-  I, extra: Integer;
-  img, icon: TImage;
-  backgroundImage: TImage;
-  background: TLazImage;
-  saveButton: TLazSpeedButton;
-begin
-  img := new TImage();
-  img.FromString(TPrayerForm.BACKGROUND_IMAGE);
-
-  //the background fits 6 rows of prayers, stretch its plain middle for any extra rows
-  extra := Max(0, (Length(EPrayer) + 4) div 5 - 6) * (33 + 4);
-  backgroundImage := new TImage(img.Width, img.Height + extra);
-  backgroundImage.DrawImage(img, [0, extra]);
-  backgroundImage.DrawImage(img.Copy([0, 0, img.Width - 1, img.Height div 2]), [0, 0]);
-
-  Self.Form := TLazForm.Create(TLazComponent(parent));
-  Self.Form.SetBounds(0, 0, backgroundImage.Width, backgroundImage.Height);
-  with Self.Form.Constraints do
-  begin
-    MinWidth := Self.Form.Width;
-    MaxWidth := MinWidth;
-    MinHeight := Self.Form.Height;
-    MaxHeight := MinHeight;
-  end;
-  Self.Form.Position := ELazFormPosition.OwnerFormCenter;
-
-  background := TLazImage.Create(Self.Form);
-  background.SetBounds(0, 0, backgroundImage.Width, backgroundImage.Height);
-  background.Picture.Bitmap := backgroundImage.ToLazBitmap();
-  background.Parent := Self.Form;
-
-  SetLength(Self.PrayerImages, Length(EPrayer));
-  for i := 0 to Ord(High(EPrayer)) do
-  begin
-    img := new TImage(33, 33);
-    img.Fill(TPrayerForm.BACKGROUND_COLOR);
-    icon := PrayerFinder.GetImage(EPrayer(i));
-    if icon <> nil then
-      img.DrawImage(icon, [(img.Width - icon.Width) div 2, (img.Height - icon.Height) div 2]);
-    Self.PrayerImages[i] := TLazImage.Create(Self.Form);
-    Self.PrayerImages[i].Picture.Bitmap := img.ToLazBitmap();
-    Self.PrayerImages[i].Top := 9 + ((i div 5) * (33 + 4));
-    Self.PrayerImages[i].Left := 7 + ((i mod 5) * (33 + 4));
-    Self.PrayerImages[i].Parent := Self.Form;
-    Self.PrayerImages[i].OnClick := @Self._OnPrayerClick;
-  end;
-
-  img := new TImage();
-  img.FromString(TPrayerForm.SAVE_IMAGE);
-  saveButton := TLazSpeedButton.Create(Self.Form);
-  saveButton.Parent := Self.Form;
-  saveButton.SetBounds(Self.Form.Width div 2 - img.Width div 2, 230 + extra, img.Width, img.Height);
-  saveButton.Glyph := img.ToLazBitmap();
-  saveButton.OnClick := @Self._OnSaveButtonClick;
-
-  Self.OpenFormButton := TLazButton.CreateEx(parent, 'Select prayers', 'Select prayers', buttonLeft, buttonTop, 100, 25);
-  Self.OpenFormButton.OnClick := @Self._OnOpenFormButtonClick;
-
-  Self.AllowedPrayers := [Low(EPrayer)..High(EPrayer)];
-end;
 
 type
 (*
@@ -456,8 +143,7 @@ var
 begin
   Self.Config.Setup('prayerlayouts' + PATH_SEP + ToStr(ProfileIndex));
   SetLength(Self.Layouts, Self.Config.Data.Count);
-
-  Self.BackgroundImg := new TImage(WLEnv.AssetsDir + 'images' + PATH_SEP + 'gametab.png');
+  Self.BackgroundImg := FormUtils.GetGameTabImage().Copy();
 
   //laid out like the prayer tab, 5 prayers per row and centered on the background
   rows := (Length(EPrayer) + 4) div 5;
@@ -540,7 +226,7 @@ begin
 
     if prayer in Self.Layout.Prayers then
     begin
-      Result.DrawColor := TPrayerForm.HIGHLIGHT_COLOR;
+      Result.DrawColor := $6DB3CE;
       Result.DrawAlpha := $7D;
       Result.DrawTPA(TPointArray.CreateFromCircle(box.Center, box.Width div 2, True));
       Result.DrawAlpha := $FF;

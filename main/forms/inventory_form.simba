@@ -57,7 +57,7 @@ begin
   Self.Config.Setup('inventorylayouts' + PATH_SEP + ToStr(ProfileIndex));
   SetLength(Self.Layouts, Self.Config.Data.Count);
 
-  Self.BackgroundImg := new TImage(WLEnv.AssetsDir + 'images' + PATH_SEP + 'gametab.png');
+  Self.BackgroundImg := FormUtils.GetGameTabImage().Copy();
 
   try
     for i := 0 to Self.Config.Data.Count-1 do

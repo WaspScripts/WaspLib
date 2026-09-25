@@ -82,6 +82,13 @@ The frames go at {ref}`TEquipment.GetSlots` positions, the same boxes the form d
 and every silhouette is placed by the offset its own sprite carries. The bars joining the slots
 belong to no slot, so they carry the interface's own coordinates.
 *)
+(*
+TGearFormHelper.LoadBackground
+------------------------------
+```
+procedure TGearFormHelper.LoadBackground()
+```
+*)
 procedure TGearFormHelper.LoadBackground();
 const
   FRAME: Integer      = 170;
@@ -98,7 +105,7 @@ var
   img: TImage;
   pt: TPoint;
 begin
-  Self.BackgroundImg := new TImage(WLEnv.AssetsDir + 'images' + PATH_SEP + 'gametab.png');
+  Self.BackgroundImg := FormUtils.GetGameTabImage().Copy();
 
   //the bars run under the frames, so they go down first
   img := Self._Sprite(VERTICAL).ToImage();

@@ -15,6 +15,7 @@ Type that olds several method utilities for `TLazForms`.
   TFormUtils = record
     DPI: Integer;
     Scale: Single;
+    _GameTabImg: TImage;
     const BASE_DPI: Integer = 96;
   end;
 
@@ -211,6 +212,51 @@ begin
     if checkbox <> control then
       TLazControl(control).Enabled := checked;
   end;
+end;
+
+
+(*
+## FormUtils.GetGameTabImage
+```pascal
+function TFormUtils.GetGameTabImage(): TImage;
+```
+Builds an empty gametab looking image.
+
+Example:
+```pascal
+{$INCLUDE WaspLib/main.simba}
+begin
+  FormUtils.GetGameTabImage().Show();
+end.
+```
+*)
+function TFormUtils.GetGameTabImage(): TImage;
+const
+  WIDTH: Integer = 202;
+  HEIGHT: Integer = 273;
+  BEVEL_TL: TIntegerArray = [$5E7078, $3A4C53, $3B4C53, $405057, $49585F, $1A292F];
+  BEVEL_BR: TIntegerArray = [$4F5E65, $49585F, $415158, $3B4C53, $374950, $5A6D75];
+var
+  i: Integer;
+begin
+  if Self._GameTabImg <> nil then
+    Exit(Self._GameTabImg);
+
+  Result := new TImage(WIDTH, HEIGHT);
+  Result.Fill($333C45);
+
+  for i := 0 to High(BEVEL_TL) do
+  begin
+    Result.DrawColor := BEVEL_TL[i];
+    Result.DrawTPA(TPointArray.CreateFromBox([i, i, WIDTH-1-i, i], True));                   //top
+    Result.DrawTPA(TPointArray.CreateFromBox([i, i, i, HEIGHT-1-i], True));                  //left
+
+    Result.DrawColor := BEVEL_BR[i];
+    Result.DrawTPA(TPointArray.CreateFromBox([WIDTH-1-i, i, WIDTH-1-i, HEIGHT-1-i], True));  //right
+    Result.DrawTPA(TPointArray.CreateFromBox([i, HEIGHT-1-i, WIDTH-1-i, HEIGHT-1-i], True)); //bottom
+  end;
+
+  Self._GameTabImg := Result;
 end;
 
 var
