@@ -1,97 +1,16 @@
-(*
-# GrandExchange
-Methods to interact with the GrandExchange interface:
-```{figure} ../../images/ge_interface.png
-```
 
-The {ref}`GrandExchange` is a very complex interface, probably the most complex
-available in game and for that reason, the functionality to
-fully interact with it is split into multiple files and records:
-- {ref}`GrandExchange`, the main grand exchange screen and what this page is about.
-- {ref}`GrandExchangeHistory`, the history screen of the grand exchange.
-- {ref}`GrandExchangeChat`, the chat interface of the grand exchange when you are setting up a buy offer.
-- {ref}`GrandExchangeOffer`, the screen of the grand exchange where you view or setup a new offer.
-*)
 
 {$DEFINE WL_GRANDEXCHANGE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EGEOfferStatus
-```pascal
-EGEOfferStatus = enum(NONE, PROGRESSING, COMPLETED, ABORTED);
-```
-Enum to represent the Grand Exchange offer slot states.
-*)
+
   EGEOfferStatus = enum(NONE, PROGRESSING, COMPLETED, ABORTED);
 
-(*
-## EGESlotType
-```pascal
-EGESlotType = enum(EMPTY, SELL, BUY);
-```
-Enum to represent the type of Grand Exchange offer slot.
-*)
+
   EGESlotType = enum(EMPTY, SELL, BUY, UNAVAILABLE);
 
-(*
-## TGrandExchangeSlot
-Record that represents a slot in the {ref}`GrandExchange` interface.
 
-When you want to interact with a Grand Exchange slot you should do it through
-the `TGrandExchange.Slots` array, which is an array of this type.
-
-The next examples will be showing how this is done with random slot numbers.
-
-If you want to visualize what the `TGrandExchangeSlot` has to offer are you
-can use this short script:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-  slot: TGrandExchangeSlot;
-begin
-  img := Target.GetImage();
-  for slot in GrandExchange.Slots do
-  begin
-    case slot.GetType() of
-      EGESlotType.EMPTY:
-      begin
-        img.DrawColor := $00FFFF;
-        img.DrawBox(slot.Bounds);
-        img.DrawColor := $0000FF;
-        img.DrawBox(slot.Header);
-        img.DrawColor := $FF00FF;
-        img.DrawBox(slot.BuyButton);
-        img.DrawColor := $FFFF00;
-        img.DrawBox(slot.SellButton);
-      end;
-
-      EGESlotType.SELL, EGESlotType.BUY:
-      begin
-        img.DrawColor := $00FFFF;
-        img.DrawBox(slot.Bounds);
-        img.DrawColor := $0000FF;
-        img.DrawBox(slot.Header);
-        img.DrawColor := $FF00FF;
-        img.DrawBox(slot.ItemBox);
-        img.DrawColor := $FFFF00;
-        img.DrawBox(slot.ItemNameBox);
-        img.DrawColor := $FFFFFF;
-        img.DrawBox(slot.StatusBox);
-        img.DrawColor := $0000FF;
-        img.DrawBox(slot.ValueBox);
-      end;
-    end;
-  end;
-
-  img.Show();
-end.
-```
-```{figure} ../../images/ge_slots.png
-```
-*)
   TGrandExchangeSlot = record
     Typ: EGESlotType;
     Bounds, Header, BuyButton, SellButton: TBox;
@@ -139,24 +58,7 @@ begin
   end;
 end;
 
-(*
-## TGrandExchangeSlot.GetType
-```pascal
-function TGrandExchangeSlot.GetType(): EGESlotType;
-```
-Returns the {ref}`EGESlotType` of the slot.
-This also sets the `TGrandExchangeSlot.Typ` to the result in case you want
-to access it later without calling this.
 
-WaspLib will also try to keep `TGrandExchangeSlot.Typ` updated when you
-interact with the `GrandExchange` but it cannot track things a user might do
-manually.
-
-Example:
-```pascal
-WriteLn GrandExchange.Slots[2].GetType();
-```
-*)
 function TGrandExchangeSlot.GetType(): EGESlotType;
 var
   count: Integer;
@@ -177,20 +79,7 @@ begin
 end;
 
 
-(*
-## TGrandExchangeSlot.Contains
-```pascal
-function TGrandExchangeSlot.Contains(item: TItem): Boolean;
-```
-Returns the {ref}`TItem` of the slot.
 
-If the slot is empty an empty string is returned.
-
-Example:
-```pascal
-WriteLn GrandExchange.Slots[0].Contains('Abyssal whip');
-```
-*)
 function TGrandExchangeSlot.Contains(item: TItem): Boolean;
 var
   match: TImageMatch;
@@ -198,21 +87,7 @@ begin
   Result := ItemFinder.Find([item], [Self.ItemBox], match);
 end;
 
-(*
-## TGrandExchangeSlot.Discover
-```pascal
-function TGrandExchangeSlot.Discover(): TItemArray;
-```
-Uses item discover to return a {ref}`TItemArray` of the possible items in the
-slot.
 
-If the slot is empty an empty array is returned.
-
-Example:
-```pascal
-WriteLn GrandExchange.Slots[5].Discover();
-```
-*)
 function TGrandExchangeSlot.Discover(): TItemArray;
 var
   hash: UInt32;
@@ -222,35 +97,13 @@ begin
     Result := ItemFinder.GetHashItems(hash);
 end;
 
-(*
-## TGrandExchangeSlot.Item
-```pascal
-property TGrandExchangeSlot.Item: TItem;
-```
-Reads the item text in the offer slot.
 
-Example:
-```pascal
-WriteLn GrandExchange.Slots[7].Item;
-```
-*)
 property TGrandExchangeSlot.Item: TItem;
 begin
   Result := OCR.RecognizeLines(Self.ItemNameBox, Fonts.PLAIN_11, [TFonts.LIGHT_ORANGE], 0).Join(' ');
 end;
 
-(*
-## TGrandExchangeSlot.Value
-```pascal
-property TGrandExchangeSlot.Value: Integer;
-```
-Reads the value text in the offer slot and returns it as an `Integer`.
 
-Example:
-```pascal
-WriteLn GrandExchange.Slots[3].Value;
-```
-*)
 property TGrandExchangeSlot.Value: Integer;
 var
   str: String;
@@ -259,19 +112,7 @@ begin
   Result := str.ExtractInteger(-1);
 end;
 
-(*
-## TGrandExchangeSlot.Quantity
-```pascal
-property TGrandExchangeSlot.Quantity: Integer;
-```
 
-Returns the quantity text in the offer slot as an `Integer`.
-
-Example:
-```pascal
-WriteLn GrandExchange.Slots[4].Quantity;
-```
-*)
 property TGrandExchangeSlot.Quantity: Integer;
 var
   str: String;
@@ -281,20 +122,7 @@ begin
   Result := str.ExtractInteger(1);
 end;
 
-(*
-## TGrandExchangeSlot.TotalValue
-```pascal
-property TGrandExchangeSlot.TotalValue: Integer;
-```
 
-Returns the total value of the offer slot.
-Taking into account the Grand Exchange tax for sell offers.
-
-Example:
-```pascal
-WriteLn GrandExchange.Slots[5].TotalValue;
-```
-*)
 property TGrandExchangeSlot.TotalValue: Integer;
 var
   postTaxValue, tax: Integer;
@@ -322,18 +150,7 @@ begin
   Result := postTaxValue * Self.Quantity;
 end;
 
-(*
-## TGrandExchangeSlot.Status
-```pascal
-property TGrandExchangeSlot.Status: EGEOfferStatus;
-```
-Returns the slot {ref}`EGEOfferStatus` status.
 
-Example:
-```pascal
-WriteLn GrandExchange.Slots[2].Status;
-```
-*)
 property TGrandExchangeSlot.Status: EGEOfferStatus;
 begin
   if Target.HasColor($005F00, 0, 1, Self.StatusBox) then
@@ -346,18 +163,7 @@ begin
   Result := EGEOfferStatus.NONE;
 end;
 
-(*
-## TGrandExchangeSlot.Progress
-```pascal
-property TGrandExchangeSlot.Progress: Integer;
-```
-Returns the progress percentage of the slot.
 
-Example:
-```pascal
-WriteLn GrandExchange.Slots[2].Progress;
-```
-*)
 property TGrandExchangeSlot.Progress: Integer;
 var
   tpa: TPointArray;
@@ -371,62 +177,16 @@ begin
     Result := -1;
 end;
 
-(*
-## TGrandExchangeSlot.Open
-```pascal
-function TGrandExchangeSlot.Open(): Boolean;
-```
-Attempts to open the {ref}`GrandExchangeOffer` status screen of an existing
-offer.
 
-Example:
-```pascal
-WriteLn GrandExchange.Slots[1].Open();
-```
-*)
 function TGrandExchangeSlot.Open(): Boolean; forward;
 
-(*
-## TGrandExchangeSlot.Buy
-```pascal
-function TGrandExchangeSlot.Buy(): Boolean;
-```
-Attempts to open the {ref}`GrandExchangeOffer` screen with the buy button.
 
-Example:
-```pascal
-WriteLn GrandExchange.Slots[2].Buy();
-```
-*)
 function TGrandExchangeSlot.Buy(): Boolean; forward;
 
-(*
-## TGrandExchangeSlot.Sell
-```pascal
-function TGrandExchangeSlot.Sell(): Boolean;
-```
-Attempts to open the {ref}`GrandExchangeOffer` screen with the sell button.
 
-Example:
-```pascal
-WriteLn GrandExchange.Slots[2].Sell();
-```
-*)
 function TGrandExchangeSlot.Sell(): Boolean; forward;
 
-(*
-## TGrandExchangeSlot.Abort
-```pascal
-function TGrandExchangeSlot.Abort(): Boolean;
-```
 
-Attempts to abort an ongoing offer in the slot.
-
-Example:
-```pascal
-WriteLn GrandExchange.Slots[3].Abort();
-```
-*)
 function TGrandExchangeSlot.Abort(): Boolean;
 begin
   if Self.Status = EGEOfferStatus.ABORTED then Exit(True);
@@ -437,10 +197,7 @@ begin
 end;
 
 type
-(*
-## TGrandExchange
-Record responsible to handle the {ref}`GrandExchange` interface.
-*)
+
   TGrandExchange = record
     Title: TInterfaceTitle;
     Bounds: TBox;
@@ -450,14 +207,7 @@ Record responsible to handle the {ref}`GrandExchange` interface.
 
 function TGrandExchange.IsOpen(): Boolean; forward;
 
-(*
-## GrandExchange.SetupInterface
-```pascal
-procedure TGrandExchange.SetupInterface();
-```
-Internal method used to setup the {ref}`TGrandExchange` coordinates.
-This is automatically called for you on the {ref}`GrandExchange variable`.
-*)
+
 procedure TGrandExchange.SetupInterface();
 var
   i: Integer;
@@ -483,18 +233,7 @@ begin
   end;
 end;
 
-(*
-## GrandExchange.IsOpen
-```pascal
-function TGrandExchange.IsOpen(): Boolean;
-```
-Returns true if the Grand Exchange is open.
 
-Example:
-```pascal
-WriteLn GrandExchange.IsOpen();
-```
-*)
 function TGrandExchange.IsOpen(): Boolean;
 begin
   if BankPin.IsOpen() then
@@ -509,38 +248,14 @@ begin
   Result := Self.Title.GetTitle() = 'Grand Exchange';
 end;
 
-(*
-## GrandExchange.WaitOpen
-```pascal
-function TGrandExchange.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
-```
-Returns true if the Grand Exchange is open within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn GrandExchange.WaitOpen();
-```
-*)
 function TGrandExchange.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## GrandExchange.Close
-```pascal
-function TGrandExchange.Close(escape: Boolean): Boolean;
-function TGrandExchange.Close(escapeProbability: Single = 0): Boolean; overload;
-```
-Closes the GrandExchange, Depending on `escape` or `escapeProbability the function will
-either click the button or press escape key.
 
-Example:
-```pascal
- WriteLn GrandExchange.Close();
-```
-*)
 function TGrandExchange.Close(escape: Boolean): Boolean;
 begin
   Result := Self.Title.Close(escape);
@@ -552,30 +267,7 @@ begin
 end;
 
 
-(*
-## GrandExchange.GetEmptySlots
-```pascal
-function TGrandExchange.GetEmptySlots(): TGrandExchangeSlotArray;
-```
-Returns a `TGrandExchangeSlotArray` of the empty slots available.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-  slot: TGrandExchangeSlot;
-begin
-  img := Target.GetImage();
-  img.DrawColor := $00FFFF;
-  for slot in GrandExchange.GetEmptySlots() do
-    img.DrawBox(slot.Bounds);
-  img.Show();
-end.
-```
-```{figure} ../../images/ge_emptyslots.png
-```
-*)
 function TGrandExchange.GetEmptySlots(): TGrandExchangeSlotArray;
 var
   i: Integer;
@@ -585,18 +277,7 @@ begin
       Result += Self.Slots[i];
 end;
 
-(*
-## GrandExchange.IndexOfEmptySlot
-```pascal
-function TGrandExchange.IndexOfEmptySlot(): Integer;
-```
-Returns the index of the first empty slot available.
 
-Example:
-```pascal
-WriteLn GrandExchange.IndexOfEmptySlot();
-```
-*)
 function TGrandExchange.IndexOfEmptySlot(): Integer;
 begin
   for Result := 0 to 7 do
@@ -605,23 +286,7 @@ begin
   Result := -1;
 end;
 
-(*
-## GrandExchange.GetEmptySlot
-```pascal
-function TGrandExchange.GetEmptySlot(): TGrandExchangeSlot;
-```
-Returns a `TGrandExchangeSlot` that is empty.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(GrandExchange.GetEmptySlot().Bounds);
-end.
-```
-```{figure} ../../images/ge_emptyslot.png
-```
-*)
 function TGrandExchange.GetEmptySlot(): TGrandExchangeSlot;
 var
   slot: Integer;
@@ -631,20 +296,7 @@ begin
     Result := Self.Slots[slot];
 end;
 
-(*
-## TGrandExchange.Collect
-```pascal
-function TGrandExchange.Collect(): Boolean;
-```
-Attempts to Collect from the Grand Exchange.
 
-In case of failure, returns False.
-
-Example:
-```pascal
-WriteLn GrandExchange.Collect();
-```
-*)
 function TGrandExchange.Collect(): Boolean;
 begin
   if not Target.HasColor(TFonts.WHITE, 0, 1, Self.CollectButton) then Exit(False);
@@ -653,10 +305,7 @@ begin
 end;
 
 var
-(*
-## GrandExchange variable
-Global {ref}`TGrandExchange` variable.
-*)
+
   GrandExchange: TGrandExchange;
 
 function TGrandExchangeSlot.Open(): Boolean;

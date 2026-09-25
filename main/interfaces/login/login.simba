@@ -1,31 +1,10 @@
-(*
-# Login
-The login screen is the first screen you see when you open a client and it
-finishes loading:
-```{figure} ../../images/loginscreen.png
-```
 
-WaspLib's {ref}`TLogin` can handle both resizable and fixed mode login screens.
-*)
 
 {$DEFINE WL_LOGIN_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 const
-(*
-(LOGIN_MESSAGES)=
-## Login Messages
-```pascal
-const
-  LOGIN_MESSAGES = [
-    'Welcome to ',
-    'Connecting to server',
-    ...,
-    'Authenticator'
-  ];
-```
-Constant of all the login messages the login screen can handle.
-*)
+
   LOGIN_MESSAGES = [
     'Welcome to ',
     'Connecting to server',
@@ -51,18 +30,7 @@ Constant of all the login messages the login screen can handle.
   ];
 
 type
-(*
-## Login Enums
-```pascal
-ELoginMode    = enum(UNKNOWN, LEGACY, LAUNCHER);
-ELoginButton  = enum(LAUNCHER, EXISTING_USER, LOGIN, RETRY, OKAY, CONTINUE);
-ELoginInput   = enum(USERNAME, PASSWORD);
-ELoginMessage = enum(UNKNOWN, WELCOME, ..., AUTHENTICATOR);
-```
-Enums representing various aspects of the login screen.
 
-`ELoginMessage` is a enum representation of {ref}`LOGIN_MESSAGES`.
-*)
   ELoginMode    = enum(UNKNOWN, LEGACY, LAUNCHER);
   ELoginButton  = enum(LAUNCHER, EXISTING_USER, LOGIN, RETRY, OKAY, CONTINUE);
   ELoginInput   = enum(USERNAME, PASSWORD);
@@ -78,14 +46,7 @@ Enums representing various aspects of the login screen.
     AUTHENTICATOR
   );
 
-(*
-## TLogin
-Main record responsible for handling the {ref}`Login` screen.
 
-```{figure} ../../images/Tlogin.png
-The login screen.
-```
-*)
   TLogin = record
     Bounds: TBox;
 
@@ -101,14 +62,7 @@ The login screen.
     ClearInputs: Boolean;
   end;
 
-(*
-## Login.Setup
-```pascal
-procedure TLogin.Setup();
-```
-Internal method responsible for setting up the {ref}`TLogin` coordinates.
-This is automatically called for you on the {ref}`Login variable`.
-*)
+
 procedure TLogin.Setup();
 begin
   Self.Bounds.X1 := Target.Width div 2 - 176;
@@ -182,13 +136,7 @@ begin
 end;
 
 
-(*
-## Login.FindButton
-```pascal
-function TLogin.FindButton(button: ELoginButton): Boolean;
-```
-Attempts to find the specified `ELoginButton`, returns `True` if we find it.
-*)
+
 function TLogin.FindButton(button: ELoginButton): Boolean;
 begin
   if button = ELoginButton.LAUNCHER then
@@ -205,18 +153,7 @@ begin
   Result := Self.Buttons[button].Text = OCR.Recognize(Self.Buttons[button].Bounds, Fonts.PLAIN_12, [$FFFFFF], 0);
 end;
 
-(*
-## Login.ClickButton
-```pascal
-function TLogin.ClickButton(button: ELoginButton): Boolean;
-```
-Attempts to click the specified `ELoginButton`, returns `True` if we succeed.
 
-Example:
-```pascal
-WriteLn Login.ClickButton(ELoginButton.LOGIN);
-```
-*)
 function TLogin.ClickButton(button: ELoginButton): Boolean;
 begin
   if not Self.FindButton(button) then Exit;
@@ -225,19 +162,7 @@ begin
 end;
 
 
-(*
-## Login.SelectInput
-```pascal
-function TLogin.SelectInput(field: ELoginInput): Boolean;
-```
-Attempts to select the specified `ELoginInput`, returns `True` if we succeed.
-This waits a few milliseconds for the flashing yellow cursor for confirmation.
 
-Example:
-```pascal
-WriteLn Login.SelectInput(ELoginInput.USERNAME);
-```
-*)
 function TLogin.SelectInput(field: ELoginInput): Boolean;
 begin
   if SleepUntil(Target.HasColor($00FFFF, 0, 8, Self.Inputs[field]), 30, 100) then
@@ -252,35 +177,13 @@ begin
   Result := SleepUntil(Target.HasColor($00FFFF, 0, 8, Self.Inputs[field]), 30, 600);
 end;
 
-(*
-## Login.InputIsFilled
-```pascal
-function TLogin.InputIsFilled(field: ELoginInput): Boolean;
-```
-Returns True/False if the specified `field` is filled.
 
-Example:
-```pascal
-WriteLn Login.InputIsFilled(ELoginInput.USERNAME);
-```
-*)
 function TLogin.InputIsFilled(field: ELoginInput): Boolean;
 begin
   Result := Target.HasColor($FFFFFF, 0, 1, Self.Inputs[field]);
 end;
 
-(*
-## Login.ClearInput
-```pascal
-function TLogin.ClearInput(field: ELoginInput): Boolean;
-```
-Attempts to clear the  specified `field`.
 
-Example:
-```pascal
-WriteLn Login.ClearInput(ELoginInput.USERNAME);
-```
-*)
 function TLogin.ClearInput(field: ELoginInput): Boolean;
 var
   timeout: TCountDown;
@@ -298,18 +201,7 @@ begin
   until timeout.IsFinished;
 end;
 
-(*
-## Login.FillInput
-```pascal
-function TLogin.FillInput(field: ELoginInput; details: String): Boolean;
-```
-Attempts to fill the  specified `field` with `details`.
 
-Example:
-```pascal
-WriteLn Login.FillInput(ELoginInput.USERNAME, 'myprofile@email.com');
-```
-*)
 function TLogin.FillInput(field: ELoginInput; details: String): Boolean;
 begin
   if Self.InputIsFilled(field) then Exit(True);
@@ -322,19 +214,7 @@ begin
 end;
 
 
-(*
-## Login.GetMessage
-```pascal
-function TLogin.GetMessage(): ELoginMessage;
-```
-Returns the currently visible login message as a `ELoginMessage`.
-Check {ref}`Login Enums` for more information on `ELoginMessage`.
 
-Example:
-```pascal
-WriteLn Login.GetMessage();
-```
-*)
 function TLogin.GetMessage(): ELoginMessage;
 var
   dialog: String;
@@ -357,21 +237,7 @@ begin
 end;
 
 
-(*
-## Login.GetMode
-```pascal
-function TLogin.GetMode(): ELoginMode;
-```
-Returns the current login mode as a `ELoginMode`.
-The login mode can only be known from the "Welcome to " screen.
 
-Check {ref}`Login Enums` for more information on `ELoginMode`.
-
-Example:
-```pascal
-WriteLn Login.GetMode();
-```
-*)
 function TLogin.GetMode(): ELoginMode;
 begin
   if Self.GetMessage() = ELoginMessage.WELCOME then
@@ -393,21 +259,7 @@ begin
 end;
 
 
-(*
-## Login.HandleWelcome
-```pascal
-function TLogin.HandleWelcome(): Boolean;
-```
-Attempts to handle the "Welcome to " screen regardless of the
-`ELoginMode` the client is on.
 
-Check {ref}`Login Enums` for more information on `ELoginMode`.
-
-Example:
-```pascal
-WriteLn Login.HandleWelcome();
-```
-*)
 function TLogin.HandleWelcome(): Boolean;
 begin
   if Self.Mode = ELoginMode.UNKNOWN then
@@ -421,20 +273,7 @@ begin
   Result := SleepUntil(Self.GetMessage() <> ELoginMessage.WELCOME, RandomMode(100, 50, 1500), 600);
 end;
 
-(*
-## Login.Back2Welcome
-```pascal
-function TLogin.Back2Welcome(): Boolean;
-```
-Attempts to return to the "Welcome to " screen.
-This is used to handle any screen that has an "Ok" button.
-Returns True if we succeed.
 
-Example:
-```pascal
-WriteLn Login.Back2Welcome();
-```
-*)
 function TLogin.Back2Welcome(): Boolean;
 begin
   if not Self.ClickButton(ELoginButton.OKAY) then Exit;
@@ -442,18 +281,7 @@ begin
 end;
 
 
-(*
-## Login.EnterCredentials
-```pascal
-function TLogin.EnterCredentials(username, password: String): Boolean;
-```
-Attempts to enter a user credentials.
 
-Example:
-```pascal
-WriteLn Login.EnterCredentials('username', 'password');
-```
-*)
 function TLogin.EnterCredentials(username, password: String): Boolean;
 begin
   if Self.ClearInputs then
@@ -468,17 +296,7 @@ begin
 end;
 
 
-(*
-## Login.Retry
-```pascal
-function TLogin.Retry(msg: ELoginMessage): Boolean;
-```
-Attempts to handle any screen that has a "Retry" button.
-Returns True if we succeed.
 
-The current `ELoginMessage` message has to be passed as `msg` so we know
-when we successfully handled the button.
-*)
 function TLogin.Retry(msg: ELoginMessage): Boolean;
 begin
   if not Self.ClickButton(ELoginButton.RETRY) then Exit;
@@ -486,23 +304,7 @@ begin
   Result := SleepUntil(Self.GetMessage() <> msg, RandomMode(100, 50, 1500), 600);
 end;
 
-(*
-## Login.HandleError
-```pascal
-function TLogin.HandleError(msg: ELoginMessage): Boolean;
-```
-Attempts to handle any screen that has an error message.
-Returns True if we succeed.
 
-The current `ELoginMessage` message has to be passed as `msg` so we know
-when we successfully handled the current error.
-
-Everytime this function is called, the internal `Login.Attempts` variable is
-increased.
-After 10 times of this being called without `Login.Attempts` being reset, this
-will raise an exception **IF** the reason we can't login is not the world being
-full. **IF** the reason is the world being full, this can be called forever.
-*)
 function TLogin.HandleError(msg: ELoginMessage): Boolean;
 var
   time: Integer;
@@ -529,24 +331,7 @@ begin
   raise GetDebugLn('Login', 'Failed to login 10 times. Last login state: ' + ToStr(msg));
 end;
 
-(*
-## Login.HandleMessage
-```pascal
-function TLogin.HandleMessage(msg: ELoginMessage; username, password: String): Boolean;
-```
-Attempts to handle whatever screen the login screen is currently at.
-Returns True if we succeed.
 
-The current `ELoginMessage` message has to be passed as `msg` so we know
-when we successfully handled the current error.
-
-The profile `username` and `password` we want to use also have to be passed in.
-This can be empty value if we are using the Jagex Launcher, e.g.: `'', ''`.
-
-On certain `ELoginMessages` that cannot be handled this will raise an
-exception to shutdown your script. For example, if the profile you are trying to
-use has been banned.
-*)
 function TLogin.HandleMessage(msg: ELoginMessage; username, password: String): Boolean;
 begin
   case msg of
@@ -580,14 +365,7 @@ begin
   end;
 end;
 
-(*
-## Login.SwitchWorld
-```pascal
-procedure TLogin.SwitchWorld(worlds: TIntegerArray);
-```
-Ensures we are on a world declared in the profile, retrying transient failures
-before giving up.
-*)
+
 procedure TLogin.SwitchWorld(worlds: TIntegerArray);
 var
   attempt: Integer;
@@ -604,20 +382,7 @@ begin
   raise GetDebugLn('Login', 'Failed to switch to a valid world from the profile list after 5 attempts.');
 end;
 
-(*
-## Login.DoLogin
-```pascal
-function TLogin.DoLogin(profile: TProfile): Boolean;
-```
-Attempts to login into `profile`.
-If we login, the {ref}`Lobby` screen is handled for you.
-Returns true if we succeed.
 
-Example:
-```pascal
-WriteLn Login.DoLogin(profile);
-```
-*)
 function TLogin.DoLogin(profile: TProfile = Default(TProfile)): Boolean;
 var
   timeout: UInt64;
@@ -666,8 +431,5 @@ begin
 end;
 
 var
-(*
-## Login variable
-Global {ref}`TLogin` variable.
-*)
+
   Login: TLogin;

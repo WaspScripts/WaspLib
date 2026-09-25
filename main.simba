@@ -1,59 +1,8 @@
 {%anchor WaspLib}
-(*
-# WaspLib
-WaspLib is a library used to bot a popular MMORPG with Simba 2.0.
-WaspLib is heavily inspired in previous work done by the SRL Community.
 
-This library is meant to do the job of both [SRL-T](https://github.com/Torwent/SRL-T)
-and the original [WaspLib](https://github.com/Torwent/WaspLib) in Simba 1.4 in a lighter,
-less confusing way.
-*)
 
 {%anchor Compiler Directives}
-(*
-## Compiler Directives
-```pascal
-{$DEFINE WL_DISABLE_FAKE_INPUT}
-{$DEFINE WL_GENERATE_GRAPH_ALWAYS}
-{$DEFINE WL_DEBUG_MAPLOADER}
-{$DEFINE WL_DEBUG_MOUSE}
-{$DEFINE WL_DEBUG_KEYBINDS}
-{$DEFINE WL_DEBUG_UPTEXT}
-{$DEFINE WL_DEBUG_INTERFACES}
-{$DEFINE WL_DEBUG_MAP}
-{$DEFINE WL_DEBUG_TRANSPORTER}
-{$DEFINE WL_DEBUG_CHAT_LISTENER}
-{$DEFINE WL_DEBUG_LEVELUP_LISTENER}
-{$DEFINE WL_DEBUG_RECORDER}
-```
-These are the main compiler directives available in the library.
 
-They should be self-explanatory.
-
-You also have the following to override versions, for more information read {ref}`Version`
-```pascal
-{$DEFINE SCRIPT_SIMBA_VERSION := 'version_hash'}
-{$DEFINE SCRIPT_WASPLIB_VERSION := 'version_hash'}
-```
-
-For the {ref}`WaspClient` you also have the following:
-```pascal
-{$DEFINE WASP_LOCAL_DEVELOPMENT}
-{$DEFINE WASP_REFRESH_TOKEN := 'refresh_token'}
-{$DEFINE SCRIPT_ID := 'script_UUID'}
-{$DEFINE SCRIPT_REVISION := 'script_revision'}
-```
-They also should be self-explanatory but you can read more about them in
-{ref}`WaspClient`.
-
-All of the directives above must be added **before** including the library to
-use them, for example:
-```pascal
-{$DEFINE WL_DISABLE_FAKE_INPUT}
-{$I WaspLib/main.simba}
-```
-Otherwise WaspLib won't be aware of them.
-*)
 
 {$INCLUDE_ONCE version.simba}
 {$INCLUDE_ONCE utils.simba}
