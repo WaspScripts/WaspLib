@@ -1,86 +1,10 @@
 //!PACKAGE SCRIPT
-(*
-(Video Player)=
-# Tool: Video Player
-Displays image sequences rapidly to create smooth motion, like a flipbook.
-Works with image frame sequences (not video files) and provides interactive controls.
 
-- Credits: Developed by TazE
-- Acknowledgement: Slackydev for the original prototype concept
-
-Requirements:
-- Individual image files (PNG, BMP, JPG) with numbers in filenames
-- Example: `frame_001.bmp`, `002.bmp` (last number is used for ordering)
-- **FPS Note**: Set playback FPS to match how frames were extracted for accurate speed
-
-Video to Frames:
-```bash
-# Extract all frames at original framerate
-ffmpeg -i video.mp4 -vsync 0 frame_%04d.bmp
-```
-Note: Frames from recorder.simba videos will have compression artifacts and won't match screenshot quality.
-
-## Video Player Getting Started
-
-Creating frame sequences:
-Use the {ref}`framerecorder` utility to capture frames.
-
-Playing frame sequences:
-```pascal
-{$I WaspLib/main.simba}
-{$I Wasplib/tools/videoplayer.simba}
-var
-  player: TVideoPlayer;
-begin
-  player.Init(25); // 25 FPS
-  player.Play();
-end;
-```
-
-## Keyboard Controls
-
-- **Space**: Pause/Resume playback
-- **Left/Right**: Step through frames (when paused)
-- **Shift + Left/Right**: Jump by FPS amount (when paused)
-- **Q/E**: Decrease/Increase playback speed
-- **Home/End**: Jump to first/last frame
-- **R**: Toggle reverse playback
-- **H**: Toggle overlay display
-- **L**: Toggle loop mode
-*)
 
 {$DEFINE WL_VIDEOPLAYER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 type
-(*
-(TVideoPlayer)=
-## type TVideoPlayer
-```pascal
-TVideoPlayer = record
-  Frames: TStringArray;
-  FrameIndex: Int32;
-  Directory: String;
-  FPS: Int32;
-  Loop: Boolean;
-  IsPaused: Boolean;
-  PlaybackSpeed: Single;
-  IsReversed: Boolean;
-  ShowOverlay: Boolean;
-end;
-```
-Main record for video playback functionality. Handles frame sequences with interactive controls.
 
-Fields:
-- `Frames`: Array of file paths for each frame
-- `FrameIndex`: Current frame being displayed
-- `Directory`: Source directory containing frames
-- `FPS`: Frames per second for playback
-- `Loop`: Whether to loop playback
-- `IsPaused`: Current pause state
-- `PlaybackSpeed`: Playback speed multiplier (0.25x to 16x)
-- `IsReversed`: Whether playing in reverse
-- `ShowOverlay`: Whether to display frame info overlay
-*)
   TVideoPlayer = record
     Frames: TStringArray;
     FrameIndex: Int32;
@@ -122,18 +46,7 @@ procedure TVideoPlayer._Pause(); forward;
 procedure TVideoPlayer._Resume(); forward;
 {%codetools on}
 
-(*
-## TVideoPlayer.Init
-```pascal
-procedure TVideoPlayer.Init(dir: String = ''; fps: Int32 = 25; pattern: String = '*.*');
-```
-Initializes the video player with a directory of frame files.
 
-Parameters:
-- `fps`: Frames per second (default: 25)
-- `dir`: Directory containing frame files (default: '' shows dialog)
-- `pattern`: File pattern to match (default: '*.*')
-*)
 procedure TVideoPlayer.Init(fps: Int32 = 25; dir: String = ''; pattern: String = '*.*');
 begin
   if dir = '' then
@@ -164,13 +77,7 @@ begin
   Self.Frames.Sort(@_CompareFrameNumbers);
 end;
 
-(*
-## TVideoPlayer.Play
-```pascal
-procedure TVideoPlayer.Play();
-```
-Starts video playback. This is the main method that handles the playback loop and user input.
-*)
+
 procedure TVideoPlayer.Play();
 begin
   Self._PrintControls();
