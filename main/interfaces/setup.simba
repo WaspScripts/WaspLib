@@ -178,6 +178,7 @@ begin
   FormUtils.Setup();
   Fonts.Setup();
   Logger.Init();
+  ChooseOption.Setup();
   WebGraphGenerator.Setup(16, 12);
 
   {$IFDEF WL_TEST}

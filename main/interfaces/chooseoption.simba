@@ -28,10 +28,53 @@ Core record responsible with interacting with the {ref}`ChooseOption` context me
   TChooseOption = record
     Bounds: TBox;
     MinDelay, MaxDelay: Integer;
+    TitleImg: TImage;
     const BACKGROUND: TColor = $47545D;
-    const TitleImg: TImage = ImageFromString('IMG:AQAAAGYAAAASAAAAAAAAAP21aQABAAAAIKprAAEAAADI5D8BAAAAAM0CAQABAAAAOIe7BgAAAAAApLsGAAAAADQBAACYAQAAOIe7BgAAAAABAAAAZgAAABIAAAAYAAAAAAAAAAAAAAAAAAAAAwAAABgIEAgICAAAAAEAAAIAAAAAAAAAAAAAAAAAAAAAiVBORw0KGgoAAAANSUhEUgAAAGYAAAASCAIAAAAmDjziAAAAzUlEQVR4nO2U0Q2AMAhE3c4F/HX/NYzxo9oWvAO0mkBqoqTA9Qmd1mXORa1pf9IoS2S0JTLaWmRlaK+ed3X1rdU2RkT1eXjOysarvMoA9TwlG+mmLyAzNH4iC0AWcxAcWfce8fjb0sqRdGSenEpUP5BCVu3xvEs4wE63lcOjtEuTHUwnJuXH4hpspf3iSxZJVkglPCcyRGZJkeKlpFGYPMMohRjwRYpvXdTgSN2hDODtfgUfG1s5EfEWZL8zsEkj671X7BlLZLQNQJaLWhvxdfuwwsTSHQAAAABJRU5ErkJggg==');
   end;
 
+
+(*
+## ChooseOption.Setup
+```pascal
+procedure TChooseOption.Setup();
+```
+Draws the context menu's "Choose Option" header, which {ref}`ChooseOption.Header` looks for on
+screen to find the menu.
+*)
+procedure TChooseOption.Setup();
+const
+  TEXT: String = 'Choose Option';
+var
+  i, x, idx: Integer;
+  c: Char;
+  glyph: TPixelFontGlyph;
+begin
+  Self.TitleImg := new TImage(102, 18);
+  Self.TitleImg.DrawColor := Self.BACKGROUND;
+
+  for c in TEXT do
+  begin
+    if c = ' ' then
+    begin
+      x += Fonts.BOLD.SpaceWidth;
+      Continue;
+    end;
+
+    //Check Simba's TPixelOCR to understand this
+    idx := Ord(c) - 32;
+    if Ord(c) > 96 then
+      Dec(idx);
+
+    glyph := Fonts.BOLD.Glyphs[idx];
+    Self.TitleImg.DrawTPA(glyph.Points.Offset([4+x, 2]));
+    x += glyph.Width + 1;
+  end;
+
+  //no right edge on purpose. We don't know the width of mini-menu.
+  Self.TitleImg.DrawLine([0, 0], [101, 0]);
+  Self.TitleImg.DrawLine([0, 17], [101, 17]);
+  Self.TitleImg.DrawLine([0, 0], [0, 17]);
+end;
 
 property TChooseOption.Header(clientBounds: TBox): TBox;
 var
