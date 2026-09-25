@@ -45,7 +45,7 @@ procedure TChooseOption.Setup();
 const
   TEXT: String = 'Choose Option';
 var
-  i, x, idx: Integer;
+  x, idx: Integer;
   c: Char;
   glyph: TPixelFontGlyph;
 begin
