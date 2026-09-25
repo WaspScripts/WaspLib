@@ -1,24 +1,10 @@
-(*
-# House
-This file is about {ref}`THouse` and the {ref}`House variable` and all of it's
-methods used to interact and navigate an account's POH:
 
-```{figure} ../../images/house.png
-```
-
-For {ref}`House` to work properly you need to setup it's {ref}`HouseLoader`,
-which you can do either via the {ref}`House Form` or via the
-{ref}`HouseViewer`.
-*)
 
 {$DEFINE WL_HOUSE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## THouse
-The core record used to handle navigating a POH.
-*)
+
   THouse = record
     Loader: THouseLoader;
     Walker: TWalker;
@@ -134,14 +120,7 @@ begin
     end;
 end;
 
-(*
-## POH.Setup()
-```pascal
-procedure THouse.Setup();
-```
-Method you need to use at the start of your script after the user has already configured his house
-with `TScriptForm.CreateHouseBuilder()`.
-*)
+
 procedure THouse.Setup(downscale: Integer = 8);
 var
   minimapImage, minimapSample: TImage;
@@ -174,17 +153,7 @@ begin
   Self.IsSetup := True;
 end;
 
-(*
-## House.ScaledSearch
-```pascal
-function THouse.ScaledSearch(img: TImage; samples: Integer): TPointArray;
-```
-Internal THouse method used to get an initial TPointArray of possible positions.
-This is performed in a downscaled map with a downscaled minimap.
-This is very innacurate by itself but by ruling down most of the map
-in a downscaled search before doing a full sized search speed has a dramatic boost.
-You probably won't ever need to call this directly.
-*)
+
 function THouse.ScaledSearch(img: TImage): TPointArray;
 var
   sample: TImage;
@@ -214,19 +183,7 @@ begin
   Result := Result.Offset([n, n]);
 end;
 
-(*
-## House.Position
-```pascal
-function THouse.Position(): TPoint;
-```
-Returns the players current position on the loaded house map.
 
-Example:
-```pascal
-WriteLn(House.Position());
-WriteLn(House.Similarity); // Check to see the match percentage if needed
-```
-*)
 function THouse.Position(): TPoint;
 const
   SCALE: Integer = 2;
@@ -270,20 +227,7 @@ begin
   Result := RSTranslator.Normalize(Result);
 end;
 
-(*
-## House.DebugPosition
-```pascal
-function THouse.DebugPosition(): TPoint;
-```
-Debugs the player position in the currently loaded house map.
 
-Example:
-```pascal
-//setup your house and house.loader
-while True do
-  Map.DebugPosition();
-```
-*)
 function THouse.DebugPosition(print: Boolean = True): TPoint;
   function _BoxStr(b: TBox): String;
   begin
@@ -454,8 +398,5 @@ begin
 end;
 
 var
-(*
-## House variable
-Global {ref}`THouse` variable.
-*)
+
   House: THouse;
