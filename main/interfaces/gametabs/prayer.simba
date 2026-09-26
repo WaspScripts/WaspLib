@@ -1,112 +1,38 @@
-(*
-# Prayer
-Methods to interact with the prayer gametab.
-```{figure} ../../images/prayer.png
-```
-*)
+
 
 {$DEFINE WL_PRAYER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TPrayerSet
-A set of prayers represented by the `EPrayer` enumeration.
-*)
+
   TPrayerSet = set of EPrayer;
 
-(*
-## TPrayer
-Main record used to interact with the {ref}`Prayer` gametab.
-*)
+
   TPrayer = record
     Slots: TBoxArray;
   end;
 
-(*
-## TPrayer.Slots
-```pascal
-Slots: TBoxArray;
-```
-Slot boxes of the prayers. You are unlikely to need to use these directly.
 
-Example:
-```pascal
-ShowOnTarget(Prayer.Slots);
-```
-```{figure} ../../images/prayer_slots.png
-```
-*)
 
-(*
-## Prayer.SetupGameTab
-```pascal
-procedure TPrayer.SetupGameTab();
-```
-Internal method used to setup the {ref}`TPrayer` coordinates.
 
-This is automatically called for you on the {ref}`Prayer variable`.
-
-*)
 procedure TPrayer.SetupGameTab();
 begin
   Self.Slots := TBoxArray.Create(GameTab.Bounds.TopLeft.Offset(1,10), 5, 6, 33, 33, [4, 4]);
 end;
 
-(*
-## TPrayer.IsOpen
-```pascal
-function TPrayer.IsOpen(): Boolean;
-```
-Returns True/False whether the {ref}`Prayer` gametab is currently open.
 
-Example:
-```pascal
-if Prayer.IsOpen() then
-  WriteLn('Prayer tab is open')
-else
-  WriteLn('Prayer tab is closed');
-```
-*)
 function TPrayer.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.PRAYER);
 end;
 
-(*
-## Prayer.Open
-```pascal
-function TPrayer.Open(): Boolean;
-```
-Attempts to open the Prayer tab.
 
-Example:
-```pascal
-if Prayer.Open() then
-  WriteLn('Prayer tab is open')
-else
-  WriteLn('Failed to open Prayer tab');
-```
-*)
 function TPrayer.Open(): boolean;
 begin
   Result := GameTabs.Open(EGameTab.PRAYER);
 end;
 
-(*
-## Prayer.GetInfoBox
-```pascal
-function TPrayer.GetInfoBox(): TBox;
-```
-Attempts to locate and return the bounding box of the yellow prayer info box (the tooltip).
 
-Example:
-```pascal
-ShowOnTarget(Prayer.GetInfoBox());
-```
-```{figure} ../../images/prayer_tooltip.png
-```
-*)
 function TPrayer.GetInfoBox(): TBox;
 const
   INFO_BOX_COLOR: TColor = $A0FFFF;
@@ -120,35 +46,13 @@ begin
     Result := tpa.Bounds();
 end;
 
-(*
-## Prayer.InfoIsOpen
-```pascal
-function TPrayer.InfoIsOpen(): Boolean;
-```
-Returns True/False if the yellow prayer info box (the tooltip) is currently open.
 
-Example:
-```pascal
-WriteLn Prayer.InfoIsOpen();
-```
-*)
 function TPrayer.InfoIsOpen(): Boolean;
 begin
   Result := Self.GetInfoBox() <> [];
 end;
 
-(*
-## Prayer.CloseInfo
-```pascal
-function TPrayer.CloseInfo(): Boolean;
-```
-Attempts to close the prayer info box if it is open.
 
-Example:
-```pascal
-WriteLn Prayer.CloseInfo();
-```
-*)
 function TPrayer.CloseInfo(): Boolean;
 var
   destination: TPoint;
@@ -163,18 +67,7 @@ begin
   AsyncMouse.Stop();
 end;
 
-(*
-## Prayer.Find
-```pascal
-function TPrayer.Find(prayer: EPrayer; out bounds: TBox; attempts: Integer = 2): Boolean;
-```
-Searches for the specified `prayer`. Returns true if found and it's bounds through `bounds`
 
-Example:
-```pascal
-WriteLn Prayer.Find(EPrayer.Smite, b);
-```
-*)
 function TPrayer.Find(prayer: EPrayer; out bounds: TBox; attempts: Integer = 2): Boolean;
 var
   match: TImageMatch;
@@ -195,18 +88,7 @@ begin
     Result := Self.CloseInfo() and Self.Find(prayer, bounds, attempts-1);
 end;
 
-(*
-## Prayer.Hover
-```pascal
-function TPrayer.Hover(prayer: EPrayer; checkUpText: Boolean = False): Boolean;
-```
-Moves the mouse over the specified `prayer`.
 
-Example:
-```pascal
-WriteLn Prayer.Hover(EPrayer.PIETY);
-```
-*)
 function TPrayer.Hover(prayer: EPrayer; checkUpText: Boolean = False): Boolean;
 var
   b: TBox;
@@ -222,18 +104,7 @@ begin
       = ToStr(prayer).ToLower().Replace('_', ' ').CapitalizeWords();
 end;
 
-(*
-## Prayer.Click
-```pascal
-function TPrayer.Click(prayer: EPrayer; button: EMouseButton = EMouseButton.LEFT; checkUpText: Boolean = False): Boolean;
-```
-Clicks on the specified `prayer` with the specified `button`. If no `button` is specified `EMouseButton.LEFT` is used.
 
-Example:
-```pascal
-Prayer.Click(EPrayer.PIETY);
-```
-*)
 function TPrayer.Click(prayer: EPrayer; button: EMouseButton = EMouseButton.LEFT; checkUpText: Boolean = False): Boolean;
 begin
   Result := Self.Hover(prayer, checkUpText);
@@ -241,19 +112,7 @@ begin
     Target.MouseClick(button);
 end;
 
-(*
-## Prayer.CanActivate
-```pascal
-function TPrayer.CanActivate(prayer: EPrayer): Boolean;
-```
-Checks if the specified prayer can be activated. For example, if you check a
-prayer you don't have the level for this should return `False`.
 
-Example:
-```pascal
-WriteLn Prayer.CanActivate(EPrayer.PIETY);
-```
-*)
 function TPrayer.CanActivate(prayer: EPrayer): Boolean;
 var
   b: TBox;
@@ -261,21 +120,7 @@ begin
   Result := Self.Find(prayer, b);
 end;
 
-(*
-## Prayer.IsActive
-```pascal
-function TPrayer.IsActive(prayers: TPrayerSet): Boolean; overload;
-```
-Returns true if all the specified `prayers` are currently active.
 
-Example:
-```pascal
-if Prayer.IsActive([EPrayer.PIETY, EPrayer.PROTECT_FROM_MELEE]) then
-  WriteLn('Both prayers are active')
-else
-  WriteLn('One or more prayers are not active');
-```
-*)
 function TPrayer.IsActive(prayers: TPrayerSet): Boolean;
 const
   ACTIVE_COLOR: TColorTolerance = [$6CAAC2, 0.777, EColorSpace.HSL, [1.967, 0.232, 0.803]];
@@ -290,18 +135,7 @@ begin
   Result := True;
 end;
 
-(*
-## Prayer.GetActivePrayers
-```pascal
-function TPrayer.GetActivePrayers(): TPrayerSet;
-```
-Returns a set of all currently active prayers.
 
-Example:
-```pascal
-WriteLn(Prayer.GetActivePrayers());
-```
-*)
 function TPrayer.GetActivePrayers(): TPrayerSet;
 var
   prayer: EPrayer;
@@ -311,21 +145,7 @@ begin
       Result += prayer;
 end;
 
-(*
-## Prayer.Activate
-```pascal
-function TPrayer.Activate(prayers: TPrayerSet): Boolean;
-```
-Attempts to activate all the specified `prayers`.
 
-Example:
-```pascal
-if Prayer.Activate([EPrayer.PIETY, EPrayer.PROTECT_FROM_MELEE]) then
-  WriteLn('Prayers activated successfully')
-else
-  WriteLn('Failed to activate prayers');
-```
-*)
 function TPrayer.Activate(prayers: TPrayerSet): Boolean;
 var
   prayer: EPrayer;
@@ -349,21 +169,7 @@ begin
   Result := Result and SleepUntil(Self.IsActive(activatedPrayers), 100, 2000);
 end;
 
-(*
-## Prayer.Deactivate
-```pascal
-function TPrayer.Deactivate(prayers: TPrayerSet): Boolean;
-```
-Attempts to deactivate all the specified `prayers`.
 
-Example:
-```pascal
-if Prayer.Deactivate([EPrayer.PIETY, EPrayer.PROTECT_FROM_MELEE]) then
-  WriteLn('Prayers deactivated successfully')
-else
-  WriteLn('Failed to deactivate prayers');
-```
-*)
 function TPrayer.Deactivate(prayers: TPrayerSet): Boolean;
 var
   prayer: EPrayer;
@@ -384,8 +190,5 @@ begin
 end;
 
 var
-(*
-## Prayer variable
-Global {ref}`TPrayer` variable.
-*)
+
   Prayer: TPrayer;

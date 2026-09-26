@@ -1,57 +1,29 @@
-(*
-# Music
-Music is resposible for the track handling in the Music gametab.
-```{figure} ../../images/music.png
-```
-*)
+
 
 {$DEFINE WL_MUSIC_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EMusicButton
-```pascal
-EMusicButton = enum(AREA, MANUAL, RANDOM);
-```
-Enum representing the music configuration buttons.
-*)
+
   EMusicButton = enum(AREA, MANUAL, RANDOM);
 
-(*
-## TMusic
-Main record that interacts with the {ref}`Music` gametab.
-*)
+
   TMusic = record
     Scroll: TScrollBar;
     Buttons: TButtonArray;
   end;
 
-(*
-## TMusicTrack
-Helper record for {ref}`TMusic`.
-*)
+
   TMusicTrack = record
     Name: String;
     Available: Boolean;
     Bounds: TBox;
   end;
 
-(*
-## TMusicTrackArray
-Helper type for {ref}`TMusic`.
-*)
+
   TMusicTrackArray = array of TMusicTrack;
 
-(*
-## TMusic.SetupGameTab
-```pascal
-procedure TMusic.SetupGameTab();
-```
-Interal method used to setup the {ref}`TMusic` coordinates.
 
-This is automatically called for you on the {ref}`Music variable`.
-*)
 procedure TMusic.SetupGameTab();
 begin
   with GameTab.Bounds do
@@ -70,52 +42,19 @@ begin
   Self.Scroll.Setup();
 end;
 
-(*
-## Music.IsOpen
-```pascal
-function TMusic.IsOpen(): Boolean;
-```
-Returns true if the music gametab is open.
 
-Example:
-```pascal
-WriteLn Music.IsOpen();
-```
-*)
 function TMusic.IsOpen() : Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.MUSIC);
 end;
 
-(*
-## Music.Open
-```pascal
-function TMusic.Open(): Boolean;
-```
-Attempts to open the Music gametab.
 
-Example:
-```pascal
-WriteLn Music.Open();
-```
-*)
 function TMusic.Open() : Boolean;
 begin
   Result := GameTabs.Open(EGameTab.MUSIC);
 end;
 
-(*
-## Music.ActiveTrack
-```pascal
-property TMusic.ActiveTrack : String;
-```
-Returns the currently playing track.
 
-Example:
-```pascal
-WriteLn Music.ActiveTrack;
-```
-*)
 property TMusic.ActiveTrack : String;
 begin
   if not Self.Open() then Exit;
@@ -125,18 +64,7 @@ begin
   end;
 end;
 
-(*
-## Music.GetTracks
-```pascal
-function TMusic.GetTracks() : TMusicTrackArray;
-```
-Returns the currently visible {ref}`TMusicTrackArray`.
 
-Example:
-```pascal
-WriteLn Music.GetTracks();
-```
-*)
 function TMusic.GetTracks() : TMusicTrackArray;
 var
   tpa : TPointArray;
@@ -168,24 +96,7 @@ begin
     Result.Sort(Weights, True);
 end;
 
-(*
-## Music.FindTrack
-```pascal
-function TMusic.FindTrack(trackName: String) : TMusicTrack;
-```
-Returns a {ref}`TMusicTrack` if it was found in the playlist.
 
-Example:
-```pascal
-var
-  track: TMusicTrack;
-begin
-  track := Music.FindTrack('Sea Shanty 2');
-  if track <> Default(TMusicTrack) then
-    WriteLn track.Available;
-end.
-```
-*)
 function TMusic.FindTrack(trackName: String) : TMusicTrack;
 var
   track: TMusicTrack;
@@ -217,19 +128,7 @@ begin
   until timeout.IsFinished;
 end;
 
-(*
-## Music.PlayTrack
-```pascal
-function TMusic.PlayTrack(trackName: String; force: Boolean = false) : Boolean;
-```
-Attempts to play the given track, if the track is already playing it can be clicked again by using the force parameter.
-Returns true if successful.
 
-Example:
-```pascal
-WriteLn Music.PlayTrack('Sea Shanty 2');
-```
-*)
 function TMusic.PlayTrack(trackName: String; force: Boolean = false) : Boolean;
 var
   track: TMusicTrack;
@@ -245,9 +144,6 @@ begin
   Result := SleepUntil(Self.ActiveTrack.Equals(trackName, False), 250, 2000);
 end;
 
-(*
-## Music variable
-Global {ref}`TMusic` variable.
-*)
+
 var
   Music: TMusic;

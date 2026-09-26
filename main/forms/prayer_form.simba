@@ -1,10 +1,4 @@
-(*
-# Prayer Form
-A {ref}`TLazForm` utility to aid in prayer selection settings.
 
-This will setup a {ref}`TLazButton` which opens a {ref}`TLazForm` that mimics the prayer
-tab and allows a user to select prayers to be used.
-*)
 
 {$DEFINE WL_PRAYER_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -14,19 +8,7 @@ type
     NONE, ATTACK, STRENGTH, DEFENCE, RANGED, MAGIC, COMBO, OVERHEAD
   );
 
-(*
-## EPrayer.GetInterfering
-```pascal
-function EPrayer.GetInterfering(): TPrayerSet;
-```
-The prayers that can't be active at the same time as this one, including itself.
-Activating a prayer in game turns all of these off.
 
-Example:
-```pascal
-WriteLn EPrayer.PIETY.GetInterfering();
-```
-*)
 function EPrayer.GetInterfering(): TPrayerSet;
 const
   PRAYER_GROUPS: array[EPrayerGroup] of TPrayerSet = [
@@ -80,23 +62,13 @@ end;
 
 
 type
-(*
-## TPrayerLayout
-Type that represents a named set of prayers, as saved by {ref}`ScriptForm.CreatePrayerTab`.
-*)
+
   TPrayerLayout = record
     Name: String;
     Prayers: TPrayerSet;
   end;
 
-(*
-## TPrayerLayout.ToJSON
-```pascal
-function TPrayerLayout.ToJSON(): TJSONItem;
-```
-Convert the `TPrayerLayout` into a `TJSONItem`.
-Prayers are saved by name so the saved layouts don't depend on the order of {ref}`EPrayer`.
-*)
+
 function TPrayerLayout.ToJSON(): TJSONItem;
 var
   prayer: EPrayer;
@@ -107,14 +79,7 @@ begin
 end;
 
 type
-(*
-## TPrayerLayoutFormHelper
-The `TPrayerLayoutFormHelper` type is, as it's name implies a helper type for the
-prayer layouts tab made by {ref}`ScriptForm.CreatePrayerTab`.
 
-It has a lot of methods and callbacks that are hidden by default and won't be
-mentioned on this page because they are internal methods you shouldn't touch.
-*)
   TPrayerLayoutFormHelper = record
     Layouts: array of TPrayerLayout;
     Index: Integer;
@@ -389,14 +354,7 @@ begin
   Self.Refresh();
 end;
 
-(*
-## PrayerLayoutForm.CreatePrayerCombobox
-```pascal
-function TPrayerLayoutFormHelper.CreatePrayerCombobox(owner: Pointer; caption: String = 'Prayer Layout:'; left, top: Integer = 0): TLazComboBox;
-```
-This will create a combobox for you whose contents auto-update with changes made
-on the prayer layouts tab. The combobox `ItemIndex` is the index of the layout in `PrayerLayoutForm.Layouts`.
-*)
+
 function TPrayerLayoutFormHelper.CreatePrayerCombobox(owner: Pointer; caption: String = 'Prayer Layout:'; left, top: Integer = 0): TLazComboBox;
 var
   i: Integer;
@@ -411,33 +369,10 @@ begin
 end;
 
 var
-(*
-## PrayerLayoutForm variable
-Global {ref}`TPrayerLayoutFormHelper` variable.
-*)
+
   PrayerLayoutForm: TPrayerLayoutFormHelper;
 
-(*
-## ScriptForm.CreatePrayerTab
-```pascal
-function TScriptForm.CreatePrayerTab(): TLazTabSheet;
-```
-Sets up a `TLazTabSheet` on your `TScriptForm` to configure prayer layouts, named sets of prayers
-your script can activate with {ref}`Prayer.Activate`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  form: TScriptForm;
-begin
-  form.Setup();
-  form.CreatePrayerTab();
-  form.Run();
-end.
-```
-For a more complete example check out the file `Simba/Includes/WaspLib/examples/prayer_form.simba`.
-*)
 function TScriptForm.CreatePrayerTab(): TLazTabSheet;
 var
   save, read, clear: TLazButton;
