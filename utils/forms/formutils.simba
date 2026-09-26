@@ -912,6 +912,10 @@ begin
   Result := TLazButton.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
   Result.Cursor := ELazCursor.HandPoint;
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 75;
+  Result.Height := 25;
 end;
 
 function TLazButton.CreateEx(
