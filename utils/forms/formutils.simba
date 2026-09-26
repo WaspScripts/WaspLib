@@ -694,6 +694,10 @@ function TLazPanel.CreateEx(owner: Pointer): TLazPanel; static;
 begin
   Result := TLazPanel.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 170;
+  Result.Height := 50;
 end;
 
 function TLazPanel.CreateEx(
@@ -713,6 +717,10 @@ function TLazPageControl.CreateEx(owner: Pointer): TLazPageControl; static;
 begin
   Result := TLazPageControl.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 200;
+  Result.Height := 200;
 end;
 
 function TLazPageControl.CreateEx(
@@ -873,6 +881,10 @@ function TLazMemo.CreateEx(owner: Pointer): TLazMemo; static;
 begin
   Result := TLazMemo.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 150;
+  Result.Height := 90;
 end;
 
 function TLazMemo.CreateEx(
@@ -971,6 +983,10 @@ function TLazToggleBox.CreateEx(owner: Pointer): TLazToggleBox; static;
 begin
   Result := TLazToggleBox.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 75;
+  Result.Height := 25;
 end;
 
 function TLazToggleBox.CreateEx(
@@ -1064,6 +1080,10 @@ function TLazListBox.CreateEx(owner: Pointer): TLazListBox; static;
 begin
   Result := TLazListBox.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 100;
+  Result.Height := 80;
 end;
 
 function TLazListBox.CreateEx(
@@ -1102,6 +1122,10 @@ function TLazCheckListBox.CreateEx(owner: Pointer): TLazCheckListBox; static;
 begin
   Result := TLazCheckListBox.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 100;
+  Result.Height := 80;
 end;
 
 function TLazCheckListBox.CreateEx(
@@ -1178,6 +1202,10 @@ function TLazImage.CreateEx(owner: Pointer): TLazImage; static;
 begin
   Result := TLazImage.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 90;
+  Result.Height := 90;
 end;
 
 function TLazImage.CreateEx(
@@ -1254,6 +1282,10 @@ function TLazScrollBox.CreateEx(owner: Pointer): TLazScrollBox; static;
 begin
   Result := TLazScrollBox.Create(TLazControl(owner));
   Result.Parent := TLazComponent(owner);
+  //This triggers our Width and Height overrides with
+  //the default values.
+  Result.Width := 150;
+  Result.Height := 150;
 end;
 
 function TLazScrollBox.CreateEx(
