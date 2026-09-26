@@ -49,6 +49,7 @@ Do feel free to read the source code though if you so desire.
     //where the equipment interface sits on the gametab background
     const SLOTS_ORIGIN: TPoint = [9, 35];
     BackgroundImg, SlotImg: TImage;
+    SlotImages: TStringMap<TImage>;
   end;
 
 (*
@@ -225,17 +226,29 @@ begin
 end;
 
 
-procedure TGearFormHelper.DrawItem(slot: EEquipment; background: TImage);
-var
-  id: String;
-  img, item: TImage;
-begin
-  id := ItemFinder.Database.Get(Self.Gear.Items[slot].ToLower(), 'item', 'id');
-  img := Self.SlotImg.Copy();
-  item := ItemFinder.GetImage(id);
+(*
+## TGearFormHelper.SlotImage
+```pascal
+function TGearFormHelper.SlotImage(item: String): TImage;
+```
+Returns the slot frame with `item` drawn into it.
 
-  img.DrawImage(item, [2,2]);
-  background.DrawImage(img, Self.SlotBoxes[slot].TopLeft);
+The result is kept, keyed by the item, because a redraw asks for the same frames
+over and over and each one costs a copy of `TGearFormHelper.SlotImg`.
+*)
+function TGearFormHelper.SlotImage(item: String): TImage;
+begin
+  if Self.SlotImages.Exists(item) then
+    Exit(Self.SlotImages.Value[item]);
+
+  Result := Self.SlotImg.Copy();
+  Result.DrawImage(ItemFinder.GetImage(ItemFinder.Database.Get(item.ToLower(), 'item', 'id')), [2,2]);
+  Self.SlotImages.Value[item] := Result;
+end;
+
+procedure TGearFormHelper.DrawItem(slot: EEquipment; background: TImage);
+begin
+  background.DrawImage(Self.SlotImage(Self.Gear.Items[slot]), Self.SlotBoxes[slot].TopLeft);
 end;
 
 procedure TGearFormHelper.UpdateBackground();

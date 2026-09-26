@@ -46,7 +46,8 @@ Do feel free to read the source code though if you so desire.
     DragSource: Integer;
     DragX, DragY: Integer;
 
-    BackgroundImg: TImage;
+    BackgroundImg, SlotsImg: TImage;
+    SlotImages: TStringMap<TImage>;
   end;
 
 procedure TInventoryFormHelper.Setup();
@@ -134,119 +135,151 @@ begin
     Self.AmountEdit.Text := '1';
 end;
 
-procedure TInventoryFormHelper.DrawFloatingItem(itemName: String; amount: Integer; background: TImage; x, y: Integer);
+(*
+## TInventoryFormHelper.SlotImage
+```pascal
+function TInventoryFormHelper.SlotImage(item: String; amount: Integer): TImage;
+```
+Returns the sprite a slot holding `amount` of `item` is drawn with, stack text
+included.
+
+The result is kept, keyed by both the item and the amount, because a redraw asks
+for the same sprites over and over and rendering the stack text is the most
+expensive part of drawing a slot.
+*)
+function TInventoryFormHelper.SlotImage(item: String; amount: Integer): TImage;
 var
-  id, txt: String;
-  item: TImage;
-  pt: TPoint;
+  key, txt: String;
 begin
-  if (itemName = '') or (itemName = 'Nothing') then
-    Exit;
-  id := ItemFinder.Database.Get(itemName.ToLower(), 'item', 'id');
-  item := ItemFinder.GetImage(id).Copy();
+  key := item + '_' + ToStr(amount);
+  if Self.SlotImages.Exists(key) then
+    Exit(Self.SlotImages.Value[key]);
+
+  Result := ItemFinder.GetImage(ItemFinder.Database.Get(item.ToLower(), 'item', 'id')).Copy();
 
   if amount > 1 then
   begin
     if amount < 99999 then
     begin
-      item.DrawColor := $00FFFF;
+      Result.DrawColor := $00FFFF;
       txt := ToStr(amount);
     end
     else if InRange(amount, 100000, 9999999) then
     begin
-      item.DrawColor := $FFFFFF;
+      Result.DrawColor := $FFFFFF;
       txt := ToStr(amount div 1000) + 'K';
     end
     else
     begin
-      item.DrawColor := $80FF00;
+      Result.DrawColor := $80FF00;
       txt := ToStr(amount div 1000000) + 'M';
     end;
 
-    item.DrawTPA(OCR.Engine.TextToTPA(Fonts.PLAIN_11, txt));
+    Result.DrawTPA(OCR.Engine.TextToTPA(Fonts.PLAIN_11, txt));
   end;
 
-  pt := [x - (item.Width div 2), y - (item.Height div 2)];
+  Self.SlotImages.Value[key] := Result;
+end;
+
+procedure TInventoryFormHelper.DrawFloatingItem(itemName: String; amount: Integer; background: TImage; x, y: Integer);
+var
+  item: TImage;
+begin
+  if (itemName = '') or (itemName = 'Nothing') then
+    Exit;
+
+  item := Self.SlotImage(itemName, amount);
   background.DrawAlpha := $9D;
-  background.DrawImage(item, pt);
+  background.DrawImage(item, [x - (item.Width div 2), y - (item.Height div 2)]);
   background.DrawAlpha := $FF;
 end;
 
 procedure TInventoryFormHelper.DrawItem(slot: Integer; background: TImage; amount: Integer);
-var
-  id, txt: String;
-  item: TImage;
 begin
-  id := ItemFinder.Database.Get(Self.Layout.Items[slot].Item.ToLower(), 'item', 'id');
-  item := ItemFinder.GetImage(id).Copy();
-  if amount > 1 then
-  begin
-    if amount < 99999 then
-    begin
-      item.DrawColor := $00FFFF;
-      txt := ToStr(amount);
-    end
-    else if InRange(amount, 100000, 9999999) then
-    begin
-      item.DrawColor := $FFFFFF;
-      txt := ToStr(amount div 1000) + 'K';
-    end
-    else
-    begin
-      item.DrawColor := $80FF00;
-      txt := ToStr(amount div 1000000) + 'M';
-    end;
-    item.DrawTPA(OCR.Engine.TextToTPA(Fonts.PLAIN_11, txt));
-  end;
-  background.DrawImage(item, Self.SlotBoxes[slot].TopLeft);
+  background.DrawImage(
+    Self.SlotImage(Self.Layout.Items[slot].Item, amount), Self.SlotBoxes[slot].TopLeft
+  );
 end;
 
+(*
+## TInventoryFormHelper.UpdateDrag
+```pascal
+procedure TInventoryFormHelper.UpdateDrag();
+```
+Draws the item being dragged at the cursor over the slot composite
+{ref}`TInventoryFormHelper.UpdateBackground` built, and pushes the result to the
+imagebox.
+
+This is the path the cursor takes, so it reuses that composite rather than
+rebuilding it: nothing behind the cursor changes while the cursor moves.
+*)
+procedure TInventoryFormHelper.UpdateDrag();
+var
+  bg: TImage;
+begin
+  if not Self.Dragging then
+  begin
+    Self.ImageBox.SetImage(Self.SlotsImg.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
+    Exit;
+  end;
+
+  bg := Self.SlotsImg.Copy();
+  Self.DrawFloatingItem(
+    Self.Layout.Items[Self.DragSource].Item, Self.Layout.Items[Self.DragSource].Amount,
+    bg, Self.DragX, Self.DragY
+  );
+  Self.ImageBox.SetImage(bg.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
+end;
+
+(*
+## TInventoryFormHelper.UpdateBackground
+```pascal
+procedure TInventoryFormHelper.UpdateBackground();
+```
+Redraws the slot composite into `TInventoryFormHelper.SlotsImg`: the gametab
+background, every slot's item and the slot outlines.
+
+All of that only changes when the layout, the selection or the drag source does,
+so the composite is kept for {ref}`TInventoryFormHelper.UpdateDrag` to reuse, and
+this is only called from the callbacks that change one of them.
+*)
 procedure TInventoryFormHelper.UpdateBackground();
 var
   slot: Integer;
-  bg: TImage;
-  origX, origY: Integer;
 begin
-  bg := Self.BackgroundImg.Copy();
+  Self.SlotsImg := Self.BackgroundImg.Copy();
 
   for slot := 0 to 27 do
   begin
     if Self.Dragging and (slot = Self.DragSource) then
     begin
-      bg.DrawAlpha := $3F;
+      Self.SlotsImg.DrawAlpha := $3F;
       case Self.Layout.Items[slot].Item of
         '', 'Nothing': ;
         'Anything': ;
-        else Self.DrawItem(slot, bg, Self.Layout.Items[slot].Amount);
+        else Self.DrawItem(slot, Self.SlotsImg, Self.Layout.Items[slot].Amount);
       end;
-      bg.DrawAlpha := $FF;
+      Self.SlotsImg.DrawAlpha := $FF;
     end
     else
     begin
       case Self.Layout.Items[slot].Item of
         '', 'Nothing': ;
         'Anything': ; //TODO....
-        else Self.DrawItem(slot, bg, Self.Layout.Items[slot].Amount);
+        else Self.DrawItem(slot, Self.SlotsImg, Self.Layout.Items[slot].Amount);
       end;
     end;
 
     if slot = Self.Selected then
-      bg.DrawColor := $00FF00
+      Self.SlotsImg.DrawColor := $00FF00
     else
-      bg.DrawColor := $00FFFF;
-    bg.DrawAlpha := $7D;
-    bg.DrawBox(Self.SlotBoxes[slot]);
-    bg.DrawAlpha := $FF;
+      Self.SlotsImg.DrawColor := $00FFFF;
+    Self.SlotsImg.DrawAlpha := $7D;
+    Self.SlotsImg.DrawBox(Self.SlotBoxes[slot]);
+    Self.SlotsImg.DrawAlpha := $FF;
   end;
 
-  if Self.Dragging then
-  begin
-    origX := Round(Self.DragX / FormUtils.Scale);
-    origY := Round(Self.DragY / FormUtils.Scale);
-    Self.DrawFloatingItem(Self.Layout.Items[Self.DragSource].Item, Self.Layout.Items[Self.DragSource].Amount, bg, origX, origY);
-  end;
-
-  Self.ImageBox.SetImage(bg.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
+  Self.UpdateDrag();
 end;
 
 procedure TInventoryFormHelper.OnSelectionChange(sender: TLazObject);
@@ -399,13 +432,18 @@ begin
 end;
 
 procedure TInventoryFormHelper.OnImgMouseMove(sender: TImageBox; shift: ELazShiftStates; x, y: Integer);
+var
+  pt: TPoint;
 begin
-  if Self.Dragging then
-  begin
-    Self.DragX := x;
-    Self.DragY := y;
-    Self.UpdateBackground();
-  end;
+  if not Self.Dragging then Exit;
+
+  pt := [Round(x / FormUtils.Scale), Round(y / FormUtils.Scale)];
+  //the item is drawn on the unscaled image, so consecutive events land on the same pixel
+  if (pt.X = Self.DragX) and (pt.Y = Self.DragY) then Exit;
+
+  Self.DragX := pt.X;
+  Self.DragY := pt.Y;
+  Self.UpdateDrag();
 end;
 
 procedure TInventoryFormHelper.OnImgMouseDown(sender: TImageBox; btn: ELazMouseButton; shift: ELazShiftStates; x, y: Integer);
@@ -422,8 +460,8 @@ begin
     begin
       Self.Dragging := True;
       Self.DragSource := i;
-      Self.DragX := x;
-      Self.DragY := y;
+      Self.DragX := Round(x / FormUtils.Scale);
+      Self.DragY := Round(y / FormUtils.Scale);
       Self.Selected := i;
       Self.ListLabel.Caption := 'Dragging: ' + Self.Layout.Items[i].Item;
       Self.UpdateListBox();
