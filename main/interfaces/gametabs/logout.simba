@@ -1,47 +1,20 @@
-(*
-# Logout
-Methods to interact with the logout tab.
-```{figure} ../../images/inventory.png
-```
-*)
+
 {$DEFINE WL_LOGOUT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## ERSRating
-```pascal
-ERSRating = (ONE, TWO, THREE, FOUR, FIVE);
-```
-Enum representing the star buttons on the {ref}`Logout` gametab.
-*)
+
   ERSRating = (ONE, TWO, THREE, FOUR, FIVE);
-(*
-## ERSLogoutButton
-```pascal
-ERSLogoutButton = (WORLD_SWITCHER, CLICK_HERE);
-```
-Enum representing the buttons available on the {ref}`Logout` gametab.
-*)
+
   ERSLogoutButton = (WORLD_SWITCHER, CLICK_HERE);
 
-(*
-## TLogout
-Main record that holds and the methods to interact with the logout gametab.
-*)
+
   TLogout = record
     Ratings: array [ERSRating] of TButton;
     Buttons: array [ELoginButton] of TButton;
   end;
 
-(*
-## Logout.SetupGameTab
-```pascal
-procedure TLogout.SetupGameTab();
-```
-Internal method used to setup {ref}`TLogout` coordinates.
-This is called automatically for you on the {ref}`Logout variable`.
-*)
+
 procedure TLogout.SetupGameTab();
 var
   btns: TBoxArray;
@@ -78,85 +51,17 @@ begin
   end;
 end;
 
-(*
-## TLogout.Ratings
-```pascal
-Ratings: array [ERSRating] of TButton;
-```
-`TButton` for each of the {ref}`Logout` rating buttons.
 
-Example:
-```pascal
-ShowOnTarget(Logout.Ratings);
-```
-```{figure} ../../images/logout_ratings.png
-```
 
-You can also access each button with an index or, more conveniently, with a
-{ref}`ERSRating`.
 
-Example:
-```pascal
-ShowOnTarget(Logout.Ratings[ERSRating.THREE]);
-```
-```{figure} ../../images/logout_rating.png
-```
-*)
 
-(*
-## TLogout.Buttons
-```pascal
-Buttons: array [ERSLogoutButton] of TButton;
-```
-`TButton` for each of the {ref}`Logout` buttons.
 
-Example:
-```pascal
-ShowOnTarget(Logout.Buttons);
-```
-```{figure} ../../images/logout_buttons.png
-```
-
-You can also access each button with an index or, more conveniently, with a
-{ref}`ERSLogoutButton`.
-
-Example:
-```pascal
-ShowOnTarget(Logout.Buttons[ERSLogoutButton.WORLD_SWITCHER]);
-```
-```{figure} ../../images/logout_button.png
-```
-*)
-
-(*
-## Logout.IsOpen
-```pascal
-function TLogout.IsOpen(): Boolean;
-```
-Returns true if the logout gametab is open, false if it's not.
-
-Example:
-```pascal
-WriteLn Logout.IsOpen();
-```
-*)
 function TLogout.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.LOGOUT);
 end;
 
-(*
-## Logout.Open
-```pascal
-function TLogout.Open(): Boolean;
-```
-Attempts to open the logout tab, returns true if it succeeds.
 
-Example:
-```pascal
-WriteLn Logout.Open();
-```
-*)
 function TLogout.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.LOGOUT);
@@ -165,35 +70,13 @@ begin
 end;
 
 
-(*
-## Logout.IsRated
-```pascal
-function TLogout.IsRated(): Boolean;
-```
-Returns true if a star button was clicked.
 
-Example:
-```pascal
-WriteLn Logout.IsRated();
-```
-*)
 function TLogout.IsRated(): Boolean;
 begin
   Result := Self.Ratings[ERSRating.ONE].Enabled;
 end;
 
-(*
-## Logout.Rate
-```pascal
-function TLogout.Rate(star: ERSRating): Boolean;
-```
-Click a star button to rate the game.
 
-Example:
-```pascal
-WriteLn Logout.Rate(ERSRating.FOUR);
-```
-*)
 function TLogout.Rate(star: ERSRating): Boolean;
 begin
    if Self.Ratings[star].Enabled and
@@ -204,19 +87,7 @@ begin
    Result := Self.Ratings[star].WaitEnabled();
 end;
 
-(*
-## Logout.Logout
-```pascal
-function TLogout.Logout(attempts: UInt32 = 5; time: UInt32 = 20000): Boolean;
-```
-Attempts to logout of the game. Returns true if we succesfully logout of the game.
-If the {ref}`WorldSwitcher` is open, we will use {ref}`WorldSwitcher.Logout` instead.
 
-Example:
-```pascal
-WriteLn Logout.Logout();
-```
-*)
 function TLogout.Logout(attempts: UInt32 = 5; time: UInt32 = 20000): Boolean;
 var
   i: Integer;
@@ -254,8 +125,5 @@ begin
 end;
 
 var
-(*
-## Logout variable
-Global {ref}`TLogout` variable.
-*)
+
   Logout: TLogout;
