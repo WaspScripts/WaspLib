@@ -1,46 +1,4 @@
-(*
-# World Fetcher
-Fetches and filters world information for world selection.
 
-Credits: Developed by TazE
-Acknowledgements: Thanks to BigAussie for initial world scraper prototype
-
-Basic example for finding a suitable world:
-```pascal
-var
-  BestWorld: TWorldInfo;
-begin
-  // Setup WorldFetcher with default settings
-  WorldFetcher.Setup();
-
-  // Fetch all available worlds
-  if WorldFetcher.FetchAll() then
-  begin
-    // Find the best world (excludes dangerous/restricted by default)
-    BestWorld := WorldFetcher.FindBestWorld();
-    WriteLn('Best world: ', BestWorld.WorldNumber, ' with ', BestWorld.PlayerCount, ' players');
-  end;
-end;
-```
-
-Example for checking skill requirements:
-```pascal
-var
-  WorldInfo: TWorldInfo;
-begin
-  // Check a specific world
-  WorldInfo := WorldFetcher.GetWorldInfo(420, False);
-
-  if WorldInfo.MinSkillTotal > 0 then
-    WriteLn('World ', WorldInfo.WorldNumber, ' requires ',
-            WorldInfo.MinSkillTotal, ' total level')
-  else if WorldInfo.Activity = WA_DANGEROUS then
-    WriteLn('World ', WorldInfo.WorldNumber, ' is a PvP world - avoid!')
-  else
-    WriteLn('World ', WorldInfo.WorldNumber, ' is suitable');
-end;
-```
-*)
 {$DEFINE WL_WORLDFETCHER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
@@ -48,57 +6,21 @@ const
   WORLD_LIST_URL = 'http://oldschool.runescape.com/slu';
 
 type
-(*
-## type EWorldType
-```pascal
-EWorldType = enum(FREE_TO_PLAY, MEMBERS);
-```
-An enumeration representing the membership type of a world.
-*)
+
   EWorldType = enum(FREE_TO_PLAY, MEMBERS);
 
-(*
-## type EWorldActivity
-```pascal
-EWorldActivity = enum(NORMAL, DANGEROUS, RESTRICTED, SKILL_TOTAL);
-```
-An enumeration representing world activity categories.
-*)
+
   EWorldActivity = enum(NORMAL, DANGEROUS, RESTRICTED, SKILL_TOTAL);
 
-(*
-## type EWorldLocation
-```pascal
-EWorldLocation = enum(GERMANY, UNITED_KINGDOM, UNITED_STATES, AUSTRALIA, BRAZIL);
-```
-An enumeration representing the geographical location of world servers.
-*)
+
   EWorldLocation = enum(GERMANY, UNITED_KINGDOM, UNITED_STATES, AUSTRALIA, BRAZIL);
 
-(*
-## type EWorldSort
-```pascal
-EWorldSort = enum(WORLD_NUMBER, PLAYER_COUNT_ASC, PLAYER_COUNT_DESC, PING_ASC, PING_DESC);
-```
-An enumeration for sorting world lists.
-*)
+
   EWorldSort = enum(
     WORLD_NUMBER, PLAYER_COUNT_ASC, PLAYER_COUNT_DESC, PING_ASC, PING_DESC
   );
 
-(*
-## type TWorldInfo
-Contains comprehensive information about a single game world.
-- `WorldNumber`: The unique world number (e.g., 301, 302).
-- `Location`: The geographical location of the world server.
-- `PlayerCount`: Current number of players online (-1 if unavailable).
-- `WorldType`: Whether the world is free-to-play or members-only.
-- `Activity`: Activity category (Normal, Dangerous, Restricted, Skill Total).
-- `ActivityString`: Original activity description from the world list.
-- `MinSkillTotal`: Minimum skill total required (0, 500, 750, 1250, 1500, 1750, 2000, 2200).
-- `Ping`: Round-trip time in milliseconds (-1 if not measured).
-- `LastCheck`: Timestamp when this information was last updated.
-*)
+
   TWorldInfo = record
     WorldNumber: Int32;
     Location: EWorldLocation;
@@ -111,23 +33,7 @@ Contains comprehensive information about a single game world.
     LastCheck: UInt64;
   end;
 
-(*
-## type TSettings
-Configurable settings for filtering and scoring worlds in FindBestWorld.
-- `MaxPing`: Maximum acceptable ping in milliseconds.
-- `MaxPlayers`: Maximum acceptable player count.
-- `MinPlayers`: Minimum acceptable player count.
-- `ExcludeActivities`: Array of activities to exclude from results.
-- `ExcludeWorlds`: Array of specific world numbers to exclude.
-- `ExcludeLocations`: Array of locations to exclude.
-- `ExcludeTypes`: Array of world types to exclude.
-- `IncludeActivities`: If set, ONLY worlds with these activities are considered.
-- `IncludeLocations`: If set, ONLY worlds in these locations are considered.
-- `PingWeight`: Weight factor for ping in scoring (0.0-1.0).
-- `PlayerWeight`: Weight factor for player count in scoring (0.0-1.0).
-- `PingNormalize`: Normalization factor for ping values.
-- `PlayerNormalize`: Normalization factor for player count values.
-*)
+
   TWorldFetcherSettings = record
     // Limits
     MaxPing: Int32;
@@ -152,13 +58,7 @@ Configurable settings for filtering and scoring worlds in FindBestWorld.
     PlayerNormalize: Double;
   end;
 
-(*
-## type TWorldFetcher
-The main record for fetching and managing world information.
-- `Worlds`: Cached array of world information.
-- `LastFetched`: Timestamp of the last successful fetch operation.
-- `Settings`: Default search settings for this instance.
-*)
+
   TWorldFetcher = record
     Worlds: array of TWorldInfo;
     LastFetched: UInt64;
@@ -362,13 +262,7 @@ begin
   end;
 end;
 
-(*
-## TWorldFetcher.Setup
-```pascal
-procedure TWorldFetcher.Setup();
-```
-Setup WorldFetcher with default search settings. Override this method to customize settings.
-*)
+
 procedure TWorldFetcher.Setup();
 begin
   Self.Settings.ExcludeActivities := [];
@@ -381,19 +275,7 @@ begin
   Self.Settings.PlayerNormalize := 1000.0;
 end;
 
-(*
-## TWorldFetcher.PingWorld
-```pascal
-function TWorldFetcher.PingWorld(WorldNum: Int32): Int32;
-```
-Measures the round-trip time (ping) to a specific world server.
 
-Example:
-```pascal
-Ping := WorldFetcher.PingWorld(301);
-WriteLn('World 301 ping: ', Ping, 'ms');
-```
-*)
 function TWorldFetcher.PingWorld(WorldNum: Int32): Int32;
 var
   HTTPClient: THTTPClient;
@@ -424,26 +306,7 @@ begin
   end;
 end;
 
-(*
-## TWorldFetcher.GetWorldInfo
-```pascal
-function TWorldFetcher.GetWorldInfo(WorldNum: Int32; IncludePing: Boolean = False): TWorldInfo;
-```
-Fetches information for a specific world from the official server list.
 
-Parameters:
-- `WorldNum`: The world number to fetch.
-- `IncludePing`: Whether to measure ping (default: False).
-
-Returns:
-- TWorldInfo record with the world's data.
-
-Example:
-```pascal
-WorldInfo := WorldFetcher.GetWorldInfo(301, True);
-WriteLn('World 301: ', WorldInfo.PlayerCount, ' players, ', WorldInfo.Ping, 'ms ping');
-```
-*)
 function TWorldFetcher.GetWorldInfo(WorldNum: Int32; IncludePing: Boolean = False): TWorldInfo;
 var
   WorldsData: TStringArray;
@@ -496,20 +359,7 @@ begin
     Result.Ping := Self.PingWorld(WorldNum);
 end;
 
-(*
-## TWorldFetcher.Fetch
-```pascal
-function TWorldFetcher.Fetch(WorldNumbers: TIntegerArray): Boolean;
-```
-Fetches information for multiple specific worlds in a single HTTP request.
-Results are stored in the Worlds array.
 
-Example:
-```pascal
-if WorldFetcher.Fetch([301, 302, 303]) then
-  WriteLn('Fetched ', Length(WorldFetcher.Worlds), ' specific worlds');
-```
-*)
 function TWorldFetcher.Fetch(WorldNumbers: TIntegerArray): Boolean;
 var
   AllWorldNumbers: TIntegerArray;
@@ -583,23 +433,7 @@ begin
   end;
 end;
 
-(*
-## TWorldFetcher.FetchAll
-```pascal
-function TWorldFetcher.FetchAll(): Boolean;
-```
-Fetches information for all available worlds from the official server list.
-Results are stored in the Worlds array.
 
-Returns:
-- True if the fetch was successful, False otherwise.
-
-Example:
-```pascal
-if WorldFetcher.FetchAll() then
-  WriteLn('Fetched ', Length(WorldFetcher.Worlds), ' worlds');
-```
-*)
 function TWorldFetcher.FetchAll(): Boolean;
 var
   WorldNumbers: TIntegerArray;
@@ -678,20 +512,7 @@ begin
 end;
 
 
-(*
-## TWorldFetcher.GetAvailableWorlds
-```pascal
-function TWorldFetcher.GetAvailableWorlds(): TIntegerArray;
-```
-Fetches and returns all currently available world numbers from the official server list.
-This method performs a fresh HTTP request each time it's called.
 
-Example:
-```pascal
-WorldNumbers := WorldFetcher.GetAvailableWorlds();
-WriteLn('Found ', Length(WorldNumbers), ' available worlds');
-```
-*)
 function TWorldFetcher.GetAvailableWorlds(): TIntegerArray;
 var
   WorldRows: TStringArray;
@@ -712,20 +533,7 @@ begin
     Result[i] := Self.Worlds[i].WorldNumber;
 end;
 
-(*
-## TWorldFetcher.GetWorld
-```pascal
-function TWorldFetcher.GetWorld(WorldNum: Int32): TWorldInfo;
-```
-Retrieves cached information for a specific world.
 
-Example:
-```pascal
-CachedWorld := WorldFetcher.GetWorld(301);
-if CachedWorld.WorldNumber > 0 then
-  WriteLn('World 301 has ', CachedWorld.PlayerCount, ' players');
-```
-*)
 function TWorldFetcher.GetWorld(WorldNum: Int32): TWorldInfo;
 var
   i: Int32;
@@ -739,18 +547,7 @@ begin
   Result.WorldNumber := -1;
 end;
 
-(*
-## TWorldFetcher.FilterByType
-```pascal
-function TWorldFetcher.FilterByType(WorldType: EWorldType): array of TWorldInfo;
-```
-Filters the cached worlds by membership type.
 
-Example:
-```pascal
-F2PWorlds := WorldFetcher.FilterByType(EWorldType.FREE_TO_PLAY);
-```
-*)
 function TWorldFetcher.FilterByType(WorldType: EWorldType): array of TWorldInfo;
 var
   i: Int32;
@@ -760,18 +557,7 @@ begin
       Result += Self.Worlds[i];
 end;
 
-(*
-## TWorldFetcher.FilterByLocation
-```pascal
-function TWorldFetcher.FilterByLocation(Location: EWorldLocation): array of TWorldInfo;
-```
-Filters the cached worlds by server location.
 
-Example:
-```pascal
-GermanWorlds := WorldFetcher.FilterByLocation(EWorldLocation.WL_GERMANY);
-```
-*)
 function TWorldFetcher.FilterByLocation(Location: EWorldLocation): array of TWorldInfo;
 var
   i: Int32;
@@ -781,19 +567,7 @@ begin
       Result += Self.Worlds[i];
 end;
 
-(*
-## TWorldFetcher.FilterWorldsByPing
-```pascal
-function TWorldFetcher.FilterWorldsByPing(MinPing, MaxPing: Int32): array of TWorldInfo;
-```
-Filters the cached worlds by ping range. Only includes worlds with valid ping measurements.
 
-Example:
-```pascal
-LowPingWorlds := WorldFetcher.FilterWorldsByPing(0, 50);
-WriteLn('Found ', Length(LowPingWorlds), ' worlds with ping < 50ms');
-```
-*)
 function TWorldFetcher.FilterWorldsByPing(MinPing, MaxPing: Int32): array of TWorldInfo;
 var
   i: Int32;
@@ -803,18 +577,7 @@ begin
       Result += Self.Worlds[i];
 end;
 
-(*
-## TWorldFetcher.FilterByPlayerCount
-```pascal
-function TWorldFetcher.FilterByPlayerCount(MinPlayers, MaxPlayers: Int32): array of TWorldInfo;
-```
-Filters the cached worlds by player count range.
 
-Example:
-```pascal
-MediumWorlds := WorldFetcher.FilterByPlayerCount(200, 800);
-```
-*)
 function TWorldFetcher.FilterByPlayerCount(MinPlayers, MaxPlayers: Int32): array of TWorldInfo;
 var
   i: Int32;
@@ -824,18 +587,7 @@ begin
       Result += Self.Worlds[i];
 end;
 
-(*
-## TWorldFetcher.FilterByActivity
-```pascal
-function TWorldFetcher.FilterByActivity(Activity: EWorldActivity): array of TWorldInfo;
-```
-Filters the cached worlds by activity type.
 
-Example:
-```pascal
-SkillWorlds := WorldFetcher.FilterByActivity(EWorldActivity.SKILL_TOTAL);
-```
-*)
 function TWorldFetcher.FilterByActivity(Activity: EWorldActivity): array of TWorldInfo;
 var
   i: Int32;
@@ -865,20 +617,7 @@ begin
   end;
 end;
 
-(*
-## TWorldFetcher.FilterBySettings
-```pascal
-function TWorldFetcher.FilterBySettings(Settings: TSettings): array of TWorldInfo;
-```
-Applies all filter criteria from the provided settings to return matching worlds.
 
-Example:
-```pascal
-Settings.IncludeLocations := [WL_GERMANY, WL_UNITED_KINGDOM];
-Settings.ExcludeActivities := [WA_DANGEROUS, WA_RESTRICTED];
-Worlds := WorldFetcher.FilterBySettings(Settings);
-```
-*)
 function TWorldFetcher.FilterBySettings(const Settings: TWorldFetcherSettings): array of TWorldInfo;
 var
   i, j: Int32;
@@ -981,38 +720,13 @@ begin
   end;
 end;
 
-(*
-## TWorldFetcher.GetFilteredWorlds
-```pascal
-function TWorldFetcher.GetFilteredWorlds(): array of TWorldInfo;
-```
-Helper method that applies the instance's Settings to filter cached worlds.
 
-Example:
-```pascal
-WorldFetcher.Settings.IncludeLocations := [WL_UNITED_STATES];
-Worlds := WorldFetcher.GetFilteredWorlds();
-```
-*)
 function TWorldFetcher.GetFilteredWorlds(): array of TWorldInfo;
 begin
   Result := Self.FilterBySettings(Self.Settings);
 end;
 
-(*
-## TWorldFetcher.FindBestWorld
-```pascal
-function TWorldFetcher.FindBestWorld(): TWorldInfo;
-```
-Finds the best world based on the search settings configured in Setup.
 
-Example:
-```pascal
-BestWorld := WorldFetcher.FindBestWorld();
-if BestWorld.WorldNumber > 0 then
-  WriteLn('Best world: ', BestWorld.WorldNumber);
-```
-*)
 function TWorldFetcher.FindBestWorld(): TWorldInfo;
 var
   i, j: Int32;
@@ -1125,21 +839,7 @@ begin
   end;
 end;
 
-(*
-## TWorldFetcher.FindLowestPingWorld
-```pascal
-function TWorldFetcher.FindLowestPingWorld(): TWorldInfo;
-```
-Finds the world with the lowest ping from the cached data.
-Note: Only considers worlds with valid ping measurements (> 0).
 
-Example:
-```pascal
-LowestPing := WorldFetcher.FindLowestPingWorld();
-if LowestPing.WorldNumber > 0 then
-  WriteLn('Best ping: World ', LowestPing.WorldNumber, ' (', LowestPing.Ping, 'ms)');
-```
-*)
 function TWorldFetcher.FindLowestPingWorld(): TWorldInfo;
 var
   i: Int32;
@@ -1165,19 +865,7 @@ begin
     WriteLn('Warning: No worlds with valid ping found');
 end;
 
-(*
-## TWorldFetcher.FindLowestPlayerWorld
-```pascal
-function TWorldFetcher.FindLowestPlayerWorld(): TWorldInfo;
-```
-Finds the world with the lowest player count from the cached data.
 
-Example:
-```pascal
-EmptyWorld := WorldFetcher.FindLowestPlayerWorld();
-WriteLn('Least crowded: World ', EmptyWorld.WorldNumber, ' (', EmptyWorld.PlayerCount, ' players)');
-```
-*)
 function TWorldFetcher.FindLowestPlayerWorld(): TWorldInfo;
 var
   i: Int32;
@@ -1203,18 +891,7 @@ begin
     WriteLn('Warning: No worlds with valid player count found');
 end;
 
-(*
-## TWorldFetcher.SortWorlds
-```pascal
-function TWorldFetcher.SortWorlds(Worlds: array of TWorldInfo; worldSort: EWordSort): array of TWorldInfo;
-```
-Sorts an array of worlds according to the specified criteria.
 
-Example:
-```pascal
-SortedWorlds := WorldFetcher.SortWorlds(FilteredWorlds, SORT_PLAYER_COUNT_ASC);
-```
-*)
 function TWorldFetcher.SortWorlds(Worlds: array of TWorldInfo; worldSort: EWorldSort): array of TWorldInfo;
 var
   Weights: TIntegerArray;
@@ -1250,12 +927,6 @@ begin
   end;
 end;
 
-(*
-## var WorldFetcher
-```pascal
-var WorldFetcher: TWorldFetcher;
-```
-Global instance of TWorldFetcher for convenient access to world fetching functionality.
-*)
+
 var
   {$H-}WorldFetcher: TWorldFetcher;{$H+}
