@@ -722,7 +722,7 @@ begin
           );
   tips.AnchorVertically(InventoryForm.AmountEdit, 10);
 
-  InventoryForm.LayoutCombobox := TLazComboBox.CreateEx(Result, 'Layout:', 'Select a gear layout.', Round(Result.Width / FormUtils.Scale) - width - 80, 30, width);
+  InventoryForm.LayoutCombobox := TLazComboBox.CreateEx(Result, 'Layout:', 'Select a gear layout.', Result.Width - width - 80, 30, width);
   for i := 0 to High(InventoryForm.Layouts) do
     InventoryForm.LayoutCombobox.Items.Add(InventoryForm.Layouts[i].Name);
   InventoryForm.LayoutCombobox.Items.Add('New Layout');
@@ -745,7 +745,7 @@ begin
   InventoryForm.RemoveButton.AnchorHorizontally(InventoryForm.DuplicateButton, 10);
   InventoryForm.RemoveButton.OnClick := @InventoryForm.OnRemoveClick;
 
-  InventoryForm.ImageBox := TImageBox.CreateEx(Result, '', '', Round(Result.Width / FormUtils.Scale) - width - 36, 170, 202, 273);
+  InventoryForm.ImageBox := TImageBox.CreateEx(Result, '', '', Result.Width - width - 36, 170, 202, 273);
   InventoryForm.ImageBox.AllowZoom      := False;
   InventoryForm.ImageBox.AllowMoving    := False;
   InventoryForm.ImageBox.ShowScrollBars := False;

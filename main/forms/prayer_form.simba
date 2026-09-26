@@ -466,7 +466,7 @@ begin
           );
   tips.AnchorVertically(clear, 10);
 
-  PrayerLayoutForm.LayoutCombobox := TLazComboBox.CreateEx(Result, 'Layout:', 'Select a prayer layout.', Round(Result.Width / FormUtils.Scale) - width - 80, 30, width);
+  PrayerLayoutForm.LayoutCombobox := TLazComboBox.CreateEx(Result, 'Layout:', 'Select a prayer layout.', Result.Width - width - 80, 30, width);
   for i := 0 to High(PrayerLayoutForm.Layouts) do
     PrayerLayoutForm.LayoutCombobox.Items.Add(PrayerLayoutForm.Layouts[i].Name);
   PrayerLayoutForm.LayoutCombobox.Items.Add('New Layout');
@@ -489,7 +489,7 @@ begin
   PrayerLayoutForm.RemoveButton.AnchorHorizontally(PrayerLayoutForm.DuplicateButton, 10);
   PrayerLayoutForm.RemoveButton.OnClick := @PrayerLayoutForm.OnRemoveClick;
 
-  PrayerLayoutForm.ImageBox := TImageBox.CreateEx(Result, '', '', Round(Result.Width / FormUtils.Scale) - width - 36, 170, PrayerLayoutForm.BackgroundImg.Width, PrayerLayoutForm.BackgroundImg.Height);
+  PrayerLayoutForm.ImageBox := TImageBox.CreateEx(Result, '', '', Result.Width - width - 36, 170, PrayerLayoutForm.BackgroundImg.Width, PrayerLayoutForm.BackgroundImg.Height);
   PrayerLayoutForm.ImageBox.AllowZoom      := False;
   PrayerLayoutForm.ImageBox.AllowMoving    := False;
   PrayerLayoutForm.ImageBox.ShowScrollBars := False;

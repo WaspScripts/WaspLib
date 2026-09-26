@@ -571,7 +571,7 @@ begin
   GearForm.UnfilterButton.Enabled := False;
   GearForm.UnfilterButton.OnClick := @GearForm.OnUnfilterClick;
 
-  GearForm.LayoutCombobox := TLazComboBox.CreateEx(Result, 'Layout:', 'Select a gear layout.', Round(Result.Width / FormUtils.Scale) - width - 80, 30, width);
+  GearForm.LayoutCombobox := TLazComboBox.CreateEx(Result, 'Layout:', 'Select a gear layout.', Result.Width - width - 80, 30, width);
   for i := 0 to High(GearForm.Sets) do
     GearForm.LayoutCombobox.Items.Add(GearForm.Sets[i].Name);
   GearForm.LayoutCombobox.Items.Add('New Layout');
@@ -594,7 +594,7 @@ begin
   GearForm.RemoveButton.AnchorHorizontally(GearForm.DuplicateButton, 10);
   GearForm.RemoveButton.OnClick := @GearForm.OnRemoveClick;
 
-  GearForm.ImageBox := TImageBox.CreateEx(Result, '', '', Round(Result.Width / FormUtils.Scale) - width - 36, 170, 202, 273);
+  GearForm.ImageBox := TImageBox.CreateEx(Result, '', '', Result.Width - width - 36, 170, 202, 273);
   GearForm.ImageBox.AllowZoom := False;
   GearForm.ImageBox.AllowMoving := False;
   GearForm.ImageBox.ShowScrollBars := False;
