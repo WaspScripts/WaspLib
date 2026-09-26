@@ -1,360 +1,71 @@
-(*
-# Time
-Time related misc functions, constants and variables.
-*)
+
 {$DEFINE WL_TIME_INCLUDED}
 
-(*
-## Time constants
-This section is about the time constants WaspLib provides so you have an easier time
-specifying human friendly units of time since Simba works in milliseconds.
-*)
+
 
 const
-(*
-(TICK)=
-### TICK const
-Represents a game tick worth of time (600 milliseconds).
 
-For example, if you wanted to sleep for 6 game ticks you could do this:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Sleep(6*TICK);
-end.
-```
-*)
   TICK:   Integer = 600;
 
-(*
-(SECOND)=
-### SECOND const
-Represents one second worth of time in milliseconds (1000 milliseconds).
 
-For example, if you wanted to sleep for 33 seconds you could do this:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Sleep(33*SECOND);
-end.
-```
-*)
   SECOND: Integer = 1000;
 
-(*
-(MINUTE)=
-### MINUTE const
-Represents one minute worth of time in milliseconds (60000 milliseconds).
 
-For example, if you wanted to sleep for 12 minutes you could do this:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Sleep(12*MINUTE);
-end.
-```
-*)
   MINUTE: Integer = 60000;
 
-(*
-(HOUR)=
-### HOUR const
-Represents one hour worth of time in milliseconds (3600000 milliseconds).
 
-For example, if you wanted to sleep for 4 hours you could do this:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Sleep(4*HOUR);
-end.
-```
-*)
   HOUR: Integer = 3600000;
 
-(*
-(DAY)=
-### DAY const
-Represents one day worth of time in milliseconds (86400000 milliseconds).
 
-For example, if you wanted to sleep for 7 days you could do this:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Sleep(7*DAY);
-end.
-```
-*)
   DAY: Integer = 86400000;
 
-(*
-## Date format constants
-Date format strings ready to use with some popular date formatting schemes.
-*)
 
-(*
-(DT_FORMAL_DATE)=
-### DT_FORMAL_DATE const
-Formal date format `YYYY years, M months and D days` for {ref}`TDateTime`
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn TDateTime.CreateFromSystem().ToString(DATE_FORMAL);
-end.
-```
-Which should print something like this:
-```
-2026 years, 6 months and 14 days
-```
-*)
+
   DT_FORMAL_DATE: String = 'YYYY "years", M "months and" D "days"';
 
-(*
-(MS_DATE_FORMAL)=
-### MS_DATE_FORMAL const
-Formal date format `YYYY years, M months and D days` for {ref}`FormatMilliseconds`
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn FormatMilliseconds(900*DAY, MS_DATE_FORMAL);
-end.
-```
-Which should print something like this:
-```
-2 years, 5 months and 17 days
-```
-*)
   MS_DATE_FORMAL: String = 'Y \year\s, M \mont\h\s and D \day\s';
 
 
-(*
-(DT_SHORT_DATE)=
-### DT_SHORT_DATE const
-Short date format `DD/MM/YYYY`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn TDateTime.CreateFromSystem().ToString(DT_SHORT_DATE);
-end.
-```
-Which should print something like this:
-```
-14/06/2026
-```
-*)
   DT_SHORT_DATE: String = 'DD"/"MM"/"YYYY';
 
-(*
-(MS_DATE_SHORT)=
-### MS_DATE_SHORT const
-Short date format `DD/MM/YYYY` for {ref}`FormatMilliseconds`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn FormatMilliseconds(900*DAY, MS_DATE_SHORT);
-end.
-```
-Which should print something like this:
-```
-17/05/02
-```
-*)
   MS_DATE_SHORT: String = 'DD/MM/YY';
 
 
-(*
-(DT_SHORT_DATE_R)=
-### DT_SHORT_DATE_R const
-Reversed short date format `YYYY/MM/DD` for {ref}`TDateTime`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn TDateTime.CreateFromSystem().ToString(DT_SHORT_DATE_R);
-end.
-```
-Which should print something like this:
-```
-2026/06/14
-```
-*)
   DT_SHORT_DATE_R: String = 'YYYY"/"MM"/"DD';
 
-(*
-(MS_DATE_SHORT_R)=
-### MS_DATE_SHORT_R const
-Short date format `YYYY/MM/DD` for {ref}`FormatMilliseconds`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn FormatMilliseconds(900*DAY, MS_DATE_SHORT_R);
-end.
-```
-Which should print something like this:
-```
-02/05/17
-```
-*)
   MS_DATE_SHORT_R: String = 'YY/MM/DD';
 
 
-(*
-## Time format constants
-Time format strings ready to use with some popular time formatting schemes.
-*)
 
-(*
-(DT_TIME_FORMAL)=
-### DT_TIME_FORMAL const
-Formal time format `HH hours, MM minutes and SS seconds` for {ref}`TDateTime`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn TDateTime.CreateFromSystem().ToString(DT_TIME_FORMAL);
-end.
-```
-Which should print something like this:
-```
-13 hours, 40 minutes and 50 seconds
-```
-*)
+
   DT_TIME_FORMAL: String = 'h "hours", n "minutes and" s "seconds"';
 
-(*
-(MS_TIME_FORMAL)=
-### MS_TIME_FORMAL const
-Formal time format `HH hours, MM minutes and SS seconds` for {ref}`FormatMilliseconds`.
 
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn FormatMilliseconds(32*DAY+15*MINUTE+12*SECOND, MS_TIME_FORMAL);
-end.
-```
-Which should print something like this:
-```
-768 hours, 15 minutes and 12 seconds
-```
-*)
   MS_TIME_FORMAL: String = 'h \ho\ur\s, m \min\ute\s and s \second\s';
 
 
-(*
-(TIME_SHORT)=
-### TIME_SHORT const
-Short, 24H time format `HH:MM:SS` for both {ref}`TDateTime` and {ref}`FormatMilliseconds`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn TDateTime.CreateFromSystem().ToString(TIME_SHORT);
-end.
-```
-Which should print something like this:
-```
-13:40:50
-```
-*)
   TIME_SHORT: String = 'hh:mm:ss';
 
 
-(*
-(DT_MINUTES_FORMAL)=
-### DT_MINUTES_FORMAL const
-Formal time format for minutes and seconds `MM minutes and SS seconds` for
-{ref}`TDateTime`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn TDateTime.CreateFromSystem().ToString(DT_MINUTES_FORMAL);
-end.
-```
-Which should print something like this:
-```
-48 minutes and 59 seconds
-```
-*)
   DT_MINUTES_FORMAL: String = 'n "minutes and" s "seconds"';
 
-(*
-(MS_MINUTES_FORMAL)=
-### MS_MINUTES_FORMAL const
-Formal time format for minutes and seconds `MM minutes and SS seconds` for
-{ref}`FormatMilliseconds`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn FormatMilliseconds(3*HOUR+15*SECOND, MS_MINUTES_FORMAL);
-end.
-```
-Which should print this:
-```
-180 minutes and 15 seconds
-```
-*)
   MS_MINUTES_FORMAL: String = 'm \min\ute\s and s \second\s';
 
 
-(*
-(FILE_TIME_FORMAT)=
-### FILE_TIME_FORMAT const
-Date and time format for file names `YYYY-MM-DD_hh-mm-ss-ms` for both {ref}`TDateTime` and
-{ref}`FormatMilliseconds`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn TDateTime.CreateFromSystem().ToString(FILE_TIME_FORMAT);
-end.
-```
-Which should print something like this:
-```
-2026-06-14_13-50-14-614
-```
-
-This can be useful when you need unique file names and unless you try to create the same file
-twice in the same millisecond this will give you a unique name for it, for example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-  filename: String;
-begin
-  img := Target.GetImage();
-  filename := TDateTime.CreateFromSystem().ToString(FILE_TIME_FORMAT);
-  img.Save(filename + '.png', True);
-end.
-```
-*)
   FILE_TIME_FORMAT: String = 'YYYY-MM-DD_hh-mm-ss-ms';
 
-(*
-## TCountDown.Restart
-```pascal
-procedure TCountDown.Restart(min, max: Integer); overload;
-```
-Restarts the `TCountDown` with a random value between `min` and `max`
-*)
+
 procedure TCountDown.Restart(min, max: Integer); overload;
 begin
   Self.Restart(Random(min, max));
