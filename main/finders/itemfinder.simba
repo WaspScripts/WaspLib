@@ -123,7 +123,7 @@ begin
   if Self.IsSetup then
     Exit;
 
-  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache(EConfigArchive.ITEM);
   Self.Archive := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
   Self.Version := ToStr(Self.Archive.CRC);
 

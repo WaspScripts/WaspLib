@@ -86,7 +86,7 @@ begin
   if not DirCreate(Self.CacheDir + 'prices' + PATH_SEP) then
     raise GetDebugLn('ItemData', 'Failed to create cache directory: ' + Self.CacheDir + 'prices' + PATH_SEP);
 
-  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache(EConfigArchive.ITEM);
   Self.Items := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
 end;
 

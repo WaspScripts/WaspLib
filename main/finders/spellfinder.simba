@@ -91,7 +91,8 @@ begin
   if Self.Similarity = 0 then
     Self.Similarity := 0.85;
 
-  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache(EConfigArchive.ENUMS);
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache(EConfigArchive.ITEM);
   Self.Enums := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ENUMS];
   Self.Items := CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ITEM];
 

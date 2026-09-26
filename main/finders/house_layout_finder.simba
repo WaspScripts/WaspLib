@@ -34,7 +34,7 @@ procedure THouseLayoutFinder.Setup();
 const
   SPRITE_ENUM: Integer = 1423;
 begin
-  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache(EConfigArchive.ENUMS);
 
   Self.CacheEnum := TEnumDefinition.Create(
     SPRITE_ENUM,

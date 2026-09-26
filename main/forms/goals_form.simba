@@ -151,7 +151,7 @@ var
   i, spriteId: Integer;
   sprite: TSpriteDefinition;
 begin
-  CacheReader.Indices[ECacheIndex.CONFIGS].Cache();
+  CacheReader.Indices[ECacheIndex.CONFIGS].Cache(EConfigArchive.ENUMS);
   enumDef := TEnumDefinition.Create(
     SPRITE_ENUM,
     CacheReader.Indices[ECacheIndex.CONFIGS].ReferenceTable.Archives.Value[EConfigArchive.ENUMS].Files.Value[SPRITE_ENUM].Data
