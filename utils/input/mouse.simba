@@ -1,13 +1,4 @@
-(*
-# Mouse
-Methods to interact with the mouse.
 
-To see a click heatmap at the end of your botting session add the following
-compiler directive before you include WaspLib:
-```pascal
-{$DEFINE WL_DEBUG_MOUSE}
-```
-*)
 
 {$DEFINE WL_MOUSE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
@@ -18,30 +9,10 @@ compiler directive before you include WaspLib:
 {$IFDEF SIMBAHEADLESS}{$UNDEF WL_DEBUG_MOUSE}{$ENDIF}
 
 type
-(*
-## EMouseDistribution
-```pascal
-EMouseDistribution = enum(DEFAULT, RANDOM, GAUSS, SKEWED, ROWP);
-```
-The available distributions used to generate a point in a shape.
 
-- `EMouseDistribution.DEFAULT`: Uses whatever is set for {ref}`TMouse.Distribution`,
-which is `EMouseDistribution.GAUSS` by default.
-- `EMouseDistribution.RANDOM`: Completely random point
-- `EMouseDistribution.GAUSS`: Weighted towards the center of the shape
-- `EMouseDistribution.SKEWED`: Weighted torwards current mouse position
-- `EMouseDistribution.ROWP`: Weighted torwards current mouse position but more "rounded" compared to SKEWED
-
-You can view what the distributions look like by running the {ref}`Distribution Viewer`:
-```{figure} ../../images/distribution_viewer.gif
-```
-*)
   EMouseDistribution = enum(DEFAULT, RANDOM, GAUSS, SKEWED, ROWP);
 
-(*
-## TMouse
-Main record used to interact with the {ref}`Mouse`.
-*)
+
   TMouse = record
     Distribution: EMouseDistribution;
 
@@ -74,17 +45,7 @@ begin
 end;
 {$ENDIF}
 
-(*
-## Mouse.Setup
-```pascal
-procedure TMouse.Setup();
-```
-Initializes `TMouse` internal values.
 
-```{note}
-This is automatically called on the {ref}`Mouse variable`.
-```
-*)
 procedure TMouse.Setup();
 begin
   Target.Options.MouseSpeed := 12;
@@ -101,77 +62,17 @@ begin
   {$ENDIF}
 end;
 
-(*
-## Mouse variables and properties
-The following are some of the variables and properties that `TMouse` has
-available to control it's behaviour.
-*)
 
-(*
-### Mouse.Distribution
-```pascal
-TMouse.Distribution: EMouseDistribution;
-```
-Variable used to set the type of click {ref}`EMouseDistribution` distrubution
-you want the `Mouse` to use.
 
-The default value is `EMouseDistribution.GAUSS`.
 
-Read {ref}`EMouseDistribution` for more information about it.
-*)
 
-(*
-### Mouse.MissChance
-```pascal
-TMouse.MissChance: Double;
-```
-Variable used to control the miss chance of the `Mouse`.
-*)
 
-(*
-### Mouse.CanIdle
-```pascal
-TMouse.CanIdle: Boolean;
-```
-Variable used to control the whether the `Mouse` can randomly idle while
-traveling. The default is `True`.
-*)
 
-(*
-### Mouse.UseTeleport
-```pascal
-TMouse.UseTeleport: Boolean;
-```
-Variable used to control the whether the `Mouse` will teleport instead of
-traveling to it's destinations. The default is `False`.
 
-Setting this to `True` will make all the above variables and the below
-properties irrelevant as they will not be used.
 
-It will also make all of the {ref}`Mouse.Move` methods use {ref}`Mouse.Teleport`
-instead.
-*)
 
-(*
-### Mouse.Wind
-```pascal
-property TMouse.Wind: Double;
-property TMouse.Wind(value: Double);
-```
-Get/Set `TMouse` wind value.
 
-To understand what this does it might be worth reading
-[BenLand's blog](https://ben.land/post/2021/04/25/windmouse-human-mouse-movement/)
-about it as he is the original creator of the wind mouse algorithm.
 
-You can imagine `Wind` as the tendency the `Mouse` will have to spiral.
-The default value is `5`. Especially if it's increased.
-The value you set should be balanced with {ref}`Mouse.Gravity` and {ref}`Mouse.Speed`.
-
-Keep in mind that adjusting this without understanding what you are doing can
-cause the mouse to do some very weird movements, even spin forever or until
-`TMouse.Timeout` is reached.
-*)
 property TMouse.Wind: Double;
 begin
   Result := Target.Options.MouseWind;
@@ -183,36 +84,7 @@ begin
 end;
 
 
-(*
-### Mouse.Speed
-```pascal
-property TMouse.Speed: Double;
-property TMouse.Speed(value: Double);
-```
-Get/Set `TMouse` speed value.
 
-To understand what this does it might be worth reading
-[BenLand's blog](https://ben.land/post/2021/04/25/windmouse-human-mouse-movement/)
-about it as he is the original creator of the wind mouse algorithm.
-
-This should be self explanatory, basically speeds up the mouse.
-The default value is `12`.
-
-Keep in mind that adjusting this without understanding what you are doing can
-cause the mouse to do some very weird movements, even spin forever or until
-`TMouse.Timeout` is reached. Especially if it's increased.
-The value you set should be balanced with {ref}`Mouse.Wind` and {ref}`Mouse.Gravity`
-and this basically amplifies their effects.
-
-Also, despite what value you add here, there's 2 hard limits to how fast the
-mouse can travel:
-- The first is your computer speed, there's a limit to how fast your computer
-can calculate the path and/or the next pixel to move and also how fast it can
-actually move the mouse from one pixel to another.
-- The second one is that the mouse always travels pixel by pixel. When you are
-this already at your computer speed limit, increasing speed won't do anything
-the only way to make it faster would be to make it jump pixels.
-*)
 property TMouse.Speed: Double;
 begin
   Result := Target.Options.MouseSpeed;
@@ -224,17 +96,7 @@ begin
 end;
 
 
-(*
-### Mouse.Timeout
-```pascal
-property TMouse.Timeout: Integer;
-property TMouse.Timeout(value: Integer);
-```
-Get/Set `TMouse` timeout value.
 
-This is basically a failsafe that stops the mouse from moving if it's taking too
-long to reach it's destination.
-*)
 property TMouse.Timeout: Integer;
 begin
   Result := Target.Options.MouseTimeout;
@@ -246,26 +108,7 @@ begin
 end;
 
 
-(*
-### Mouse.Gravity
-```pascal
-property TMouse.Gravity: Double;
-property TMouse.Gravity(value: Double);
-```
-Get/Set `TMouse` gravity value.
 
-To understand what this does it might be worth reading
-[BenLand's blog](https://ben.land/post/2021/04/25/windmouse-human-mouse-movement/)
-about it as he is the original creator of the wind mouse algorithm.
-
-You can imagine this as a force that pulls the mouse towards it's destination.
-The default value is `9`.
-
-Keep in mind that adjusting this without understanding what you are doing can
-cause the mouse to do some very weird movements, even spin forever or until
-`TMouse.Timeout` is reached. Especially if it's decreased.
-The value you set should be balanced with {ref}`Mouse.Wind` and {ref}`Mouse.Speed`.
-*)
 property TMouse.Gravity: Double;
 begin
   Result := Target.Options.MouseGravity;
@@ -277,19 +120,7 @@ begin
 end;
 
 
-(*
-### Mouse.PressMin
-```pascal
-property TMouse.PressMin: Integer;
-property TMouse.PressMin(value: Integer);
-```
-Get/Set `TMouse` PressMin value.
 
-Basically the minimum time the `TMouse` buttons will be held when clicking.
-
-When clicking the mouse buttons the mouse button will be held a random time
-between {ref}`TMouse.PressMin` and {ref}`TMouse.PressMax`.
-*)
 property TMouse.PressMin: Integer;
 begin
   Result := Target.Options.MousePressMin;
@@ -300,19 +131,7 @@ begin
   Target.Options.MousePressMin := value;
 end;
 
-(*
-### Mouse.PressMax
-```pascal
-property TMouse.PressMax: Integer;
-property TMouse.PressMax(value: Integer);
-```
-Get/Set `TMouse` PressMax value.
 
-Basically the maximum time the `TMouse` buttons will be held when clicking.
-
-When clicking the mouse buttons the mouse button will be held a random time
-between {ref}`TMouse.PressMin` and {ref}`TMouse.PressMax`.
-*)
 property TMouse.PressMax: Integer;
 begin
   Result := Target.Options.MousePressMax;
@@ -324,38 +143,13 @@ begin
 end;
 
 
-(*
-## Mouse.Teleport
-```pascal
-procedure TMouse.Teleport(coordinate: TPoint);
-```
-Teleport the mouse to the desired `coordinate`.
 
-Example:
-```pascal
-Mouse.Teleport(50, 50);
-```
-*)
 procedure TMouse.Teleport(coordinate: TPoint);
 begin
   Target.MouseTeleport(coordinate);
 end;
 
-(*
-## Mouse.Position
-```pascal
-property TMouse.Position: TPoint;
-property TMouse.Position(value: TPoint);
-```
-Used to return or set the mouse current position as a `TPoint`.
 
-Example:
-```pascal
-WriteLn(Mouse.Position);
-Mouse.Position := [100, 100];
-WriteLn(Mouse.Position);
-```
-*)
 property TMouse.Position: TPoint;
 begin
   Result := Target.MouseXY;
@@ -369,51 +163,20 @@ begin
     Target.MouseMove(value);
 end;
 
-(*
-## Mouse.Hold
-```pascal
-procedure TMouse.Hold(button: EMouseButton);
-```
-Holds the desired mouse button down. The button will continue to be held down until {ref}`Mouse.Release` is called.
 
-Example:
-```pascal
-Mouse.Hold(EMouseButton.LEFT); // The mouse is now holding down left click.
-```
-*)
 procedure TMouse.Hold(button: EMouseButton);
 begin
   Target.MouseDown(button);
 end;
 
-(*
-## Mouse.Release
-```pascal
-procedure TMouse.Release(button: EMouseButton);
-```
-Releases the desired mouse button which has been previously held.
 
-Example:
-```pascal
-Mouse.Release(EMouseButton.LEFT);
-```
-*)
 procedure TMouse.Release(button: EMouseButton);
 begin
   Target.MouseUp(button);
 end;
 
 
-(*
-## Mouse.Idle
-```pascal
-procedure TMouse.Idle();
-```
-When **IdleInterval** is reached this is called. Override to change behavior.
-- An **IdleInterval** of **1.0** equals to the distance between the top left and bottom right of the client.
-- Assuming the client dimensions are 500,500 the distance between (0,0) and (500,500) is ~700.
-   With an **IdleInterval** of **2.0** this would automatically be called every time the mouse has travelled ~1400 pixels.
-*)
+
 procedure TMouse.Idle();
 var
   t: UInt64 := RandomLeft(1000, 20000);
@@ -422,16 +185,7 @@ begin
   Sleep(t);
 end;
 
-(*
-## Mouse.Miss
-```pascal
-function TMouse.Miss(P: TPoint): TPoint;
-```
-"Misses" the destination point **P**. Will stop somewhere along the path or overshoot.
-Returns the position the mouse was moved to.
 
-This could automatically be called depending on **Mouse.MissChance**.
-*)
 function TMouse.Miss(destination: TPoint): TPoint;
 var
   range: Integer;
@@ -453,26 +207,7 @@ begin
 end;
 
 
-(*
-## Mouse.Move
-```pascal
-procedure TMouse.Move(destination: TPoint);
-procedure TMouse.Move(circle: TCircle; forcedMove: Boolean = False; distribution: EMouseDistribution = EMouseDistribution.DEFAULT); overload;
-procedure TMouse.Move(b: TBox; forcedMove: Boolean = False; distribution: EMouseDistribution = EMouseDistribution.DEFAULT); overload;
-procedure TMouse.Move(quad: TQuad; forcedMove: Boolean = False; distribution: EMouseDistribution = EMouseDistribution.DEFAULT); overload;
-```
-Moves the mouse to the desired destination.
-This method has several overloads available that are self explanatory.
 
-Example:
-```pascal
-var p: TPoint;
-begin
-  p := TPoint.Create(50, 50);
-  Mouse.Move(p); // The mouse is now at 50,50
-end;
-```
-*)
 procedure TMouse.Move(destination: TPoint);
 var
   start: TPoint;
@@ -569,27 +304,7 @@ begin
 end;
 
 
-(*
-## Mouse.Click
-```pascal
-procedure TMouse.Click(button: EMouseButton);
-procedure TMouse.Click(destination: TPoint; button: EMouseButton); overload;
-procedure TMouse.Click(circle: TCircle; button: EMouseButton; forcedMove: Boolean = False; distribution: EMouseDistribution = EMouseDistribution.DEFAULT); overload;
-procedure TMouse.Click(b: TBox; button: EMouseButton; forcedMove: Boolean = False; distribution: EMouseDistribution = EMouseDistribution.DEFAULT); overload;
-procedure TMouse.Click(quad: TQuad; button: EMouseButton; forcedMove: Boolean = False; distribution: EMouseDistribution = EMouseDistribution.DEFAULT); overload;
-```
-Moves and clicks the mouse on the desired `destination` with the desired `button`.
-This method has several overloads available that are self explanatory.
 
-Example:
-```pascal
-var p: TPoint;
-begin
-  p := TPoint.Create(50, 50);
-  Mouse.Click(p, EMouseButton.LEFT); // Moves and clicks the mouse left button at 50,50
-end;
-```
-*)
 procedure TMouse.Click(button: EMouseButton);
 begin
   Target.MouseClick(button);
@@ -620,16 +335,7 @@ begin
 end;
 
 
-(*
-## Mouse.Drag
-```pascal
-procedure TMouse.Drag(destination: TPoint; button: EMouseButton);
-procedure TMouse.Drag(circle: TCircle; button: EMouseButton); overload;
-procedure TMouse.Drag(box: TBox; button: EMouseButton); overload;
-procedure TMouse.Drag(quad: TQuad; button: EMouseButton); overload;
-```
-Press and hold `button` while the mouse is moved to the specified `destination`.
-*)
+
 procedure TMouse.Drag(destination: TPoint; button: EMouseButton);
 begin
   Self.Hold(button);
@@ -659,28 +365,7 @@ begin
 end;
 
 
-(*
-## Mouse.Scroll
-```pascal
-procedure TMouse.Scroll(amount: Integer; down: Boolean);
-procedure TMouse.Scroll(pt: TPoint; amount: Integer; down: Boolean);
-procedure TMouse.Scroll(box: TBox; amount: Integer; down: Boolean);
-```
-Scrolls the mouse X amount of times.
-If a `TPoint P` or a `TBox b` is passed in, the mouse will be moved there to scroll.
-Otherwise, the current mouse position is used.
 
-Example:
-```pascal
-var P: TPoint;
-begin
-  P.X := 50;
-  P.Y := 50;
-  Mouse.Scroll(P, 5, True);  // Scroll 5 times down at 50,50
-  Mouse.Scroll(P, 5, False); // Scroll 5 times up at 50,50
-end;
-```
-*)
 procedure TMouse.Scroll(amount: Integer; down: Boolean);
 begin
   if not down then
@@ -701,14 +386,8 @@ begin
 end;
 
 var
-(*
-## Mouse variable
-Global {ref}`TMouse` variable.
-*)
+
   Mouse: TMouse;
 
-(*
-## ASyncMouse variable
-Global {ref}`TASyncMouse` variable.
-*)
+
   ASyncMouse: TASyncMouse;

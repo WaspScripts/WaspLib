@@ -1,59 +1,21 @@
-(*
-# ChatTabs
-Chat tabs refer to the tabs/buttons that are below the {ref}`Chat` box.
 
-You can use these to change the current chat being viewed.
-```{figure} ../../images/chattabs.png
-```
-*)
 {$DEFINE WL_CHAT_TABS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(EChatTab)=
-## EChatTab enum
-```pascal
-EChatTab = enum(NONE, ALL, GAME, PUB, PRIV, CHANNEL, CLAN, TRADE);
-```
-Enum representing each of the chat tabs available.
-*)
+
   EChatTab = enum(NONE, ALL, GAME, PUB, PRIV, CHANNEL, CLAN, TRADE);
 
-(*
-(EChatTabState)=
-## EChatTabState enum
-```pascal
-EChatTabState = enum(NONE, ENABLED, FILTERED, DISABLED, HIDE, AUTOCHAT);
-```
-Enum representing each of the filters a chat tab can have.
 
-You can see the filters when you right click the tab:
-```{figure} ../../images/chattab_filter.png
-```
-*)
   EChatTabState = enum(NONE, ENABLED, FILTERED, DISABLED, HIDE, AUTOCHAT);
 
-(*
-## TChatTabs
-Record responsible with interacting with the {ref}`ChatTabs`.
 
-In {ref}`TChat` you have a `Tabs` variable of this type.
-*)
   TChatTabs = record
     Bounds: TBox;
     Tabs: array [0..7] of TButton;
   end;
 
-(*
-## Chat.Tabs.SetupInterface
-```pascal
-procedure TChatTabs.SetupInterface();
-```
-Internal method used to setup the {ref}`TChatTabs` coordinates.
 
-This is automatically called for you on the {ref}`Chat.Tabs variable`.
-*)
 procedure TChatTabs.SetupInterface();
 var
   i: Int32;
@@ -77,18 +39,7 @@ begin
   MainScreen.Mask.DrawBoxFilled(Self.Bounds);
 end;
 
-(*
-## Chat.Tabs.GetActive
-```pascal
-function TChatTabs.GetActive(): EChatTab;
-```
-Returns the {ref}`TChatTab` that is active right now.
 
-Example:
-```pascal
-WriteLn Chat.Tabs.GetActive();
-```
-*)
 function TChatTabs.GetActive(): EChatTab;
 var
   tab: EChatTab;
@@ -98,36 +49,14 @@ begin
       Exit(tab);
 end;
 
-(*
-## Chat.Tabs.IsActive
-```pascal
-function TChatTabs.IsActive(tab: EChatTab): Boolean;
-```
-Returns True/False if the specified {ref}`EChatTab` is active right now.
 
-Example:
-```pascal
-WriteLn Chat.Tabs.IsActive(EChatTab.ALL);
-```
-*)
 function TChatTabs.IsActive(tab: EChatTab): Boolean;
 begin
   Result := Self.Tabs[tab].Enabled;
 end;
 
 
-(*
-## Chat.Tabs.Open
-```pascal
-function TChatTabs.Open(tab: EChatTab): Boolean;
-```
-Attempts to open the specified {ref}`EChatTab`.
 
-Example:
-```pascal
-WriteLn Chat.Tabs.Open(EChatTab.ALL);
-```
-*)
 function TChatTabs.Open(tab: EChatTab): Boolean;
 begin
   Result := Self.Tabs[tab].Enabled[True];
@@ -148,36 +77,13 @@ begin
       Exit(state);
 end;
 
-(*
-## Chat.Tabs.GetState
-```pascal
-function TChatTabs.GetState(tab: EChatTab): EChatTabState;
-```
-Returns the {ref}`EChatTabState` of the specified {ref}`EChatTab`.
 
-Example:
-```pascal
-WriteLn Chat.Tabs.GetState(EChatTab.PUBLIC_);
-```
-*)
 function TChatTabs.GetState(tab: EChatTab): EChatTabState;
 begin
   Result := Self._GetState(tab);
 end;
 
-(*
-## Chat.Tabs.ChangeState
-```pascal
-function TChatTabs.ChangeState(tab: EChatTab; state: EChatTabState): Boolean;
-```
-Attempts to change the state of the specified {ref}`EChatTab` to the
-specified {ref}`EChatTabState`.
 
-Example:
-```pascal
-WriteLn Chat.Tabs.GetState(EChatTab.PUBLIC_, EChatTabState.ENABLED);
-```
-*)
 function TChatTabs.ChangeState(tab: EChatTab; state: EChatTabState): Boolean;
 begin
   if Self._GetState(tab) = state then

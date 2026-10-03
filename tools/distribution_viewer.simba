@@ -1,12 +1,5 @@
 //!PACKAGE SCRIPT
-(*
-(Distribution Viewer)=
-# Tool: Distribution Viewer
-Tool to visually see random distributions available in the library in multiple shapes.
 
-```{figure} ../../images/distribution_viewer.gif
-```
-*)
 {$I WaspLib/main.simba}
 
 const DEFAULT_SHAPE: Integer = 0;

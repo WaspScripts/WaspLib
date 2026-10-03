@@ -1,18 +1,4 @@
-(*
-# RSEntities
-This file is responsible for interacting with `RSEntities`.
 
-`RSEntities` is anything in the game that has a {ref}`EDot` assign to
-it on the {ref}`Minimap`.
-
-These are functionally very similar to {ref}`RSObjects` and you create and
-interact with them almost the same way.
-
-They only differ in the fact that `TEntity` can use a {ref}`EDot` to
-help find them and/or {ref}`TDotFilters`.
-Also, due to the unpredictability of entities that move, unlike {ref}`RSObjects`
-these do not have a rotation field.
-*)
 
 {$DEFINE WL_ENTITIES_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -28,10 +14,7 @@ end;
 type
   ENPCData = enum(ID, NAME, LEVEL, CATEGORY, MINIMAPDOT, ACTIONS, SIZE, COORDINATES, COLORS);
 
-(*
-## TEntity
-Main type to handle {ref}`RSEntity`.
-*)
+
   TEntity = record
     UpText: TStringArray;
     Size, Offset: TVector3;
@@ -47,48 +30,10 @@ Main type to handle {ref}`RSEntity`.
 
   PRSEntity = ^TEntity;
 
-(*
-## TEntityArray
-Array of {ref}`TEntity`.
-*)
+
   TEntityArray = array of TEntity;
 
-(*
-## TEntity.Create
-```pascal
-function TEntity.Create(var walker: TWalker; size: TVector3; coordinates: TPointArray; uptext: TStringArray = []; dots: EDots = []): TEntity; static;
-function TEntity.Create(var walker: TWalker; json: TJSONObject): TEntity; static; overload;
-```
-Create function to create your {ref}`TEntity`.
 
-Assuming you create the `RSEntity` manually, the create function will provide
-you with a fully built `TEntity` without a finder.
-
-You may optionally assign one later if you want:
-```pascal
-{$I WaspLib/main.simba}
-var
-  npc: TEntity;
-begin
-  Map.Setup([EChunk.VARROCK]);             //varrock west southern most banker
-  npc := TEntity.Create(Map.Walker, [1,1,7], [[8652,36686]], ['Banker'], [EDot.NPC]);
-  //npc.Finder.Colors += [$543B3B, 10.121, EColorSpace.HSV, [0.528, 1.275, 1.199]];
-end;
-```
-
-The `json` version of the function expects a specific json structure which is
-the one that {ref}`Map JSONs` provide:
-```pascal
-{$I WaspLib/main.simba}
-var
-  npc: TEntity;
-begin
-  Map.Setup([EChunk.VARROCK]);
-  //Item[0] because this returns a JSON array. For more info read Map JSONs documentation.
-  npc := TEntity.Create(Map.Walker, NPCsJSON.GetByName('banker', 1).Item[0]);
-end;
-```
-*)
 function TEntity.Create(var walker: TWalker; size: TVector3; radius: Integer; coordinates: TPointArray; uptext: TStringArray = []; dots: EDots = []): TEntity; static;
 var
   pt: TPoint;
@@ -185,28 +130,7 @@ begin
   Result.DotOffset := [1,1];
 end;
 
-(*
-## TEntityArray.Create
-```pascal
-function TEntityArray.Create(json: TJSONArray): TEntityArray; static;
-```
-Create function to build your {ref}`TEntityArray`.
 
-This only accepts a `json` array and it expects a specific json structure which is
-the one that {ref}`Map JSONs` provide.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-
-var
-  entities: TEntityArray;
-begin
-  Map.Setup([EChunk.VARROCK]);
-  entities := TEntityArray.Create(Map.Walker, NPCsJSON.GetByName('Banker'));
-end;
-```
-*)
 function TEntityArray.Create(var walker: TWalker; json: TJSONArray): TEntityArray; static;
 var
   i: Integer;
@@ -220,13 +144,7 @@ begin
 end;
 
 
-(*
-## Entity._GetBounds
-```pascal
-function TEntity._GetBounds(me: TPoint; vector: TVector2; size: TVector3; height, radians: Single): TCuboid;
-```
-Internal helper function for {ref}`TEntity.GetBoundsArray`.
-*)
+
 function TEntity._GetBounds(me: TPoint; vector: TVector2; size: TVector3; height, radians: Single): TPolygon;
 var
   corners: TVector3Array;
@@ -270,14 +188,7 @@ begin
   Result := Projection.Run(corners, radians).ConvexHull();
 end;
 
-(*
-## Entity.GetBoundsArray
-```pascal
-function TEntity.GetBoundsArray(me: TPoint; angle: Single = $FFFF): TCuboidArray;
-```
-Internal function that returns an array of cuboids of the entity if it's visible
-on the {ref}`MainScreen`.
-*)
+
 function TEntity.GetBoundsArray(me: TPoint; out coordinates: TPointArray; radians: Single): TPolygonArray;
 var
   weights: TDoubleArray;
@@ -341,15 +252,7 @@ begin
   end;
 end;
 
-(*
-## TEntity.Find
-```pascal
-function TEntity.Find(cuboidArray: TCuboidArray): T2DPointArray;
-```
-Internal TEntity method responsible for filtering a TCuboidArray by what's visible in the mainscren.
-This is meant to filter TEntity.GetBoundsArray() so targets that are outside of the mainscreen are filtered out.
-You will probably never need to use this directly.
-*)
+
 function TEntity.FindOnMainScreen(out coordinates: TPointArray; boundsArray: TPolygonArray): T2DPointArray;
 var
   i: Integer;
@@ -374,21 +277,7 @@ begin
 end;
 {$R-}
 
-(*
-## TEntity.FindEx
-```pascal
-function TEntity.FindEx(me: TPoint; out boundsArray: TPolygonArray; out coordinates: TPointArray; out atpa: T2DPointArray): Boolean;
-```
-Internal {ref}`TEntity` method used to find a {ref}`RSEntity`.
 
-You also have {ref}`RSEntity.Find` to find entities, this version of the method
-is internal because it returns extra information about the found entities for
-internal use, like it's `cuboids` for example.
-
-This also returns an `atpa` containing the colors of the entity that were found
-assuming the entity has a {ref}`TColorFinder` setup.
-If not, the cuboids area are returned as the match.
-*)
 function TEntity.FindEx(me: TPoint; out boundsArray: TPolygonArray; out coordinates: TPointArray; out atpa: T2DPointArray): Boolean;
 begin
   boundsArray := Self.GetBoundsArray(me, coordinates, Minimap.CompassRadians);
@@ -399,19 +288,7 @@ begin
 end;
 
 
-(*
-## RSEntity.Find
-```pascal
-function TEntity.Find(out coordinates: TPointArray; out atpa: T2DPointArray): Boolean;
-function TEntity.Find(out atpa: T2DPointArray): Boolean; overload;
-```
-{ref}`TEntity` method used to find a {ref}`RSEntity`.
-This returns True/False if the entity was found and it's `atpa` which cointains
-the colors of it that were found.
 
-For more information on this refer to {ref}`TEntity.FindEx`, it's an internal
-function but is used within this one and will go into more detail.
-*)
 function TEntity.Find(out coordinates: TPointArray; out atpa: T2DPointArray): Boolean;
 var
   boundsArray: TPolygonArray;
@@ -428,13 +305,7 @@ begin
 end;
 
 
-(*
-## Entity.IsVisible
-```pascal
-function TEntity.IsVisible(): Boolean;
-```
-Returns a boolean whether the entity is currently visible or not.
-*)
+
 function TEntity.IsVisible(): Boolean;
 var
   coordinates: TPointArray;
@@ -453,14 +324,7 @@ begin
   Result := Self.FindEx(position, boundsArray, coordinates, atpa);
 end;
 
-(*
-## TEntity._UpTextCheck
-```pascal
-function TEntity._UpTextCheck(out shouldExit: Boolean; action: TStringArray): Boolean;
-```
-Internal TEntity helper method that is used by all hovering methods.
-You probably don't need to use this directly.
-*)
+
 function TEntity._UpTextCheck(out shouldExit: Boolean; action: TStringArray): Boolean;
 var
   text: String;
@@ -488,16 +352,7 @@ begin
 end;
 
 
-(*
-## TEntity._ClickHelper
-```pascal
-function TEntity._ClickHelper(leftClick: Boolean): Boolean;
-```
-Internal TEntity helper method that is used by other clicking methods.
-You probably don't need to use this directly.
 
-This is what's responsible for deciding if we click a target we are hovering or not.
-*)
 function TEntity._ClickHelper(leftClick: Boolean): Boolean;
 begin
   if Self.Walker^.RedClicked then
@@ -520,16 +375,7 @@ begin
   Result := not leftClick and (Self.UpText <> []) and ChooseOption.Select(Self.UpText);
 end;
 
-(*
-## TEntity._SelectHelper
-```pascal
-function TEntity._SelectHelper(action: TStringArray): Boolean;
-```
-Internal TEntity helper method that is used by other select methods.
-You probably don't need to use this directly.
 
-This is what is responsible for deciding if we just left click a target we are hovering or right click it and choose an option.
-*)
 function TEntity._SelectHelper(action: TStringArray): Boolean;
 begin
   if Self.Walker^.RedClicked then
@@ -548,25 +394,7 @@ begin
 end;
 
 
-(*
-## TEntity.Hover
-```pascal
-function TEntity.Hover(action: TStringArray = []; attempts: Integer = 2): Boolean;
-```
-Method used to hover a TEntity target if it's found on the {ref}`MainScreen`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  npc: TEntity;
-begin
-  Map.Setup([Chunk(Box(40,49,41,48), 0)]);
-  npc := TEntity.Create(Map.Walker, [1,1,7], 8, [[10432, 37966]], ['Dominic Onion'], [EDot.NPC]);
-  WriteLn npc.Hover();
-end.
-```
-*)
 function TEntity.Hover(action: TStringArray = []; attempts: Integer = 2): Boolean;
 var
   me: TPoint;
@@ -619,26 +447,7 @@ begin
   end;
 end;
 
-(*
-## TEntity.WalkHover
-```pascal
-function TEntity.WalkHover(action: TStringArray = []; attempts: Integer = 2): Boolean;
-```
-Method used to walk and hover a TEntity target if it's found on the
-{ref}`MainScreen` after walking.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  npc: TEntity;
-begin
-  Map.Setup([Chunk(Box(40,49,41,48), 0)]);
-  npc := TEntity.Create(Map.Walker, [1,1,7], 8, [[10432, 37966]], ['Dominic Onion'], [EDot.NPC]);
-  WriteLn npc.WalkHover();
-end.
-```
-*)
 function TEntity.WalkHover(action: TStringArray = []; attempts: Integer = 2): Boolean;
 var
   me, closest: TPoint;
@@ -706,75 +515,19 @@ begin
 end;
 
 
-(*
-## TEntity.Click
-```pascal
-function TEntity.Click(leftClick: Boolean = True; attempts: Integer = 2): Boolean;
-```
-Method used to click a TEntity target if it's found on the {ref}`MainScreen`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  npc: TEntity;
-begin
-  Map.Setup([Chunk(Box(40,49,41,48), 0)]);
-  npc := TEntity.Create(Map.Walker, [1,1,7], 8, [[10432, 37966]], ['Dominic Onion'], [EDot.NPC]);
-  WriteLn npc.Click();
-end.
-```
-*)
 function TEntity.Click(leftClick: Boolean = True; attempts: Integer = 2): Boolean;
 begin
   Result := Self.Hover([], attempts) and Self._ClickHelper(leftClick);
 end;
 
-(*
-## TEntity.Interact
-```pascal
-function TEntity.Interact(action: TStringArray; attempts: Integer = 2): Boolean;
-```
-Method used to select an option on a TEntity target if it's found on the
-{ref}`MainScreen`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  npc: TEntity;
-begin
-  Map.Setup([Chunk(Box(40,49,41,48), 0)]);
-  npc := TEntity.Create(Map.Walker, [1,1,7], 8, [[10432, 37966]], ['Dominic Onion'], [EDot.NPC]);
-  WriteLn npc.Interact(['Dream']);
-end.
-```
-*)
 function TEntity.Interact(action: TStringArray; attempts: Integer = 2): Boolean;
 begin
   Result := Self.Hover(action, attempts) and Self._SelectHelper(action);
 end;
 
-(*
-## TEntity.WalkClick
-```pascal
-function TEntity.WalkClick(leftClick: Boolean = True; attempts: Integer = 2): Boolean;
-```
-Method used to walk and click a TEntity target if it's found on the
-{ref}`MainScreen`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  npc: TEntity;
-begin
-  Map.Setup([Chunk(Box(40,49,41,48), 0)]);
-  npc := TEntity.Create(Map.Walker, [1,1,7], 8, [[10432, 37966]], ['Dominic Onion'], [EDot.NPC]);
-  WriteLn npc.WalkClick();
-end.
-```
-*)
 function TEntity.WalkClick(leftClick: Boolean = True; attempts: Integer = 2): Boolean;
 begin
   if Self.Walker = nil then
@@ -785,26 +538,7 @@ begin
   Result := Self.WalkHover([], attempts) and Self._ClickHelper(leftClick);
 end;
 
-(*
-## TEntity.WalkInteract
-```pascal
-function TEntity.WalkInteract(action: TStringArray; attempts: Integer = 2): Boolean;
-```
-Method used to walk and select an option on a TEntity target if it's found on
-the mainscreen.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  npc: TEntity;
-begin
-  Map.Setup([Chunk(Box(40,49,41,48), 0)]);
-  npc := TEntity.Create(Map.Walker, [1,1,7], 8, [[10432, 37966]], ['Dominic Onion'], [EDot.NPC]);
-  WriteLn npc.WalkInteract(['Dream']);
-end.
-```
-*)
 function TEntity.WalkInteract(action: TStringArray; attempts: Integer = 2): Boolean;
 begin
   if Self.Walker = nil then
@@ -847,14 +581,7 @@ begin
     end;
 end;
 
-(*
-## DrawEntity
-```pascal
-procedure TImage.DrawEntity(const entity: TEntity; alpha: Byte = $C8);
-procedure TExternalCanvas.DrawEntity(const entity: TEntity; alpha: Byte = $C8);
-```
-Helper methods to debug TEntitys.
-*)
+
 procedure TImage.DrawEntity(const entity: TEntity; alpha: Byte = $C8);
 var
   me: TPoint;
@@ -936,13 +663,7 @@ begin
 end;
 
 
-(*
-## ShowOnTarget TEntity
-```pascal
-procedure ShowOnTarget(entity: TEntity); overload;
-```
-Shows an image of the target with the `TEntity` drawn on it.
-*)
+
 procedure ShowOnTarget(entity: TEntity); overload;
 var
   img: TImage;
@@ -952,13 +673,7 @@ begin
   img.Show();
 end;
 
-(*
-## ShowOnTarget TEntityArray
-```pascal
-procedure ShowOnTarget(entities: TEntityArray); overload;
-```
-Shows an image of the target with the `TEntityArray` drawn on it.
-*)
+
 
 procedure ShowOnTarget(entities: TEntityArray); overload;
 var

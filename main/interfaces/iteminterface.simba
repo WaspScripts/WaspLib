@@ -1,53 +1,10 @@
-(*
-# ItemInterface
-Methods to interact item interfaces.
 
-"Item interfaces" in WaspLib refers to any interface that is an item container.
-
-In other words, if an interface has holds items, it's both a {ref}`SlotInterface` and
-{ref}`ItemInterface`.
-
-Examples of "item containers" are:
-- {ref}`Inventory`
-- {ref}`Equipment`
-- {ref}`Bank`
-- {ref}`DepositBox`
-- {ref}`CollectBox`
-
-Just because an interface is an "item container", does not mean it uses
-{ref}`ItemInterface`, but all the examples above do and you can access it through their
-`Items` variable, for example:
-```pascal
-Inventory.Items;
-Equipment.Items;
-Bank.Items;
-```
-
-```{note}
-Throughout this page examples, {ref}`Inventory` will be used in most of them
-but any interface that has a {ref}`TItemInterface` variable can used
-instead.
-```
-
-Lastly, {ref}`TItemInterface` uses `ItemFinder` underneath and there's 2 main types of
-methods:
-- {ref}`Finding methods`
-- {ref}`Recognize methods`
-*)
 
 {$DEFINE WL_ITEM_INTERFACE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TItemInterface
-Main record to handle a {ref}`ItemInterface`.
 
-```{note}
-Throughout this page `Items` will always refer to a `TItemInterface` variable
-unless specified otherwise.
-```
-*)
   TItemInterface = record
     Name: String;
     Slots: ^TSlotInterface;
@@ -55,36 +12,7 @@ unless specified otherwise.
     PreConditionFunction: TInterfacePreConditionFunction;
   end;
 
-(*
-## Items.Setup
-```pascal
-procedure TItemInterface.Setup(name: String; slots: ^TSlotInterface; discoverOffset: TPoint; checkFunc: function (): Boolean of object = nil);
-```
-Setup method of the {ref}`ItemInterface`.
 
-All interfaces included in WaspLib that use a {ref}`ItemInterface` already call
-this automatically for you.
-
-Unless you create your own, you don't need to use it.
-
-To setup a `TItemInterface`, your interface also needs a
-{ref}`TSlotInterface` and you need to pass a pointer to it through this.
-
-`checkFunc` should a function to check if the interface is open.
-This is optional but recommended as it will avoid your scripts do actions by
-accident if the interface is not open in the first place for some reason.
-
-For example, this is how {ref}`Inventory` and {ref}`Bank` setup their
-`TItemInterface`:
-```pascal
-//Inventory:
-Inventory.Slots.Setup('Inventory.Slots', TBoxArray.Create(GameTab.TopLeft.Offset(13,9), 4, 7, 31, 31, [11, 5]));
-Inventory.Items.Setup('Inventory.Items', @Inventory.Slots, [0, 0], @Inventory.Open);
-//Bank:
-Bank.Slots.Setup('Bank.Slots', Bank.SlotBoxes, @Bank.FindItemBoundaries);
-Bank.Items.Setup('Bank.Items', @Bank.Slots, [0, 1], @Bank.IsOpen);
-```
-*)
 procedure TItemInterface.Setup(
   name: String;
   slots: ^TSlotInterface;
@@ -99,35 +27,9 @@ begin
 end;
 
 
-(*
-(Finding methods)=
-## Item finding methods
-The following methods are what we call "Finding" methods.
 
-They work by loading up an image(s) of the item(s) you want to find and go over each slot
-the interface has, screenshotting each slot and comparing the images to deduce whether
-what's on the slot matches what you are looking for.
 
-This is very reliable, the only caveat is that you need to know the item you want in
-advance which is not possible in some situations, in that case you will need one of the
-{ref}`Recognize methods`.
-*)
 
-(*
-### Items.IndexOf
-```pascal
-function TItemInterface.IndexOf(items: TItemArray): Integer;
-```
-Returns the index of the first item found in `items`.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.IndexOf(['abyssal whip', 'dragon scimitar']);
-end.
-```
-*)
 function TItemInterface.IndexOf(items: TItemArray): Integer;
 var
   match: TImageMatch;
@@ -140,21 +42,7 @@ begin
 end;
 
 
-(*
-### Items.IndicesOf
-```pascal
-function TItemInterface.IndicesOf(items: TItemArray): TIntegerArray;
-```
-Returns all the indices of the `items` found in the `TItemInterface`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.IndicesOf(['abyssal whip', 'dragon scimitar']);
-end.
-```
-*)
 function TItemInterface.IndicesOf(items: TItemArray): TIntegerArray;
 var
   matches: TImageMatchArray;
@@ -170,27 +58,7 @@ begin
 end;
 
 
-(*
-### Items.FindAny
-```pascal
-function TItemInterface.FindAny(items: TItemArray; out slot: TBox): Boolean;
-```
-Returns a True/False if any item in `items` was found and returns it's `TBox`
-through `slot`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  bounds: TBox;
-begin
-  if Inventory.Items.FindAny(['abyssal whip', 'cake'], bounds) then
-    ShowOnTarget(bounds);
-end.
-```
-```{figure} ../../images/itemfind.png
-```
-*)
 function TItemInterface.FindAny(items: TItemArray; out slot: TBox): Boolean;
 var
   match: TImageMatch;
@@ -203,29 +71,7 @@ begin
     slot := match.Box;
 end;
 
-(*
-### Items.Find
-```pascal
-function TItemInterface.Find(item: TItem; out slot: TBox): Boolean;
-function TItemInterface.Find(items: TItemArray; out slot: Integer): Boolean; overload;
-function TItemInterface.Find(item: TItem; out slot: Integer): Boolean; overload;
-```
-Returns a True/False if the specified `item` or `items` were found and returns
-their `TBox` or slot index through `slot`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  bounds: TBox;
-begin
-  if Inventory.Items.Find('cake', bounds) then
-    ShowOnTarget(bounds);
-end.
-```
-```{figure} ../../images/itemfind.png
-```
-*)
 function TItemInterface.Find(item: TItem; out slot: TBox): Boolean;
 begin
   Result := Self.FindAny([item], slot);
@@ -249,32 +95,7 @@ begin
 end;
 
 
-(*
-### Items.FindAll
-```pascal
-function TItemInterface.FindAll(items: TItemArray): TBoxArray;
-function TItemInterface.FindAll(items: TItemArray; out slots: TIntegerArray): Boolean; overload;
-function TItemInterface.FindAll(items: TItemArray; out boxes: TBoxArray): Boolean; overload;
-```
-This function has several signatures, so depending on which one you use the
-parameters and/or results will vary but it all should be self explanatory.
 
-You can use this to know if all the specified `items` are visible in the
-`ItemInterface` and/or return their bounds as a `TBoxArray`.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  boxes: TBoxArray;
-begin
-  boxes := Inventory.Items.FindAll(['abyssal whip', 'cake']);
-  ShowOnTarget(boxes);
-end.
-```
-```{figure} ../../images/itemfindall.png
-```
-*)
 function TItemInterface.FindAll(items: TItemArray): TBoxArray;
 var
   match: TImageMatch;
@@ -317,70 +138,19 @@ begin
 end;
 
 
-(*
-### Items.Contains
-```pascal
-function TItemInterface.Contains(item: TItem): Boolean;
-```
-Returns True/False if the specified `item` is visible in the interface.
 
-Keep in mind for interfaces that can "contain" the item but it's currently not
-visible like the {ref}`Bank` for example, this will return false.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.Contains('abyssal whip');
-end.
-```
-*)
 function TItemInterface.Contains(item: TItem): Boolean;
 begin
   Result := Self.IndexOf([Item]) > -1;
 end;
 
-(*
-### Items.ContainsAny
-```pascal
-function TItemInterface.ContainsAny(items: TItemArray): Boolean;
-```
-Returns True/False if any of the specified `items` is visible in the interface.
 
-Keep in mind for interfaces that can "contain" an item but it's currently not
-visible like the {ref}`Bank` for example, this will not make this return true.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.ContainsAny(['abyssal whip', 'cake']);
-end.
-```
-*)
 function TItemInterface.ContainsAny(items: TItemArray): Boolean;
 begin
   Result := Self.IndexOf(items) > -1;
 end;
 
-(*
-### Items.ContainsAll
-```pascal
-function TItemInterface.ContainsAll(items: TItemArray): Boolean;
-```
-Returns True/False if all of the specified `items` are visible in the interface.
 
-Keep in mind for interfaces that can "contain" an item but it's currently not
-visible like the {ref}`Bank` for example, this will return false.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.ContainsAny(['abyssal whip', 'cake']);
-end.
-```
-*)
 function TItemInterface.ContainsAll(items: TItemArray): Boolean;
 var
   matches: TImageMatchArray;
@@ -391,43 +161,13 @@ begin
 end;
 
 
-(*
-### Items.FindDifferent
-```pascal
-function TItemInterface.FindDifferent(items: TItemArray): TIntegerArray;
-```
-This one may be a little bit confusing but it returns the indices of all slots
-that have items that are not any of the specified `items`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.FindDifferent(['abyssal whip', 'cake']);
-end.
-```
-*)
 function TItemInterface.FindDifferent(items: TItemArray): TIntegerArray;
 begin
   Result := Self.Slots^.GetUsed().Difference(Self.IndicesOf(items));
 end;
 
-(*
-### Items.ContainsDifferent
-```pascal
-function TItemInterface.ContainsDifferent(items: TItemArray): Boolean;
-```
-Similar to {ref}`Items.FindDifferent` but returns a boolean if any slots have
-items that are not any of the specified `items`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.ContainsDifferent(['abyssal whip', 'cake']);
-end.
-```
-*)
 function TItemInterface.ContainsDifferent(items: TItemArray): Boolean;
 begin
   Result := Self.FindDifferent(items) <> [];
@@ -435,51 +175,9 @@ end;
 
 
 
-(*
-(Recognize methods)=
-## Item recognize methods
-The following methods are what we call "Recognize" methods.
 
-They work by screenshotting each slot of the interface, cleaning it's background and
-hashing the result. With the resulting hash the `ItemFinder.Database` is queried for a
-known match.
 
-This is very fast, the downside in comparison to a {ref}`Finding method` is that you can
-get multiple items recognized per slot.
-There's several items in game that share the same exact sprite and there's no way to know
-just from the image exactly what an item is.
-For example, if you have `bones` in your inventory, you will get back:
-```
-sheep bones (3), sheep bones (2), sheep bones (1), human bones, sheep bones (4), bones, alan's bones, bat bones, small ninja monkey bones, small zombie monkey bones, medium ninja monkey bones, monkey bones
-```
-Because all those items share the same image as `bones`.
 
-For this reason, these methods return `TItemArrays` and it's up to you to deduce what
-which item of the returned ones is the correct one.
-
-Another thing important to note, is that for consistency reasons, the top 9 pixels of the images are ignored.
-This is because when an item is stackable you need to wipe those pixels and because
-stackable items whose you have just 1 don't have a stack number, the only consistent way
-to do this is to always ignore those top pixels for every item.
-
-The result of this is that certain items where the result should be obvious, it's not for
-WaspLib, e.g. if you have any spear, because their tip is on the top 9 pixels and it gets
-ignored, whatever spear you have will always return all spears as a match:
-```
-rune spear(p), adamant spear(p), mithril spear(p), bronze spear, iron spear, bronze spear(p), steel spear, adamant spear, steel spear(p), iron spear(p), mithril spear, rune spear, adamant spear(kp), rune spear(kp), mithril spear(kp), iron spear(kp), steel spear(kp), bronze spear(kp), black spear, black spear(kp), black spear(p), rune spear(p++), adamant spear(p++), black spear(p++), black spear(p+), mithril spear(p++), bronze spear(p++), rune spear(p+), steel spear(p++), iron spear(p++), adamant spear(p+), iron spear(p+), bronze spear(p+), mithril spear(p+), steel spear(p+)
-```
-Same applies to most arrows, most bolts, most elemental staves and any item that only has a
-difference on the top 9 pixels.
-*)
-
-(*
-### Items._GetShadowHash
-```pascal
-function TItemInterface._GetShadowHash(slot: Integer): UInt32;
-```
-Mostly used for debugging, has no real other use currently. In a nutshell, extracts the
-shadow of an item in the specified slot and returns the hash of that shadow.
-*)
 function TItemInterface._GetShadowHash(slot: Integer): UInt32;
 var
   b: TBox;
@@ -496,14 +194,7 @@ begin
   Result := TItemSprite.GetBorderCRC(Target.GetImage(b));
 end;
 
-(*
-### Items._GetHash
-```pascal
-function TItemInterface._GetHash(slot: Integer): UInt32;
-function TItemInterface._GetHash(img: TImage): String; overload;
-```
-Internal method to get an hash of an item in a slot.
-*)
+
 function TItemInterface._GetHash(slot: Integer): UInt32;
 var
   b: TBox;
@@ -524,14 +215,7 @@ begin
   Result := ItemFinder.GetHash(img);
 end;
 
-(*
-### Items._Recognize
-```pascal
-function TItemInterface._Recognize(slot: Integer): TItemArray;
-function TItemInterface._Recognize(img: TImage): TItemArray; overload;
-```
-Internal method to get an a `TItemArray` of the possible items in the given `slot`.
-*)
+
 function TItemInterface._Recognize(slot: Integer): TItemArray;
 var
   hash: UInt32;
@@ -551,32 +235,7 @@ begin
 end;
 
 
-(*
-### Items.Recognize
-```pascal
-function TItemInterface.Recognize(slot: Integer): TItemArray;
-```
-Attempts to recognize an item in the given `slot` and returns a `TItemArray` of possible
-results.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.Recognize(0);
-end.
-```
-Assuming you have `coins` in the first slot of your inventory like this:
-```{figure} ../../images/items-recognize.png
-```
-You should see something
-like this printed:
-```
-[coins]
-```
-Otherwise you should see a list of possible items for the item you have in that slot if
-any.
-*)
 function TItemInterface.Recognize(slot: Integer): TItemArray;
 begin
   if (@Self.PreConditionFunction <> nil) and not Self.PreConditionFunction() then
@@ -584,61 +243,7 @@ begin
   Result := Self._Recognize(slot);
 end;
 
-(*
-### Items.RecognizeAllEx
-```pascal
-function TItemInterface.RecognizeAllEx(): array of TItemArray;
-```
-Attempts to recognize all items the inventory and returns and `array of TItemArray`.
-Each index of the outter array is the represents the slot number.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  items: TItemArray;
-begin
-  for items in Inventory.Items.RecognizeAllEx() do
-    WriteLn items;
-end.
-```
-Assuming your inventory looks like this:
-```{figure} ../../images/items-recognize.png
-```
-You should get this printed:
-```
-[coins]
-[steel axe]
-[rune spear(p), adamant spear(p), mithril spear(p), bronze spear, iron spear, bronze spear(p), steel spear, adamant spear, steel spear(p), iron spear(p), mithril spear, rune spear, adamant spear(kp), rune spear(kp), mithril spear(kp), iron spear(kp), steel spear(kp), bronze spear(kp), black spear, black spear(kp), black spear(p), rune spear(p++), adamant spear(p++), black spear(p++), black spear(p+), mithril spear(p++), bronze spear(p++), rune spear(p+), steel spear(p++), iron spear(p++), adamant spear(p+), iron spear(p+), bronze spear(p+), mithril spear(p+), steel spear(p+)]
-[sheep bones (3), sheep bones (2), sheep bones (1), human bones, sheep bones (4), bones, alan's bones, bat bones, small ninja monkey bones, small zombie monkey bones, medium ninja monkey bones, monkey bones]
-[angler hat]
-[angler top]
-[angler boots]
-[angler waders]
-[sheep bones (3), sheep bones (2), sheep bones (1), human bones, sheep bones (4), bones, alan's bones, bat bones, small ninja monkey bones, small zombie monkey bones, medium ninja monkey bones, monkey bones]
-[]
-[spice, gnome spice]
-[]
-[]
-[]
-[water rune (nz), board game piece, water rune]
-[]
-[yommi tree seeds, mithril seeds]
-[]
-[]
-[pet kitten]
-[]
-[limestone]
-[fire rune (nz), fire rune, board game piece]
-[]
-[]
-[charcoal]
-[damaged armour]
-[hammer]
-```
-Otherwise you should see a list of possible items for the item you have in that slot if
-any.
-*)
 function TItemInterface.RecognizeAllEx(): array of TItemArray;
 var
   img: TImage;
@@ -662,33 +267,7 @@ begin
   end;
 end;
 
-(*
-### Items.RecognizeAll
-```pascal
-function TItemInterface.RecognizeAll(): TItemArray;
-```
-Attempts to recognize all items the inventory and returns them as a `TItemArray`.
 
-This is essentially the same as {ref}`Items.RecognizeAllEx` but with a "flatted" out
-result.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.RecognizeAll();
-end.
-```
-Assuming your inventory looks like this:
-```{figure} ../../images/items-recognize.png
-```
-You should get this printed:
-```
-[coins, steel axe, rune spear(p), sheep bones (3), angler hat, angler top, angler boots, angler waders, sheep bones (3), spice, water rune (nz), yommi tree seeds, pet kitten, limestone, fire rune (nz), charcoal, damaged armour, hammer]
-```
-Otherwise you should see a list of possible items for the item you have in that slot if
-any.
-*)
 function TItemInterface.RecognizeAll(): TItemArray;
 var
   img: TImage;
@@ -717,25 +296,7 @@ end;
 
 
 
-(*
-## Items.Count
-```pascal
-function TItemInterface.Count(items: TItemArray): Integer;
-function TItemInterface.Count(item: TItem): Integer; overload;
-```
-Returns the amount of `items` or `item` that are/is visible in the interface.
 
-Keep in mind for interfaces that can "contain" the item but it's currently not
-visible like the {ref}`Bank` for example, this will not count those.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.Count(['abyssal whip', 'cake']);
-end.
-```
-*)
 function TItemInterface.Count(items: TItemArray): Integer;
 begin
   Result := Length(Self.IndicesOf(items));
@@ -747,27 +308,7 @@ begin
 end;
 
 
-(*
-## Items.WaitCount
-```pascal
-function TItemInterface.WaitCount(items: TItemArray; count: Integer; time: Integer = 600; interval: Integer = -1): Boolean;
-function TItemInterface.WaitCount(item: TItem; count: Integer; time: Integer = 600; interval: Integer = -1): Boolean; overload;
-```
-Waits `time` milliseconds for {ref}`Items.Count` to return the specified `count`
-for the specified `items` or `item`.
 
-Keep in mind, like similar functions mentioned in this page, for interfaces that
-can "contain" the item but it's currently not visible like the {ref}`Bank`
-for example, this will not count those.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.WaitCount(['abyssal whip', 'cake'], 10, 600);
-end.
-```
-*)
 function TItemInterface.WaitCount(items: TItemArray; count: Integer; time: Integer = 600; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -781,32 +322,7 @@ begin
 end;
 
 
-(*
-## Items.ReadStack
-```pascal
-function TItemInterface.ReadStack(item: TItem): Integer;
-```
-Reads the stack of the specified `item` if it's visible on the interface.
 
-Keep in mind, like similar functions mentioned in this page, for interfaces that
-can "contain" the item but it's currently not visible like the {ref}`Bank`
-for example, this will not read those.
-
-If the item if not found `-1` is returned.
-If `0` is returned it means that the item was found but has no stack number.
-
-This is important to keep in mind because in most interfaces, even if an item
-is stackable, if there's only a quantity of 1 available, it won't have a stack
-number.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.ReadStack('coins');
-end.
-```
-*)
 function TItemInterface.ReadStack(item: TItem): Integer;
 var
   b: TBox;
@@ -817,25 +333,7 @@ end;
 
 
 
-(*
-## Items.CountEx
-```pascal
-function TItemInterface.CountEx(item: TItem): Integer;
-```
-Special counting method that will an item regardless of it being stackable or
-not.
 
-To put it simply, if the item is stackable it will read it's stack count,
-otherwise, it will return how many you have in the interface, currently visible.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.CountEx('coins');
-end.
-```
-*)
 function TItemInterface.CountEx(item: TItem): Integer;
 var
   slots: TIntegerArray;
@@ -850,23 +348,7 @@ end;
 
 
 
-(*
-## Items.Hover
-```pascal
-function TItemInterface.Hover(item: TItem): Boolean;
-```
-Hover the specified `item` with the mouse.
 
-If the item is not visible, nothing happens and this returns False.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.Hover('cake');
-end.
-```
-*)
 function TItemInterface.Hover(item: TItem): Boolean;
 var
   box: TBox;
@@ -875,47 +357,14 @@ begin
   if Result then Mouse.Move(box);
 end;
 
-(*
-## Items.Click
-```pascal
-function TItemInterface.Click(item: TItem; button: EMouseButton = EMouseButton.LEFT): Boolean;
-```
-Clicks the specified `item` with the specified `button`.
 
-If the item is not visible, nothing happens and this returns False.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Items.Click('cake');
-end.
-```
-*)
 function TItemInterface.Click(item: TItem; button: EMouseButton = EMouseButton.LEFT): Boolean;
 begin
   Result := Self.Hover(item);
   if Result then Target.MouseClick(button);
 end;
 
-(*
-## Items.Move
-```pascal
-function TItemInterface.Move(item: TItem; destination: Integer): Boolean; overload;
-function TItemInterface.Interact(slot: Integer; option: String = ''): Boolean; overload;
-```
-If the specified `item` is visible, move it to slot `destination`.
 
-If it's not visible this returns False and nothing happens.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Inventory.Items.Move('cake', 6);
-end.
-```
-*)
 function TItemInterface.Move(item: TItem; destination: Integer): Boolean; overload;
 var
   slots: TBoxArray;
@@ -949,26 +398,7 @@ begin
 end;
 
 
-(*
-## Items.Interact
-```pascal
-function TItemInterface.Interact(item: TItem; option: String = ''): Boolean;
-```
-Interacts with `item` if it is visible with the specified `option`.
 
-If `item` is not visible this returns False and nothing happens.
-
-If `option` is empty or if `option` is the default {ref}`UpText` for the item
-this will simply left click it.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Inventory.Items.Interact('Prayer potion(3)', 'Drop');
-end.
-```
-*)
 function TItemInterface.Interact(item: TItem; option: String = ''): Boolean;
 begin
   if not Self.Hover(item) then Exit;

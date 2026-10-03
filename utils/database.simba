@@ -1,67 +1,4 @@
-(*
-# Database
-`TDatabase` is used to create a extremely basic single table database.
 
-Despite being basic it's very effective and fast and you can use this when you
-have a large set of data and need to retrieve values very fast.
-
-To make this possible `TDatabase` creates several maps between the data and
-their respective row placement, so to use this you need to have your data
-prepared, split into database columns saved in different files and each
-"row" should be in orderder between the files.
-
-Credits: Torwent
-
-Your data has to be split into columns, each saved to its own file, with every
-row on the same line of each file.
-
-Let's use for example a little bit of what is used for the items database:
-
-```
-+-------------------+-------+------------+
-| items             | id    | hash       |
-+-------------------+-------+------------+
-| dwarf remains     | 0     | 069702cc6  |
-| toolkit           | 1     | ff026bd51  |
-| cannonball        | 2     | 0224ca70f  |
-| nulodion's notes  | 3     | 047160bd7  |
-| ammo mould        | 4     | f986eb373  |
-| ...               | ...   | ...        |
-| abyssal whip      | 4151  | 02f197ebf  |
-+-------------------+-------+------------+
-```
-
-The data in this example should be saved to 3 files with the column name
-(item.txt, id.txt, hash.txt), and line `N` of each file belongs to row `N`.
-
-`TDatabase` keeps every column in that original row order, so once you know a
-row number, reading any column at that row is a single array access.
-
-To find the row of a value, each column you search gets an index: a map from
-every distinct value in the column to the first row holding it, and for every
-row, the next row holding the same value (or `-1`). Using the table above:
-
-```
-+-------------------+-----------+       +-------+-----------+
-| item index        | first row |       | row   | next row  |
-+-------------------+-----------+       +-------+-----------+
-| abyssal whip      | 3551      |       | 0     | -1        |
-| ammo mould        | 4         |       | 1     | -1        |
-| cannonball        | 2         |       | ...   | ...       |
-| ...               | ...       |       | 3551  | -1        |
-+-------------------+-----------+       +-------+-----------+
-```
-
-So to get the `abyssal whip` id:
-- Look `abyssal whip` up in the "item" index, which gives row `3551`.
-- Read the "id" column at row `3551`, which is `4151`.
-
-Finding every row with a value just follows "next row" from the first one until
-it reaches `-1`, so rows always come back in ascending order.
-
-An index is only built the first time a column is searched, so columns you only
-read values from never pay for one.
-*)
 {$DEFINE WL_DATABASE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
@@ -80,20 +17,7 @@ type
     DataDir, CacheDir: String;
   end;
 
-(*
-## TDatabase.Setup
-```pascal
-procedure TDatabase.Setup(name: String; columns: TStringArray; path, version: String);
-```
-Sets up a new `TDatabase`, loading one `<column>.txt` file per column from
-`path`.
 
-If rows were saved with {ref}`Database.Insert`, the column files in the cache
-directory for this `version` are loaded instead. Cache directories of other
-versions are deleted.
-
-Every column must have the same number of rows.
-*)
 procedure TDatabase.Setup(name: String; columns: TStringArray; path, version: String);
 var
   i: Integer;
@@ -143,14 +67,7 @@ begin
   end;
 end;
 
-(*
-## TDatabase._ColumnIndex
-```pascal
-function TDatabase._ColumnIndex(column: String): Integer;
-```
-Returns the position of `column` in `TDatabase.Columns`, raising if the database
-has no such column.
-*)
+
 function TDatabase._ColumnIndex(column: String): Integer;
 begin
   Result := Self.Columns.IndexOf(column);
@@ -158,16 +75,7 @@ begin
     raise GetDebugLn(Self.Name, 'Unknown column: ' + column);
 end;
 
-(*
-## TDatabase._BuildIndex
-```pascal
-procedure TDatabase._BuildIndex(columnIndex: Integer);
-```
-Builds the index of the column at `columnIndex` if it was not built yet.
 
-Rows are walked from last to first so that every value ends up pointing at its
-lowest row and each "next row" chain is in ascending order.
-*)
 procedure TDatabase._BuildIndex(columnIndex: Integer);
 var
   row: Integer;
@@ -193,13 +101,7 @@ begin
   Self.Indices[columnIndex] := index;
 end;
 
-(*
-## TDatabase._FirstRow
-```pascal
-function TDatabase._FirstRow(value, column: String): Integer;
-```
-Returns the lowest row where `column` holds `value`, or `-1` if no row does.
-*)
+
 function TDatabase._FirstRow(value, column: String): Integer;
 var
   columnIndex: Integer;
@@ -209,64 +111,16 @@ begin
   Result := Self.Indices[columnIndex].FirstRow.Value[value];
 end;
 
-(*
-## Querying Data
-A database is only useful if you can query data from it.
-Below in this page you will see several examples of how to use `TDatabase` and
-these examples will be accompanied with a `SQL` equivalent.
 
-One thing to note is that `TDatabase` is a "single table" database.
-This is also not a thing in real databases so in the following SQL examples we
-will be using `TDatabaseTable` as our imaginary table.
-*)
 
-(*
-## Database.Contains
-```pascal
-function TDatabase.Contains(value, column: String): Boolean;
-```
-Returns true/false if the specified `value` exists on the specified `column`.
 
-Example:
-```pascal
-database.Contains('abyssal whip', 'item');
-```
-The SQL equivalent would be something like this:
-```sql
-SELECT EXISTS (
-  SELECT 1
-  FROM "TDatabaseTable"
-  WHERE item = 'abyssal whip'
-);
-```
-*)
 function TDatabase.Contains(value, column: String): Boolean;
 begin
   Result := Self._FirstRow(value, column) > -1;
 end;
 
 
-(*
-## Database.Get
-```pascal
-function TDatabase.Get(value, column_name, result_column: String): String;
-```
-Returns the data at `result_column` where the `column_name` column has the
-specified `value`. If several rows match, the lowest one is used. If none does,
-an empty string is returned.
 
-Example:
-```pascal
-WriteLn database.Get('abyssal whip', 'item', 'id');
-```
-The SQL equivalent would be something like this:
-```sql
-SELECT id
-FROM "TDatabaseTable"
-WHERE item = 'abyssal whip'
-LIMIT 1;
-```
-*)
 function TDatabase.Get(value, column_name, result_column: String): String;
 var
   row: Integer;
@@ -279,26 +133,7 @@ begin
   Result := Self.Data.Value[result_column][row];
 end;
 
-(*
-## Database.GetAll
-```pascal
-function TDatabase.GetAll(value, column_name, result_column: String): TStringArray;
-```
-Same as {ref}`Database.Get` but will return all existing values instead of just
-one, in row order.
 
-Example:
-```pascal
-WriteLn database.GetAll('abyssal whip', 'item', 'id');
-```
-The SQL equivalent would be something like this:
-```sql
-SELECT id
-FROM "TDatabaseTable"
-WHERE item = 'abyssal whip';
-```
-Basically the same as {ref}`Database.Get` SQL example without the `LIMIT`.
-*)
 function TDatabase.GetAll(value, column_name, result_column: String): TStringArray;
 var
   row, columnIndex: Integer;
@@ -319,28 +154,7 @@ begin
   end;
 end;
 
-(*
-## Database.Insert
-```pascal
-procedure TDatabase.Insert(values: TStringArray; saveCache: Boolean = False);
-```
-Inserts a row of data. `values` must have a value for each of
-`TDatabase.Columns`, in the same order.
 
-By default, this data insertion only stays in memory, if you want to save it to
-disk, you need to set `saveCache` to `True`. Saved rows are loaded by
-{ref}`TDatabase.Setup` until the database version changes.
-
-Example:
-```pascal
-database.Insert(['Custom Item', '99999', 'abcdef']);
-```
-The SQL equivalent would be something like this:
-```sql
-INSERT INTO "TDatabaseTable" (item, id, hash)
-VALUES ('Custom Item', '99999', 'abcdef');
-```
-*)
 procedure TDatabase.Insert(values: TStringArray; saveCache: Boolean = False);
 var
   i, row, last: Integer;

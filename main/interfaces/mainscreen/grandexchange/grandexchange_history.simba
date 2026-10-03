@@ -1,26 +1,10 @@
-(*
-# GrandExchangeHistory
-Methods to interact with the GrandExchangeHistory interface:
-```{figure} ../../images/geh_interface.png
-```
 
-The {ref}`GrandExchange` is a very complex interface, probably the most complex
-available in game and for that reason, the functionality to
-fully interact with it is split into multiple files and records:
-- {ref}`GrandExchange`, the main grand exchange screen.
-- {ref}`GrandExchangeHistory`, the history screen of the grand exchange and what this page is about.
-- {ref}`GrandExchangeChat`, the chat interface of the grand exchange when you are setting up a buy offer.
-- {ref}`GrandExchangeOffer`, the screen of the grand exchange where you view or setup a new offer.
-*)
 
 {$DEFINE WL_GRANDEXCHANGE_HISTORY_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TGrandExchangeHistory
-Record responsible to handle the {ref}`GrandExchangeHistory` interface.
-*)
+
   TGrandExchangeHistory = record
     Title: TInterfaceTitle;
     Scroll: TScrollBar;
@@ -30,14 +14,7 @@ Record responsible to handle the {ref}`GrandExchangeHistory` interface.
 
 function TGrandExchangeHistory.IsOpen(): Boolean; forward;
 
-(*
-## GrandExchangeHistory.SetupInterface
-```pascal
-procedure TGrandExchangeHistory.SetupInterface();
-```
-Internal method used to setup the {ref}`TGrandExchangeHistory` coordinates.
-This is automatically called for you on the {ref}`GrandExchangeHistory variable`.
-*)
+
 procedure TGrandExchangeHistory.SetupInterface();
 begin
   Self.Bounds := GrandExchange.Bounds;
@@ -56,18 +33,7 @@ begin
     Self.ExchangeButton := [X1+7, Y1+7, X1+63, Y1+26];
 end;
 
-(*
-## GrandExchangeHistory.IsOpen
-```pascal
-function TGrandExchangeHistory.IsOpen(): Boolean;
-```
-Returns true if the Grand Exchange is open.
 
-Example:
-```pascal
-WriteLn GrandExchangeHistory.IsOpen();
-```
-*)
 function TGrandExchangeHistory.IsOpen(): Boolean;
 begin
   if BankPin.IsOpen() then
@@ -82,38 +48,14 @@ begin
   Result := Self.Title.IsTitle('Grand Exchange Trade History');
 end;
 
-(*
-## GrandExchangeHistory.WaitOpen
-```pascal
-function TGrandExchangeHistory.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
-```
-Returns true if the Grand Exchange is open within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn GrandExchangeHistory.WaitOpen();
-```
-*)
 function TGrandExchangeHistory.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## GrandExchangeHistory.Close
-```pascal
-function TGrandExchangeHistory.Close(escape: Boolean): Boolean;
-function TGrandExchangeHistory.Close(escapeProbability: Single = 0): Boolean; overload;
-```
-Closes the GrandExchangeHistory, Depending on `escape` or `escapeProbability the function will
-either click the button or press escape key.
 
-Example:
-```pascal
- WriteLn GrandExchangeHistory.Close();
-```
-*)
 function TGrandExchangeHistory.Close(escape: Boolean): Boolean;
 begin
   Result := Self.Title.Close(escape);
@@ -124,24 +66,7 @@ begin
   Result := Self.Title.Close(escapeProbability);
 end;
 
-(*
-## GrandExchangeHistory.Slots
-```pascal
-property TGrandExchangeHistory.Slots: TBoxArray;
-```
-Returns the slot boxes of the {ref}`GrandExchangeHistory` interface.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  while True do
-    ShowOnTarget(GrandExchangeHistory.Slots);
-end.
-```
-```{figure} ../../images/geh_slots.gif
-```
-*)
 property TGrandExchangeHistory.Slots: TBoxArray;
 var
   tpa: TPointArray;
@@ -183,18 +108,7 @@ begin
   until offset.Y2 > Self.Scroll.Area.Y2;
 end;
 
-(*
-## GrandExchangeHistory.Open
-```pascal
-function TGrandExchangeHistory.Open(): Boolean;
-```
-Attempts to open the {ref}`GrandExchangeHistory`, returns `True` on success.
 
-Example:
-```pascal
-WriteLn GrandExchangeHistory.Open();
-```
-*)
 function TGrandExchangeHistory.Open(): Boolean;
 begin
   if Self.IsOpen() then Exit(True);
@@ -204,18 +118,7 @@ begin
   Result := Self.WaitOpen(2000);
 end;
 
-(*
-## GrandExchangeHistory.Back
-```pascal
-function TGrandExchangeHistory.Back(): Boolean;
-```
-Attempts to click the back button: to return to the main Grand Exchange interface, returns `True` on success.
 
-Example:
-```pascal
-WriteLn GrandExchangeHistory.Back();
-```
-*)
 function TGrandExchangeHistory.Back(): Boolean;
 begin
   if not Self.IsOpen() then Exit;
@@ -224,8 +127,5 @@ begin
 end;
 
 var
-(*
-## GrandExchangeHistory variable
-Global {ref}`TGrandExchangeHistory` variable.
-*)
+
   GrandExchangeHistory: TGrandExchangeHistory;

@@ -1,14 +1,4 @@
-(*
-# Goals Form
-This page is about the {ref}`Goals Form`, a dedicated `TLazForm` to configure
-skill level goals for a script.
 
-This is meant to be used with {ref}`TScriptForm` with
-{ref}`TScriptForm.CreateGoalsButton` and will setup a small `TLazPanel` on it
-with a checkbox and a button to open the form:
-```{figure} ../../images/goalsform.png
-```
-*)
 {$DEFINE WL_GOALS_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -117,17 +107,7 @@ begin
   Self.Config.Save();
 end;
 
-(*
-## GoalsForm.GetSkillImages
-```pascal
-function TGoalsFormHelper.GetSkillImages(): array [ESkill] of TImage;
-```
-Internal function that reads the skill icons of the stats tab out of the game cache.
-Each icon is placed on its sprite's full 25x25 canvas, where the stats tab draws it.
 
-The client picks each skill's icon from an enum keyed by the skill's id, which is not the same
-as its {ref}`ESkill` value. The total level icon is not a skill so it is not in the enum.
-*)
 function TGoalsFormHelper.GetSkillImages(): array [ESkill] of TImage;
 const
   SPRITE_ENUM: Integer = 255;
