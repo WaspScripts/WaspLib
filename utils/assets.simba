@@ -21,7 +21,6 @@ Record for managing WaspLib asset downloads and updates.
 
 function TWLAssets.GetJSON(): TJSONObject;
 var
-  assets: String;
   parser: TJSONParser;
   response: String;
 begin

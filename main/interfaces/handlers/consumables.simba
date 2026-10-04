@@ -212,7 +212,7 @@ procedure TConsumables.Init();
 var
   path, tmp: String;
 begin
-  Self.Version := WLAssets.JSON.Item['jsons/consumables.zip'].AsString;
+  Self.Version := WLAssets.JSON.Item['files/consumables.zip'].AsString;
   Self.CacheDir := WLEnv.CacheDir + 'consumables' + PATH_SEP;
 
   //Delete old cache files if they exist
