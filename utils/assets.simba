@@ -26,16 +26,7 @@ var
   response: String;
 begin
   if not Self.Config.Data.Assert('url', EJSONType.STR) then
-  begin
-    assets := GetEnvVar('assets');
-    if assets = '' then
-    begin
-      DebugLn('WLAssets', 'You don''t have an assets URL setup. If you are not providing your own assets you can''t run scripts.', ELogLevel.WARN);
-      Exit(nil);
-    end;
-
-    Self.URL := assets;
-  end
+    Self.URL := 'https://db.waspscripts.dev/storage/v1/object/public/assets/'
   else
     Self.URL := Self.Config.Data.Item['url'].AsString;
 
@@ -135,7 +126,7 @@ begin
     begin
       key := Self.JSON.Key[i];
       path := WLEnv.AssetsDir + key;
-      if CRCFile(path) <> Self.JSON.Item[i].AsInt then
+      if IntToHex(CRCFile(path), 8) <> Self.JSON.Item[i].AsString then
       begin
         key := key.Replace('\', '/');
         DebugLn('WLAssets', 'Updating ' + key, ELogLevel.WARN);

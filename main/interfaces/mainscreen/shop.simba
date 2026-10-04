@@ -347,7 +347,7 @@ begin
   );
 
   Self.Merchants := TEntityArray.Create(
-    Map.Walker, NPCsJSON.GetByAction('Trade')
+    Map.Walker, MapNPCs.GetByAction('Trade')
   );
 end;
 
@@ -392,7 +392,7 @@ Example:
 {$I WaspLib/main.simba}
 begin
   Map.Setup([Map.Setup([EChunk.BLAST_FURNACE]));
-  Shop.Open(TEntity.Create(NPCsJSON.GetByName('Ordan', 1).Item[0]));
+  Shop.Open(TEntity.Create(Map.Walker, MapNPCs.GetByName('Ordan', 1)[0]));
 end.
 ```
 *)

@@ -24,7 +24,7 @@ type
 
     Archive: TArchive;
     Unzipping, IsSetup: Boolean;
-    const DB_PATH: String = SimbaEnv.DataPath + 'items-db' + PATH_SEP;
+    const DB_PATH: String = WLEnv.CacheDir + 'items-db' + PATH_SEP;
   end;
 
 

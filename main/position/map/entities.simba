@@ -26,8 +26,6 @@ end;
 {$ENDIF}
 
 type
-  ENPCData = enum(ID, NAME, LEVEL, CATEGORY, MINIMAPDOT, ACTIONS, SIZE, COORDINATES, COLORS);
-
 (*
 ## TEntity
 Main type to handle {ref}`RSEntity`.
@@ -57,7 +55,7 @@ Array of {ref}`TEntity`.
 ## TEntity.Create
 ```pascal
 function TEntity.Create(var walker: TWalker; size: TVector3; coordinates: TPointArray; uptext: TStringArray = []; dots: EDots = []): TEntity; static;
-function TEntity.Create(var walker: TWalker; json: TJSONObject): TEntity; static; overload;
+function TEntity.Create(var walker: TWalker; data: TMapNPCData): TEntity; static; overload;
 ```
 Create function to create your {ref}`TEntity`.
 
@@ -76,16 +74,14 @@ begin
 end;
 ```
 
-The `json` version of the function expects a specific json structure which is
-the one that {ref}`Map JSONs` provide:
+The `data` version builds the entity from one of the {ref}`Map NPCs`, finder included:
 ```pascal
 {$I WaspLib/main.simba}
 var
   npc: TEntity;
 begin
   Map.Setup([EChunk.VARROCK]);
-  //Item[0] because this returns a JSON array. For more info read Map JSONs documentation.
-  npc := TEntity.Create(Map.Walker, NPCsJSON.GetByName('banker', 1).Item[0]);
+  npc := TEntity.Create(Map.Walker, MapNPCs.GetByName('Banker', 1)[0]);
 end;
 ```
 *)
@@ -110,74 +106,50 @@ begin
     Result.Filter.SetupCircle(TCircle.Create(pt.X, pt.Y, radius), True);
 end;
 
-function TEntity.Create(var walker: TWalker; json: TJSONObject): TEntity; static; overload;
+function TEntity.Create(var walker: TWalker; data: TMapNPCData): TEntity; static; overload;
 var
   i, j, l: Integer;
   unique: array of TColorArray;
   color: TColor;
   best: TBestColor;
-  coord: TJSONArray;
+  pt: TPoint;
 begin
-  if json.Typ <> EJSONType.OBJ then
-    raise GetDebugLn('TEntity', 'JSON Object expected, got ' + ToStr(json.Typ) + '.');
-
-  with json.Item[Ord(ENPCData.NAME)] do
-    if AsString <> 'null' then
-      Result.UpText := [AsString];
-
-  if json.Item[Ord(ENPCData.MINIMAPDOT)].AsBool then
+  Result.UpText := [data.Name];
+  if data.MinimapDot then
     Result.MinimapDots := [EDot.NPC];
 
-  with json.Item[Ord(ENPCData.SIZE)] do
-  begin
-    Result.Size.X := Item[0].AsInt * 0.8;
-    Result.Size.Y := Item[1].AsInt * 0.8;
-    Result.Size.Z := Item[2].AsInt / 128;
-  end;
+  Result.Size.X := data.Size * 0.8;
+  Result.Size.Y := data.Size * 0.8;
+  Result.Size.Z := data.Height / 128;
 
   if Abs(Result.Size.Z) < 0.05 then
     Result.Size.Z := 3.0;
 
-  with json.Item[Ord(ENPCData.COORDINATES)] do
-  begin
-    SetLength(Result.Coordinates, Count);
-    SetLength(Result.Filter, Count);
+  Result.Coordinates := data.Coordinates;
+  for pt in data.Coordinates do
+    Result.Filter += TDotFilter.Create(Default(TPolygon), TCircle.Create(pt.X, pt.Y, 40), True);
 
-    for i := 0 to Count-1 do
+  for i := 0 to High(data.Colors) do
+  begin
+    color := data.Colors[i];
+
+    for j := 0 to High(unique) do
     begin
-      coord := Item[i];
-      Result.Coordinates[i] := [coord.Item[0].AsInt, coord.Item[1].AsInt];
-      Result.Filter[i] := TDotFilter.Create(
-        Default(TPolygon),
-        TCircle.Create(coord.Item[0].AsInt, coord.Item[1].AsInt, 40),
-        True
-      );
+      for l := 0 to High(unique[j]) do
+        if ColorDistance(color, unique[j, l], EColorSpace.HSL, [1.5, 1.5, 1.5]) < 15 then
+        begin
+          unique[j] += color;
+          Continue(3);
+        end;
     end;
+
+    unique += [color];
   end;
 
-  with json.Item[Ord(ENPCData.COLORS)] do
-    for i := 0 to Count-1 do
-    begin
-      color := Item[i].AsInt;
-
-      for j := 0 to High(unique) do
-      begin
-        for l := 0 to High(unique[j]) do
-          if ColorDistance(color, unique[j, l], EColorSpace.HSL, [1.5, 1.5, 1.5]) < 15 then
-          begin
-            unique[j] += color;
-            Continue(3);
-          end;
-      end;
-
-      unique += [color];
-    end;
-
-  SetLength(Result.Finder.Colors, Length(unique));
   for i := 0 to High(unique) do
   begin
     best := GetBestColor(EColorSpace.HSL, unique[i]);
-    Result.Finder.Colors[i] := [best.Color, best.Tolerance*1.5, EColorSpace.HSL, [best.Mods[0]*1.5, best.Mods[1]*1.5, best.Mods[2]*1.5]];
+    Result.Finder.Colors += [best.Color, best.Tolerance*1.5, EColorSpace.HSL, [best.Mods[0]*1.5, best.Mods[1]*1.5, best.Mods[2]*1.5]];
   end;
 
   Result.Walker := @walker;
@@ -188,12 +160,11 @@ end;
 (*
 ## TEntityArray.Create
 ```pascal
-function TEntityArray.Create(json: TJSONArray): TEntityArray; static;
+function TEntityArray.Create(var walker: TWalker; data: TMapNPCDataArray): TEntityArray; static;
 ```
 Create function to build your {ref}`TEntityArray`.
 
-This only accepts a `json` array and it expects a specific json structure which is
-the one that {ref}`Map JSONs` provide.
+Builds one {ref}`TEntity` for each of the {ref}`Map NPCs` in `data`.
 
 Example:
 ```pascal
@@ -203,20 +174,17 @@ var
   entities: TEntityArray;
 begin
   Map.Setup([EChunk.VARROCK]);
-  entities := TEntityArray.Create(Map.Walker, NPCsJSON.GetByName('Banker'));
+  entities := TEntityArray.Create(Map.Walker, MapNPCs.GetByName('Banker'));
 end;
 ```
 *)
-function TEntityArray.Create(var walker: TWalker; json: TJSONArray): TEntityArray; static;
+function TEntityArray.Create(var walker: TWalker; data: TMapNPCDataArray): TEntityArray; static;
 var
   i: Integer;
 begin
-  if json.Typ <> EJSONType.ARR then
-    raise GetDebugLn('TEntity', 'JSON Array expected, got ' + ToStr(json.Typ) + '.');
-
-  SetLength(Result, json.Count);
-  for i := 0 to High(Result) do
-    Result[i] := TEntity.Create(walker, json.Item[i]);
+  SetLength(Result, Length(data));
+  for i := 0 to High(data) do
+    Result[i] := TEntity.Create(walker, data[i]);
 end;
 
 

@@ -1,0 +1,376 @@
+(*
+# Map NPCs
+The NPCs of the loaded map: where each one spawns, what it's called, what it can be clicked for,
+and what it looks like.
+
+The game cache doesn't say where NPCs spawn, the server places them, so the spawns come from the
+`map/npcspawns.txt` asset. Everything else is read out of the game cache, so it's always in step
+with the game, and the NPCs of a region are only read once that region is part of the map.
+
+Example:
+```pascal
+{$I WaspLib/main.simba}
+var
+  bankers: TEntityArray;
+begin
+  Map.Setup([EChunk.VARROCK]);
+  bankers := TEntityArray.Create(Map.Walker, MapNPCs.GetByAction('Bank'));
+end.
+```
+*)
+{$DEFINE WL_MAPNPCS_INCLUDED}
+{$INCLUDE_ONCE WaspLib/main.simba}
+
+type
+(*
+## TMapNPCData
+One kind of NPC and every place it spawns on the loaded map.
+- `ID` is the id it spawns as. `Name`, `Level`, `Category`, `Actions` and `MinimapDot` come from
+  the definition it's shown as, which for an NPC that changes form is the first form with a name.
+  `Actions` are the ones its right-click menu shows, in menu order, and `MinimapDot` says whether
+  it has a dot on the minimap.
+- `Coordinates` are where it spawns, as {ref}`Global points`.
+- `Size` is how many tiles it covers on each side and `Height` how tall it is, in the game's
+  units: a tile is `128`.
+- `Colors` are the colours it is drawn in, most common first.
+
+`Height` and `Colors` come from the NPC's models, which are only built when the NPC is asked for -
+see {ref}`MapNPCs.Build`.
+*)
+  TMapNPCData = record
+    ID, Level, Category, Size, Height: Integer;
+    Name: String;
+    Actions: TStringArray;
+    MinimapDot: Boolean;
+    Coordinates: TPointArray;
+    Colors: TColorArray;
+    IsBuilt: Boolean;
+  end;
+
+  TMapNPCDataArray = array of TMapNPCData;
+
+(*
+## TMapNPCs
+Record holding the {ref}`TMapNPCData` of every NPC on the loaded map.
+- `Definitions` are the definitions of `Data`, in the same order, for building their models.
+- `Lookup` turns an NPC id into its place in `Data`, stored one higher so `0` means none.
+- `Loaded` holds the chunks already read, as `x, y` with the plane packed in with them.
+- `SpawnIDs`, `SpawnTiles` and `SpawnPlanes` are every line of the spawns file, and
+  `SpawnChunks` the chunks they're in, packed like `Loaded`. `SpawnStarts` is where the run of
+  lines of each of `SpawnChunks` starts, with one extra entry closing the last run.
+*)
+  TMapNPCs = record
+    Data: TMapNPCDataArray;
+    Definitions: TNPCDefinitionArray;
+    Lookup: TIntegerArray;
+    Loaded: TIntegerArray;
+    SpawnIDs, SpawnPlanes, SpawnChunks, SpawnStarts: TIntegerArray;
+    SpawnTiles: TPointArray;
+    const COVERAGE: Single = 0.9;
+  end;
+
+(*
+## MapNPCs.LoadSpawns
+```pascal
+procedure TMapNPCs.LoadSpawns();
+```
+Internal method that reads the spawns file into the `Spawn` fields, once.
+
+The file holds one `id plane x y` line per spawn, sorted so the spawns of each chunk are one run
+of lines, which is what lets a chunk's spawns be found without searching them all.
+*)
+procedure TMapNPCs.LoadSpawns();
+var
+  lines, parts: TStringArray;
+  i, n, chunk: Integer;
+begin
+  if Self.SpawnStarts <> [] then
+    Exit;
+
+  lines := FileReadLines(WLEnv.AssetsDir + 'map' + PATH_SEP + 'npcspawns.txt');
+  SetLength(Self.SpawnIDs,    Length(lines));
+  SetLength(Self.SpawnPlanes, Length(lines));
+  SetLength(Self.SpawnTiles,  Length(lines));
+
+  for i := 0 to High(lines) do
+  begin
+    parts := lines[i].Split(' ');
+    if Length(parts) <> 4 then
+      Continue;
+
+    Self.SpawnIDs[n]    := StrToInt(parts[0]);
+    Self.SpawnPlanes[n] := StrToInt(parts[1]);
+    Self.SpawnTiles[n]  := [StrToInt(parts[2]), StrToInt(parts[3])];
+
+    chunk := (Self.SpawnPlanes[n] shl 16) or ((Self.SpawnTiles[n].X div 64) shl 8) or (Self.SpawnTiles[n].Y div 64);
+    if Self.SpawnChunks.IsEmpty or (Self.SpawnChunks[High(Self.SpawnChunks)] <> chunk) then
+    begin
+      Self.SpawnChunks += chunk;
+      Self.SpawnStarts += n;
+    end;
+
+    Inc(n);
+  end;
+
+  SetLength(Self.SpawnIDs, n);
+  SetLength(Self.SpawnPlanes, n);
+  SetLength(Self.SpawnTiles, n);
+  Self.SpawnStarts += n;
+end;
+
+(*
+## MapNPCs.Add
+```pascal
+procedure TMapNPCs.Add(id, plane: Integer; tile: TPoint);
+```
+Internal method that records one spawn of NPC `id` on `tile`, adding the NPC if it's the first
+one. NPCs without a name, or that can't be interacted with, are left out.
+*)
+procedure TMapNPCs.Add(id, plane: Integer; tile: TPoint);
+var
+  def: TNPCDefinition;
+  idx, i, j: Integer;
+begin
+  if id >= Length(Self.Lookup) then
+    SetLength(Self.Lookup, id + 1);
+
+  idx := Self.Lookup[id] - 1;
+  if idx = -1 then
+  begin
+    def := NPCLoader.Resolve(id);
+    if (def.Name = 'null') or (def.Name = '') or not def.IsInteractable then
+      Exit;
+
+    idx := Length(Self.Data);
+    SetLength(Self.Data, idx + 1);
+    Self.Definitions += def;
+    Self.Lookup[id] := idx + 1;
+
+    Self.Data[idx].ID := id;
+    Self.Data[idx].Name := CacheString2UTF8(def.Name);
+    Self.Data[idx].Level := Max(0, def.CombatLevel);
+    Self.Data[idx].Category := def.Category;
+    Self.Data[idx].Size := def.Size;
+    Self.Data[idx].MinimapDot := def.IsMinimapVisible;
+
+    for i := 0 to 4 do
+      for j := 0 to High(def.Ops.Ops) do
+        if def.Ops.Ops[j].Index = i then
+          Self.Data[idx].Actions += CacheString2UTF8(def.Ops.Ops[j].Text);
+  end;
+
+  Self.Data[idx].Coordinates += TMapObjects.Coordinate(tile, [Self.Data[idx].Size, Self.Data[idx].Size], plane);
+end;
+
+(*
+## MapNPCs.Load
+```pascal
+procedure TMapNPCs.Load(var loader: TMapLoader);
+procedure TMapNPCs.Load(); overload;
+```
+Reads the NPCs of every chunk `loader` has loaded that hasn't been read yet. Without a loader it
+reads {ref}`Map`'s. The getters below call this, so it rarely needs calling directly.
+*)
+procedure TMapNPCs.Load(var loader: TMapLoader);
+var
+  region: TMapRegion;
+  chunk: TPoint;
+  key, idx, i: Integer;
+begin
+  if loader.Regions = [] then
+    Exit;
+
+  Self.LoadSpawns();
+  NPCLoader.Load();
+
+  for region in loader.Regions do
+    for chunk in region.Chunks do
+    begin
+      key := (region.Plane shl 16) or (chunk.X shl 8) or chunk.Y;
+      if key in Self.Loaded then
+        Continue;
+      Self.Loaded += key;
+
+      idx := Self.SpawnChunks.IndexOf(key);
+      if idx = -1 then
+        Continue;
+
+      for i := Self.SpawnStarts[idx] to Self.SpawnStarts[idx + 1] - 1 do
+        if NPCLoader.Definitions.IndexOf(Self.SpawnIDs[i]) <> -1 then
+          Self.Add(Self.SpawnIDs[i], Self.SpawnPlanes[i], Self.SpawnTiles[i]);
+    end;
+end;
+
+procedure TMapNPCs.Load(); overload;
+begin
+  Self.Load(Map.Loader);
+end;
+
+(*
+## MapNPCs.Build
+```pascal
+procedure TMapNPCs.Build(idx: Integer);
+```
+Internal method that builds the models of `Data[idx]` with {ref}`TNPCModel` to fill in its
+`Height` and `Colors`.
+
+Only the colours that cover most of the NPC make it into `Colors`: the most common ones, until
+`COVERAGE` of its faces are accounted for. The rest are slivers and rarely lit corners that would
+only widen what a colour finder looks for.
+*)
+procedure TMapNPCs.Build(idx: Integer);
+var
+  model: TNPCModel;
+  i, total, covered: Integer;
+begin
+  if Self.Data[idx].IsBuilt then
+    Exit;
+  Self.Data[idx].IsBuilt := True;
+
+  model := TNPCModel.Create(Self.Definitions[idx]);
+  if not model.Valid then
+    Exit;
+
+  Self.Data[idx].Height := model.Height;
+
+  for i := 0 to High(model.Counts) do
+    total += model.Counts[i];
+
+  for i := 0 to High(model.Colors) do
+  begin
+    Self.Data[idx].Colors += model.Colors[i];
+    covered += model.Counts[i];
+    if covered >= total * TMapNPCs.COVERAGE then
+      Break;
+  end;
+end;
+
+(*
+## MapNPCs.GetByName
+```pascal
+function TMapNPCs.GetByName(name: String; amount: Integer = 0): TMapNPCDataArray;
+```
+Every NPC called `name`. Pass `amount` to stop after that many NPCs.
+
+Example:
+```pascal
+WriteLn MapNPCs.GetByName('Banker');
+```
+*)
+function TMapNPCs.GetByName(name: String; amount: Integer = 0): TMapNPCDataArray;
+var
+  i: Integer;
+begin
+  Self.Load();
+
+  for i := 0 to High(Self.Data) do
+    if Self.Data[i].Name = name then
+    begin
+      Self.Build(i);
+      Result += Self.Data[i];
+      if Length(Result) = amount then
+        Exit;
+    end;
+end;
+
+(*
+## MapNPCs.GetByID
+```pascal
+function TMapNPCs.GetByID(id: Integer): TMapNPCData;
+```
+The NPC with the id `id`. It has no `Coordinates` if there is no such NPC on the map.
+*)
+function TMapNPCs.GetByID(id: Integer): TMapNPCData;
+var
+  idx: Integer;
+begin
+  Self.Load();
+
+  if not InRange(id, 0, High(Self.Lookup)) then
+    Exit;
+
+  idx := Self.Lookup[id] - 1;
+  if idx = -1 then
+    Exit;
+
+  Self.Build(idx);
+  Result := Self.Data[idx];
+end;
+
+(*
+## MapNPCs.GetByAction
+```pascal
+function TMapNPCs.GetByAction(action: String; amount: Integer = 0): TMapNPCDataArray;
+```
+Every NPC with `action` in its right-click menu. Pass `amount` to stop after that many NPCs.
+
+Example:
+```pascal
+WriteLn MapNPCs.GetByAction('Bank');
+```
+*)
+function TMapNPCs.GetByAction(action: String; amount: Integer = 0): TMapNPCDataArray;
+var
+  i: Integer;
+begin
+  Self.Load();
+
+  for i := 0 to High(Self.Data) do
+    if action in Self.Data[i].Actions then
+    begin
+      Self.Build(i);
+      Result += Self.Data[i];
+      if Length(Result) = amount then
+        Exit;
+    end;
+end;
+
+(*
+## MapNPCs.GetByAllActions
+```pascal
+function TMapNPCs.GetByAllActions(actions: TStringArray; amount: Integer = 0): TMapNPCDataArray;
+```
+Every NPC with all of `actions` in its right-click menu. Pass `amount` to stop after that many
+NPCs.
+*)
+function TMapNPCs.GetByAllActions(actions: TStringArray; amount: Integer = 0): TMapNPCDataArray;
+var
+  i: Integer;
+  action: String;
+begin
+  Self.Load();
+
+  for i := 0 to High(Self.Data) do
+  begin
+    for action in actions do
+      if not (action in Self.Data[i].Actions) then
+        Continue(2);
+
+    Self.Build(i);
+    Result += Self.Data[i];
+    if Length(Result) = amount then
+      Exit;
+  end;
+end;
+
+(*
+## MapNPCs.Clear
+```pascal
+procedure TMapNPCs.Clear();
+```
+Forgets every NPC read so far, so the next getter reads the map again from scratch.
+*)
+procedure TMapNPCs.Clear();
+begin
+  Self.Data := [];
+  Self.Definitions := [];
+  Self.Lookup := [];
+  Self.Loaded := [];
+end;
+
+var
+(*
+## MapNPCs variable
+Global {ref}`TMapNPCs` variable, holding the NPCs of {ref}`Map`.
+*)
+  MapNPCs: TMapNPCs;

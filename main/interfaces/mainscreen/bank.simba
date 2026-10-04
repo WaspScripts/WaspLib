@@ -1400,7 +1400,7 @@ begin
                 TObjectArray.Create(
                   Map.Walker, MapObjects.GetByAllActions(['Use', 'Collect'])
                 );
-  Self.Bankers := TEntityArray.Create(Map.Walker, NPCsJSON.GetByAction('Bank'));
+  Self.Bankers := TEntityArray.Create(Map.Walker, MapNPCs.GetByAction('Bank'));
 end;
 
 (*

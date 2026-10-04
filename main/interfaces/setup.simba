@@ -226,7 +226,6 @@ begin
   Antiban.Zoom.Max := 100;
 
   ItemData.Setup();
-  NPCsJSON.Setup(EMapJSON.NPCS);
   Profiles.Load();
 
   Client.OnLogin := [@OnLogin];
