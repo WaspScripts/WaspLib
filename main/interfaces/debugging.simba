@@ -1,12 +1,4 @@
-(*
-# Interface Debugging
-Methods and utilities to debug interfaces.
-These are disabled by default, to enable them you must define the following
-compiler directive:
-```pascal
-{$DEFINE WL_DEBUG_INTERFACES}
-```
-*)
+
 {$DEFINE WL_INTERFACE_DEBUGGING_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -14,25 +6,7 @@ compiler directive:
 {.$DEFINE WL_DEBUG_INTERFACES}
 {$IFDEF WL_DEBUG_INTERFACES}
 
-(*
-## Button.Draw
-```pascal
-procedure TButton.Draw(img: TImage; color: Integer = $00FFFF);
-```
-Draws the current {ref}`TButton` on the `img` passed in.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-begin
-  img := Target.GetImage();
-  Bank.Buttons[EBankButtons.MENU].Draw(img);
-  img.Show();
-end;
-```
-*)
 procedure TButton.Draw(img: TImage; color: Integer = $00FFFF);
 var
   oldColor: Integer;
@@ -43,25 +17,7 @@ begin
   img.DrawColor := oldColor;
 end;
 
-(*
-## ButtonArray.Draw
-```pascal
-procedure TButtonArray.Draw(img: TImage; color: Integer = $00FFFF);
-```
-Draws the current {ref}`TButtonArray` on the `img` passed in.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-begin
-  img := Target.GetImage();
-  Bank.Buttons.Draw(img);
-  img.Show();
-end;
-```
-*)
 procedure TButtonArray.Draw(img: TImage; color: Integer = $00FFFF);
 var
   oldColor: Integer;
@@ -76,25 +32,7 @@ begin
   img.DrawColor := oldColor;
 end;
 
-(*
-## ScrollBar.Draw
-```pascal
-procedure TScrollBar.Draw(img: TImage);
-```
-Draws the current {ref}`TScrollBar` on the `img` passed in.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-begin
-  img := Target.GetImage();
-  Bank.Scroll.Draw(img);
-  img.Show();
-end;
-```
-*)
 procedure TScrollBar.Draw(img: TImage);
 var
   bounds: TBox;
@@ -119,25 +57,7 @@ begin
   img.DrawBoxArray([Self.Up, Self.Down], False);
 end;
 
-(*
-## DropDown.Draw
-```pascal
-procedure TDropDown.Draw(img: TImage);
-```
-Draws the current {ref}`TDropDown` on the `img` passed in.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-begin
-  img := Target.GetImage();
-  Options.DropDowns[EOptionsDropDown.CLIENT_MODE].Draw(img);
-  img.Show();
-end;
-```
-*)
 procedure TDropDown.Draw(img: TImage);
 var
   i: Integer;
@@ -157,36 +77,7 @@ begin
 end;
 
 
-(*
-## Interface.Draw
-```pascal
-procedure TInterface.Draw(img: TImage);
-procedure TGameTabs.Draw(img: TImage);
-procedure TChat.Draw(img: TImage);
-procedure TMake.Draw(img: TImage);
-procedure TBank.Draw(img: TImage);
-procedure TBankPin.Draw(img: TImage);
-procedure TCollectionBox.Draw(img: TImage);
-procedure TDepositBox.Draw(img: TImage);
-procedure TShop.Draw(img: TImage);
-procedure TGoldScreen.Draw(img: TImage);
-procedure TSilverScreen.Draw(img: TImage);
-procedure TLamp.Draw(img: TImage);
-```
-Draws several parts of the interface on a {ref}`TImage`
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  img: TImage;
-begin
-  img := Target.GetImage();
-  GoldScreen.Draw(img);
-  img.Show();
-end;
-```
-*)
 procedure TInterface.Draw(img: TImage);
 begin
   img.DrawColor := $00FFFF;

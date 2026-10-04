@@ -1,22 +1,9 @@
-(*
-# String extensions
-Extensions to the `String` and `TStringArray` types.
-*)
+
 {$DEFINE WL_STRINGS_INCLUDED}  
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 {$R-}
-(*
-## String.Is
-```pascal
-function String.IsURL(): Boolean;
-function String.IsEmail(): Boolean;
-function String.IsUUID(): Boolean;
-function String.IsUUIDV4(): Boolean;
-function String.IsRefreshToken(): Boolean;
-```
-Checks if a string is a certain "thing" with some predefined regex patterns.
-*)
+
 function String.IsURL(): Boolean;
 const
   REGEX: String = '^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$';
@@ -24,13 +11,7 @@ begin
   Result :=  Self.Trim().RegExprExists(REGEX);
 end;
 
-(*
-## String.IsEmail
-```pascal
-function String.IsEmail(): Boolean;
-```
-Checks if a string is a valid email address with some predefined regex patterns.
-*)
+
 function String.IsEmail(): Boolean;
 const
   REGEX: String = '^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
@@ -38,13 +19,7 @@ begin
   Result := Self.Trim().RegExprExists(REGEX);
 end;
 
-(*
-## String.IsTime
-```pascal
-function String.IsTime(): Boolean;
-```
-Checks if a string is a valid time format with some predefined regex patterns.
-*)
+
 function String.IsTime(): Boolean;
 const
   REGEX = '(?:[01]\d|2[0-3])([:.\-_\ \''])?(?:[0-5]\d)([:.\-_\ \''])?(?:[0-5]\d)';
@@ -52,13 +27,7 @@ begin
   Result := Self.Trim().RegExprExists(REGEX);
 end;
 
-(*
-## String.IsUUID
-```pascal
-function String.IsUUID(): Boolean;
-```
-Checks if a string is a "UUID" with some predefined regex patterns.
-*)
+
 function String.IsUUID(): Boolean;
 const
   REGEX: String = '[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
@@ -66,13 +35,7 @@ begin
   Result := Self.Trim().RegExprExists(REGEX);
 end;
 
-(*
-## String.IsUUIDV4
-```pascal
-function String.IsUUIDV4(): Boolean;
-```
-Checks if a string is a "UUID V4" with some predefined regex patterns.
-*)
+
 function String.IsUUIDV4(): Boolean;
 const
   REGEX: String = '[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
@@ -90,13 +53,7 @@ begin
   Result := tmp.RegExprExists(REGEX);
 end;
 
-(*
-## String.IsRefreshToken
-```pascal
-function String.IsRefreshToken(): Boolean;
-```
-Checks if a string is a "refresh token" with some predefined regex patterns.
-*)
+
 function String.IsRefreshToken(): Boolean;
 const
   REGEX = '[0-9A-Za-z-_]{22}';
@@ -104,13 +61,7 @@ begin
   Result := Self.Trim().RegExprExists(REGEX);
 end;
 
-(*
-## String.ExtractText
-```pascal
-function String.ExtractText(): String;
-```
-Returns a string with all symbols removed.
-*)
+
 function String.ExtractText(): String;
 var
   len: Integer;

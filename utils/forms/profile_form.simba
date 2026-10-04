@@ -1,21 +1,8 @@
-(*
-# Profile Form
-Profile management system for {ref}`TScriptForm`.
 
-This module handles all account profile functionality including storage,
-validation, and UI dialogs.
-
-Credits: Developed by TazE
-Acknowledgements: Thanks to XJ for design concepts and initial prototyping 
-
-*)
 {$DEFINE WL_PROFILE_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 type
-(*
-## TProfileForm
-The account management system that handles profile storage, validation, and UI.
-*)
+
   TProfileForm = record
     ProfileCombo: TLazComboBox;
     ProfileUpdateTasks: array of procedure () of object;
@@ -52,25 +39,13 @@ The account management system that handles profile storage, validation, and UI.
     EditIndex: Integer;
   end;
 
-(*
-## TProfileForm.GetProfilePath
-```pascal
-function TProfileForm.GetProfilePath(index: Integer): String;
-```
-Constructs the file path for a profile based on its index.
-*)
+
 function TProfileForm.GetProfilePath(index: Integer): String;
 begin
   Result := WLEnv.ConfigsDir + 'profiles' + PATH_SEP + ToStr(index) + '.json';
 end;
 
-(*
-## TProfileForm.SaveProfileToFile
-```pascal
-procedure TProfileForm.SaveProfileToFile(index: Integer; profile: TProfile);
-```
-Saves profile as a JSON file at the specified index.
-*)
+
 procedure TProfileForm.SaveProfile(index: Integer; profile: TProfile);
 var
   parser: TJSONParser;
@@ -96,13 +71,7 @@ begin
   end;
 end;
 
-(*
-## TProfileForm.LoadProfileFromFile
-```pascal
-function TProfileForm.LoadProfileFromFile(index: Integer): TProfile;
-```
-Loads a profile from disk at the specified index. Returns a default profile if the file doesn't exist or is invalid.
-*)
+
 function TProfileForm.LoadProfileFromFile(index: Integer): TProfile;
 var
   parser: TJSONParser;
@@ -128,13 +97,7 @@ begin
     Result.Worlds += worlds.Item[i].AsInt;
 end;
 
-(*
-## TProfileForm.GetExistingProfileIndices
-```pascal
-function TProfileForm.GetExistingProfileIndices(): TIntegerArray;
-```
-Scans the accounts directory and returns a sorted array of all existing profile indices.
-*)
+
 function TProfileForm.GetExistingProfileIndices(): TIntegerArray;
 var
   files: TStringArray;
@@ -157,13 +120,7 @@ begin
   Result.Sort();
 end;
 
-(*
-## TProfileForm.ReindexProfiles
-```pascal
-procedure TProfileForm.ReindexProfiles(fromIndex: Integer);
-```
-Renumbers profile files after a deletion to maintain sequential indexing. All profiles with indices greater than fromIndex are decremented by 1.
-*)
+
 procedure TProfileForm.ReindexProfiles(fromIndex: Integer);
 var
   indices: TIntegerArray;
@@ -193,25 +150,13 @@ begin
   end;
 end;
 
-(*
-## TProfileForm.ValidateProfile
-```pascal
-function TProfileForm.ValidateProfile(profile: TProfile): Boolean;
-```
-Validates a profile has required fields filled.
-*)
+
 function TProfileForm.ValidateProfile(profile: TProfile): Boolean;
 begin
   Result := profile.Name.Trim() <> '';  // Only profile name is required
 end;
 
-(*
-## TProfileForm.Setup
-```pascal
-procedure TProfileForm.Setup();
-```
-Sets up the account system and loads existing profiles from config.
-*)
+
 procedure TProfileForm.Setup();
 var
   indices: TIntegerArray;
@@ -249,13 +194,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.UpdateProfileCombo
-```pascal
-procedure TProfileForm.UpdateProfileCombo();
-```
-Updates the profile combo box with current profiles.
-*)
+
 procedure TProfileForm.UpdateProfileCombo();
 var
   i: Integer;
@@ -269,13 +208,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.AddProfile
-```pascal
-function TProfileForm.AddProfile(profile: TProfile): Boolean;
-```
-Adds a new profile to the configuration after validation.
-*)
+
 function TProfileForm.AddProfile(profile: TProfile): Boolean;
 var
   idx: Integer;
@@ -302,13 +235,7 @@ begin
   ProfileIndex := idx;
 end;
 
-(*
-## TProfileForm.UpdateProfile
-```pascal
-function TProfileForm.UpdateProfile(index: Integer; profile: TProfile): Boolean;
-```
-Updates an existing profile at the specified index after validation.
-*)
+
 function TProfileForm.UpdateProfile(index: Integer; profile: TProfile): Boolean;
 begin
   Result := False;
@@ -338,13 +265,7 @@ begin
   end;
 end;
 
-(*
-## TProfileForm.DeleteProfile
-```pascal
-function TProfileForm.DeleteProfile(index: Integer): Boolean;
-```
-Deletes a profile at the specified index.
-*)
+
 function TProfileForm.DeleteProfile(index: Integer): Boolean;
 var
   path: String;
@@ -380,13 +301,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.GetSelectedProfile
-```pascal
-function TProfileForm.GetSelectedProfile(): TProfile;
-```
-Returns the currently selected account profile.
-*)
+
 function TProfileForm.GetSelectedProfile(): TProfile;
 var
   selectedIndex: Integer;
@@ -399,13 +314,7 @@ begin
     Result := Profiles[selectedIndex];
 end;
 
-(*
-## TProfileForm.ValidateInput
-```pascal
-function TProfileForm.ValidateInput(profile: TProfile): String;
-```
-Validates user input and returns error message if validation fails.
-*)
+
 function TProfileForm.ValidateInput(profile: TProfile): String;
 begin
   if profile.Name = '' then
@@ -433,13 +342,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.BuildFilterSettings
-```pascal
-function TProfileForm.BuildFilterSettings(): TSettings;
-```
-Builds a TSettings record from the current state of all filter UI controls.
-*)
+
 function TProfileForm.BuildFilterSettings(): TWorldFetcherSettings;
 var
   i: Integer;
@@ -491,13 +394,7 @@ begin
   end;
 end;
 
-(*
-## TProfileForm.ApplyActivityFilters
-```pascal
-procedure TProfileForm.ApplyActivityFilters();
-```
-Filters the current world list based on selected specific activity checkboxes.
-*)
+
 procedure TProfileForm.ApplyActivityFilters();
 var
   i, j, checkboxIndex: Integer;
@@ -550,13 +447,7 @@ begin
   SetLength(Self.FilteredWorlds, j);
 end;
 
-(*
-## TProfileForm.GetLocationString
-```pascal
-function TProfileForm.GetLocationString(loc: EWorldLocation): String;
-```
-Converts a world location enum to its display string.
-*)
+
 function TProfileForm.GetLocationString(loc: EWorldLocation): String;
 const
   NAMES: array [EWorldLocation] of String = [
@@ -566,13 +457,7 @@ begin
   Result := NAMES[loc];
 end;
 
-(*
-## TProfileForm.GetTypeString
-```pascal
-function TProfileForm.GetTypeString(worldType: EWorldType): String;
-```
-Converts a world type enum to its display string.
-*)
+
 function TProfileForm.GetTypeString(worldType: EWorldType): String;
 const
   NAMES: array [EWorldType] of String = ['F2P', 'Members'];
@@ -581,13 +466,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.DisplayResults
-```pascal
-procedure TProfileForm.DisplayResults();
-```
-Formats and displays the filtered world list in the list box with columns for world number, location, type, activity, and player count.
-*)
+
 procedure TProfileForm.DisplayResults();
 const
   ACTIVITY_TABLE_MAX_LENGTH = 14;
@@ -627,13 +506,7 @@ begin
   Self.StatsLabel.Caption := Format('Found: %d worlds', [validWorldCount]);
 end;
 
-(*
-## TProfileForm.RefreshActivities
-```pascal
-procedure TProfileForm.RefreshActivities();
-```
-Dynamically creates checkboxes for all unique specific activities found in the currently filtered worlds. Removes previous activity checkboxes before creating new ones.
-*)
+
 procedure TProfileForm.RefreshActivities();
 const
   ACTIVITY_CHECKBOX_MAX_LENGTH = 35;
@@ -796,13 +669,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.OnSaveClick
-```pascal
-procedure TProfileForm.OnSaveClick(sender: TLazObject);
-```
-Handles the Save button click event. Validates and saves the profile data from the edit form.
-*)
+
 {$H-}
 procedure TProfileForm.OnSaveClick(sender: TLazObject);
 var
@@ -845,13 +712,7 @@ begin
   Self.EditForm.Close();
 end;
 
-(*
-## TProfileForm.OnDeleteClick
-```pascal
-procedure TProfileForm.OnDeleteClick(sender: TLazObject);
-```
-Handles the Delete button click event. Shows confirmation dialog before deleting the profile.
-*)
+
 procedure TProfileForm.OnDeleteClick(sender: TLazObject);
 begin
   if ShowDialog(EDialogIcon.WARNING, [EDialogButton.YES, EDialogButton.NO], 'Delete Profile', 'Are you sure you want to delete this profile?') = EDialogButton.YES then
@@ -861,25 +722,13 @@ begin
   end;
 end;
 
-(*
-## TProfileForm.OnCloseClick
-```pascal
-procedure TProfileForm.OnCloseClick(sender: TLazObject);
-```
-Handles the Close button click event. Closes the edit dialog without saving.
-*)
+
 procedure TProfileForm.OnCloseClick(sender: TLazObject);
 begin
   Self.EditForm.Close();
 end;
 
-(*
-## TProfileForm.OnGenerateClick
-```pascal
-procedure TProfileForm.OnGenerateClick(sender: TLazObject);
-```
-Handles the Generate Worlds button click. Applies current filter settings and refreshes the world list.
-*)
+
 procedure TProfileForm.OnGenerateClick(sender: TLazObject);
 var
   settings: TWorldFetcherSettings;
@@ -919,13 +768,7 @@ begin
   Self.DisplayResults();
 end;
 
-(*
-## TProfileForm.OnSelectAllActivitiesClick
-```pascal
-procedure TProfileForm.OnSelectAllActivitiesClick(sender: TLazObject);
-```
-Handles the Select/Deselect All checkbox click. Toggles all activity checkboxes to match the master checkbox state.
-*)
+
 procedure TProfileForm.OnSelectAllActivitiesClick(sender: TLazObject);
 var
   i: Integer;
@@ -937,13 +780,7 @@ begin
     Self.ActivityCheckboxes[i].Checked := newState;
 end;
 
-(*
-## TProfileForm.OnSortChange
-```pascal
-procedure TProfileForm.OnSortChange(sender: TLazObject);
-```
-Handles sort order combo box change. Re-generates the world list with the new sort order.
-*)
+
 procedure TProfileForm.OnSortChange(sender: TLazObject);
 begin
   if Length(Self.FilteredWorlds) > 0 then
@@ -952,13 +789,7 @@ end;
 {$H+}
 
 
-(*
-## TProfileForm.SetupWorldTypePanel
-```pascal
-procedure TProfileForm.SetupWorldTypePanel();
-```
-Sets up the world type filter panel with F2P and Members checkboxes.
-*)
+
 procedure TProfileForm.SetupWorldTypePanel();
 var
   typeY: Integer;
@@ -979,13 +810,7 @@ begin
   Self.MembersCheckbox.Checked := True;
 end;
 
-(*
-## TProfileForm.SetupLocationPanel
-```pascal
-procedure TProfileForm.SetupLocationPanel();
-```
-Sets up the location filter panel with checkboxes for Germany, UK, USA, and Australia.
-*)
+
 procedure TProfileForm.SetupLocationPanel();
 var
   locY: Integer;
@@ -1025,13 +850,7 @@ begin
   Self.BrazilCheckbox.Checked := True;
 end;
 
-(*
-## TProfileForm.SetupActivityPanel
-```pascal
-procedure TProfileForm.SetupActivityPanel();
-```
-Sets up the activity type filter panel with checkboxes for Normal, Dangerous, Restricted, and Skill Total worlds.
-*)
+
 procedure TProfileForm.SetupActivityPanel();
 var
   actY: Integer;
@@ -1064,13 +883,7 @@ begin
   Self.SkillTotalCheckbox.Checked := True;
 end;
 
-(*
-## TProfileForm.SetupSpecificActivityPanel
-```pascal
-procedure TProfileForm.SetupSpecificActivityPanel();
-```
-Sets up the specific activities panel with a master select/deselect all checkbox. Individual activity checkboxes are added dynamically by RefreshActivities.
-*)
+
 procedure TProfileForm.SetupSpecificActivityPanel();
 begin
   Self.SelectAllActivitiesCheckbox := TLazCheckBox.CreateEx(
@@ -1082,13 +895,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.LoadWorldData
-```pascal
-procedure TProfileForm.LoadWorldData();
-```
-Fetches all available worlds from the world fetcher and caches them. Automatically generates the initial world list after fetching.
-*)
+
 procedure TProfileForm.LoadWorldData();
 begin
   Self.StatsLabel.Caption := 'Fetching...';
@@ -1108,13 +915,7 @@ begin
     Self.StatsLabel.Caption := 'Fetch failed!';
 end;
 
-(*
-## TProfileForm.LoadSavedWorlds
-```pascal
-procedure TProfileForm.LoadSavedWorlds(worldsStr: String);
-```
-Loads saved world numbers and displays them. Unchecks filter checkboxes but keeps activity options visible.
-*)
+
 procedure TProfileForm.LoadSavedWorlds(worlds: TIntegerArray);
 begin
   if worlds = [] then
@@ -1141,15 +942,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.SetupEditDialog
-```pascal
-procedure TProfileForm.SetupEditDialog(
-  const profile: TProfile; isNew: Boolean; editIndex: Integer
-);
-```
-Sets up the modal edit dialog for profile details.
-*)
+
 procedure TProfileForm.SetupEditDialog(
   const profile: TProfile; isNew: Boolean; editIndex: Integer
 );
@@ -1319,13 +1112,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.OnEditClick
-```pascal
-procedure TProfileForm.OnEditClick(sender: TLazObject);
-```
-Handles the Edit button click event. Opens the profile edit dialog for the selected profile or creates a new one.
-*)
+
 {$H-}
 procedure TProfileForm.OnEditClick(sender: TLazObject);
 var
@@ -1364,13 +1151,7 @@ begin
 end;
 
 
-(*
-## TProfileForm.SetupUI
-```pascal
-procedure TProfileForm.SetupUI(combo: TLazComboBox; button: TLazButton);
-```
-Sets up the UI components provided by the parent form.
-*)
+
 procedure TProfileForm.SetupUI(parent: TLazComponent);
 var
   lbl: TLazLabel;
