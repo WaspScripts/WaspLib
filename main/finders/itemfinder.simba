@@ -1,7 +1,4 @@
-(*
-# ItemFinder
-Methods to find and compare item images
-*)
+
 
 {$DEFINE WL_ITEMFINDER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}

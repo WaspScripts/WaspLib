@@ -1,42 +1,9 @@
-(*
-# Map Objects
-The game objects of the loaded map, read straight out of the game cache: where each one stands,
-what it's called, what it can be clicked for, and what it looks like.
 
-Everything comes from the same cache the map itself is drawn from, so it's always in step with
-the game, and the objects of a region are only read once that region is part of the map.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  booths: TObjectArray;
-begin
-  Map.Setup([EChunk.VARROCK]);
-  booths := TObjectArray.Create(Map.Walker, MapObjects.GetByAction('Bank'));
-end.
-```
-*)
 {$DEFINE WL_MAPOBJECTS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TMapObjectData
-One kind of object and every place it stands on the loaded map.
-- `ID`, `Name`, `Category` and `Actions` come from the object's definition. `Actions` are the
-  ones its right-click menu shows, in menu order.
-- `Typ` is the shape it's placed as: `10` is an ordinary object, `0` to `3` walls, `4` to `8`
-  wall decorations and `22` ground decorations.
-- `Coordinates` and `Rotations` are where it stands, as {ref}`Global points`, and which way each
-  of those copies is turned, `0` to `3`.
-- `Size` is its footprint in tiles and `Height` how tall it is, in the game's units: a tile is
-  `128`.
-- `Colors` are the colours it is drawn in, most common first.
 
-`Height` and `Colors` come from the object's models, which are only built when the object is
-asked for - see {ref}`MapObjects.Build`.
-*)
   TMapObjectData = record
     ID, Typ, Category, Height: Integer;
     Name: String;
@@ -50,13 +17,7 @@ asked for - see {ref}`MapObjects.Build`.
 
   TMapObjectDataArray = array of TMapObjectData;
 
-(*
-## TMapObjects
-Record holding the {ref}`TMapObjectData` of every object on the loaded map.
-- `Definitions` are the definitions of `Data`, in the same order, for building their models.
-- `Lookup` turns an object id into its place in `Data`, stored one higher so `0` means none.
-- `Loaded` holds the chunks already read, as `x, y` with the plane packed in with them.
-*)
+
   TMapObjects = record
     Data: TMapObjectDataArray;
     Definitions: TObjectDefinitionArray;
@@ -65,18 +26,7 @@ Record holding the {ref}`TMapObjectData` of every object on the loaded map.
     const COVERAGE: Single = 0.9;
   end;
 
-(*
-## MapObjects.Coordinate
-```pascal
-function TMapObjects.Coordinate(tile: TPoint; size: TPoint; plane: Integer): TPoint; static;
-```
-The {ref}`Global point` an object whose south west tile is `tile`, and which covers `size` tiles
-once turned, is stored at.
 
-Vertically it is the middle of the object. Horizontally it is half a tile west of the middle,
-which is where the object data WaspLib used to download put it. It is kept that way so objects
-line up exactly where they always have.
-*)
 function TMapObjects.Coordinate(tile: TPoint; size: TPoint; plane: Integer): TPoint; static;
 var
   top: Integer;
@@ -88,17 +38,7 @@ begin
   Result.Y := top - tile.Y * RSTranslator.TILE_SIZE + 2 - 2 * (size.Y - 1);
 end;
 
-(*
-## MapObjects.Resolve
-```pascal
-function TMapObjects.Resolve(constref objects: TObjectDefinitionArray; id: Integer; out def: TObjectDefinition): Boolean; static;
-```
-The definition object `id` is shown as, if it's one a script can interact with.
 
-Some objects change with the player's progress and are placed as a stand-in whose definition only
-lists what it can turn into. Those are shown as the first of their forms that has a name. Objects
-without a name, or that can't be interacted with, like most decorations, are left out.
-*)
 function TMapObjects.Resolve(constref objects: TObjectDefinitionArray; id: Integer; out def: TObjectDefinition): Boolean; static;
 var
   child: Integer;
@@ -121,13 +61,7 @@ begin
   Result := (def.Name <> 'null') and (def.InteractType <> 0);
 end;
 
-(*
-## MapObjects.Actions
-```pascal
-function TMapObjects.Actions(constref def: TObjectDefinition): TStringArray; static;
-```
-The actions `def`'s right-click menu shows, in the order it shows them.
-*)
+
 function TMapObjects.Actions(constref def: TObjectDefinition): TStringArray; static;
 var
   i, j: Integer;
@@ -138,13 +72,7 @@ begin
         Result += def.Ops.Ops[j].Text;
 end;
 
-(*
-## MapObjects.Add
-```pascal
-procedure TMapObjects.Add(constref def: TObjectDefinition; locType, rotation: Integer; coordinate: TPoint);
-```
-Internal method that records one placement of `def`, adding the object if it's the first one.
-*)
+
 procedure TMapObjects.Add(constref def: TObjectDefinition; locType, rotation: Integer; coordinate: TPoint);
 var
   idx: Integer;
@@ -172,17 +100,7 @@ begin
   Self.Data[idx].Rotations += rotation;
 end;
 
-(*
-## MapObjects.DrawnPlane
-```pascal
-function TMapObjects.DrawnPlane(constref region: TRegion; constref loc: TWorldLocation): Integer; static;
-```
-The plane `loc` is drawn on, and so the one it's seen and clicked on, which isn't always the one
-it's stored on. The same rule the client uses:
-- A tile flagged to be drawn on the ground has everything on it drawn on plane `0`, like the
-  walls of a building that are stored upstairs but stand on the ground.
-- Under a bridge, what's stored on a plane is drawn on the plane below it.
-*)
+
 function TMapObjects.DrawnPlane(constref region: TRegion; constref loc: TWorldLocation): Integer; static;
 var
   x, y: Integer;
@@ -198,17 +116,7 @@ begin
     Dec(Result);
 end;
 
-(*
-## MapObjects.Load
-```pascal
-procedure TMapObjects.Load(var loader: TMapLoader);
-procedure TMapObjects.Load(); overload;
-```
-Reads the objects of every chunk `loader` has loaded that hasn't been read yet. Without a loader
-it reads {ref}`Map`'s. The getters below call this, so it rarely needs calling directly.
 
-An object belongs to the plane it's drawn on - see {ref}`MapObjects.DrawnPlane`.
-*)
 procedure TMapObjects.Load(var loader: TMapLoader);
 var
   region: TMapRegion;
@@ -264,18 +172,7 @@ begin
   Self.Load(Map.Loader);
 end;
 
-(*
-## MapObjects.Build
-```pascal
-procedure TMapObjects.Build(idx: Integer);
-```
-Internal method that builds the models of `Data[idx]` with {ref}`TObjectModel` to fill in its
-`Height` and `Colors`.
 
-Only the colours that cover most of the object make it into `Colors`: the most common ones, until
-`COVERAGE` of its faces are accounted for. The rest are slivers and rarely lit corners that would
-only widen what a colour finder looks for.
-*)
 procedure TMapObjects.Build(idx: Integer);
 var
   model: TObjectModel;
@@ -303,18 +200,7 @@ begin
   end;
 end;
 
-(*
-## MapObjects.GetByName
-```pascal
-function TMapObjects.GetByName(name: String; amount: Integer = 0): TMapObjectDataArray;
-```
-Every object called `name`. Pass `amount` to stop after that many objects.
 
-Example:
-```pascal
-WriteLn MapObjects.GetByName('Bank booth');
-```
-*)
 function TMapObjects.GetByName(name: String; amount: Integer = 0): TMapObjectDataArray;
 var
   i: Integer;
@@ -331,13 +217,7 @@ begin
     end;
 end;
 
-(*
-## MapObjects.GetByID
-```pascal
-function TMapObjects.GetByID(id: Integer): TMapObjectData;
-```
-The object with the id `id`. It has no `Coordinates` if there is no such object on the map.
-*)
+
 function TMapObjects.GetByID(id: Integer): TMapObjectData;
 var
   idx: Integer;
@@ -355,19 +235,7 @@ begin
   Result := Self.Data[idx];
 end;
 
-(*
-## MapObjects.GetByAction
-```pascal
-function TMapObjects.GetByAction(action: String; amount: Integer = 0): TMapObjectDataArray;
-```
-Every object with `action` in its right-click menu. Pass `amount` to stop after that many
-objects.
 
-Example:
-```pascal
-WriteLn MapObjects.GetByAction('Bank');
-```
-*)
 function TMapObjects.GetByAction(action: String; amount: Integer = 0): TMapObjectDataArray;
 var
   i: Integer;
@@ -384,14 +252,7 @@ begin
     end;
 end;
 
-(*
-## MapObjects.GetByAllActions
-```pascal
-function TMapObjects.GetByAllActions(actions: TStringArray; amount: Integer = 0): TMapObjectDataArray;
-```
-Every object with all of `actions` in its right-click menu. Pass `amount` to stop after that many
-objects.
-*)
+
 function TMapObjects.GetByAllActions(actions: TStringArray; amount: Integer = 0): TMapObjectDataArray;
 var
   i: Integer;
@@ -412,13 +273,7 @@ begin
   end;
 end;
 
-(*
-## MapObjects.Clear
-```pascal
-procedure TMapObjects.Clear();
-```
-Forgets every object read so far, so the next getter reads the map again from scratch.
-*)
+
 procedure TMapObjects.Clear();
 begin
   Self.Data := [];
@@ -428,8 +283,5 @@ begin
 end;
 
 var
-(*
-## MapObjects variable
-Global {ref}`TMapObjects` variable, holding the objects of {ref}`Map`.
-*)
+
   MapObjects: TMapObjects;
