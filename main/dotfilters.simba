@@ -1,27 +1,10 @@
-(*
-# DotFilters
-Methods to handle DotFilters. Dot filters are filters that filter in or out EDots.
-*)
+
 
 {$DEFINE WL_DOTFILTERS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(TDotFilter)=
-## type TDotFilter
-```pascal
-TDotFilter = record
-  Bounds: TPointArray;
-  Circle: TCircle;
-  Inside: Boolean;
 
-  Timeout: Boolean;
-  Timer: TCountDown;
-end;
-```
-Type used to filter minimap dots.
-*)
   TDotFilter = record
     Poly   : TPolygon;
     Circle : TCircle;
@@ -30,13 +13,7 @@ Type used to filter minimap dots.
     Timer  : TCountDown;
   end;
 
-(*
-## TDotFilter.Create
-```pascal
-function TDotFilter.Create(const bounds: TPolygon; const circle: TCircle; inside: Boolean; time: Integer = -1): TDotFilter; static;
-```
-Static method to create a TDotFilter.
-*)
+
 function TDotFilter.Create(
   const bounds: TPolygon; const circle: TCircle;
   inside: Boolean; time: Integer = -1
@@ -48,25 +25,13 @@ begin
   Result := [bounds, circle, inside, (time > 0), timer];
 end;
 
-(*
-## TDotFilter.IsExpired
-```pascal
-function TDotFilter.IsExpired(): Boolean;
-```
-Checks if a TDotFilter is already expired by checking it's timer.
-*)
+
 function TDotFilter.IsExpired(): Boolean;
 begin
   Result := (Self.Timeout and Self.Timer.IsFinished);
 end;
 
-(*
-## TDotFilter.IsValid
-```pascal
-function TDotFilter.IsValid(const pt: TPoint): Boolean;
-```
-Checks if `pt` is valid accordint to the current TDotFilter;
-*)
+
 function TDotFilter.IsValid(const pt: TPoint): Boolean;
 var
   inPoly, inCircle: Boolean;
@@ -91,22 +56,10 @@ end;
 {$ENDIF}
 
 type
-(*
-(TDotFilterArray)=
-## type TDotFilterArray
-Type used to manage and interact with arrays of TDotFilters.
-*)
+
   TDotFilterArray = array of TDotFilter;
 
-(*
-## TDotFilterArray.Setup
-```pascal
-procedure TDotFilterArray.Setup(const bounds: TPolygon; const circle: TCircle; inside: Boolean; time: Integer = -1);
-procedure TDotFilterArray.SetupBounds(const bounds: TPolygon; inside: Boolean; time: Integer = -1);
-procedure TDotFilterArray.SetupCircle(const circle: TCircle; inside: Boolean; time: Integer = -1);
-```
-Creates and adds a TDotFilter to the current TDotFilterArray.
-*)
+
 procedure TDotFilterArray.Setup(const bounds: TPolygon; const circle: TCircle; inside: Boolean; time: Integer = -1);
 begin
   Self += TDotFilter.Create(bounds, circle, inside, time);
@@ -123,15 +76,7 @@ begin
 end;
 
 
-(*
-## TDotFilterArray.ClearExpired
-```pascal
-procedure TDotFilterArray.ClearExpired();
-```
-Clears expired TDotFilter from the current TDotFilterArray.
-You usually don't need to call this directly, but you can if you want.
-Other methods already take care of this by default for you regardless.
-*)
+
 procedure TDotFilterArray.ClearExpired();
 var
   i: Integer;
@@ -142,14 +87,7 @@ begin
 end;
 
 
-(*
-## TDotFilterArray.IsValid
-```pascal
-function TDotFilterArray.IsValid(const pt: TPoint; clearExpired: Boolean = True): Boolean;
-```
-Checks if a `pt` is valid in any of the TDotFilters in the current array.
-By default, expired TDotFilters are cleared from the array while this runs.
-*)
+
 function TDotFilterArray.IsValid(const pt: TPoint; clearExpired: Boolean = True): Boolean;
 var
   i: Integer;
@@ -195,13 +133,7 @@ begin
       Exit(True);
 end;
 
-(*
-## TDotFilterArray.FilterDots
-```pascal
-function TDotFilterArray.FilterDots(const dots: TPointArray; clearExpired: Boolean): TPointArray;
-```
-Filter the dots/points passed into this according to our current TDotFilters.
-*)
+
 function TDotFilterArray.FilterDots(const dots: TPointArray; clearExpired: Boolean): TPointArray;
 var
   dot: TPoint;
@@ -211,14 +143,7 @@ begin
       Result += dot;
 end;
 
-(*
-## TMinimap.GetFilteredDot
-```pascal
-function TMinimap.GetFilteredDotArray(dots: EDots; filters: TDotFilterArray; clearExpired: Boolean): TPointArray;
-function TMinimap.GetFilteredDot(dots: EDots; filters: TDotFilterArray; clearExpired: Boolean): TPoint;
-```
-Retrieves and filters minimap dots according to the specified TDotFilters.
-*)
+
 function TMinimap.GetFilteredDotArray(dots: EDots; filters: TDotFilterArray; clearExpired: Boolean): TPointArray;
 var
   tpa, flat: TPointArray;

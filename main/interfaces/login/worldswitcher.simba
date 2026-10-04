@@ -1,23 +1,9 @@
-(*
-# Login World Switcher
-The login world switcher is the world selecting interface you get when you
-click the world button on the {ref}`Login` screen:
-```{figure} ../../images/login_worldswitcher.png
-```
-*)
+
 {$DEFINE WL_LOGIN_WORLDSWITCHER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TLoginWorldSwitcher
-Reponsible for handling the login screen world switcher.
 
-This record holds information about the several buttons it has like you can see
-in this image:
-```{figure} ../../images/login_worldswitcher_debug.png
-```
-*)
   TLoginWorldSwitcher = record
     Bounds: TBox;
     OpenButton, CancelButton, LeftButton, RightButton: TBox;
@@ -27,14 +13,7 @@ in this image:
     AllowDangerousWorlds: Boolean;
   end;
 
-(*
-## TLoginWorldSwitcher.Setup
-```pascal
-procedure TLoginWorldSwitcher.Setup();
-```
-Internal method used to setup the {ref}`TLoginWorldSwitcher` coordinates.
-This is automatically called for you on the {ref}`LoginWorldSwitcher variable`.
-*)
+
 procedure TLoginWorldSwitcher.Setup();
 begin
   Self.Bounds.X1 := Target.Width div 2 - 382;
@@ -65,54 +44,20 @@ begin
   Self.RightButton.Y2 := Self.RightButton.Y1 + 28;
 end;
 
-(*
-## LoginWorldSwitcher.IsOpen
-```pascal
-function TLoginWorldSwitcher.IsOpen(): Boolean;
-```
-Returns True/False if the login screen world switcher is currently open.
 
-Example:
-```pascal
-WriteLn LoginWorldSwitcher.IsOpen();
-```
-*)
 function TLoginWorldSwitcher.IsOpen(): Boolean;
 begin
   Result := Target.HasColor($FFFFFF, 0, 61, Self.CancelButton);
 end;
 
-(*
-## LoginWorldSwitcher.WaitOpen
-```pascal
-function TLoginWorldSwitcher.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
-```
-Returns True/False if the login screen world switcher opens within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn LoginWorldSwitcher.WaitOpen();
-```
-*)
 function TLoginWorldSwitcher.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## LoginWorldSwitcher.Close
-```pascal
-function TLoginWorldSwitcher.Close(): Boolean;
-```
-Attempts to close the login screen world switcher.
 
-Example:
-```pascal
-if LoginWorldSwitcher.IsOpen() then
-  LoginWorldSwitcher.Close();
-```
-*)
 function TLoginWorldSwitcher.Close(): Boolean;
 begin
   if not Self.IsOpen() then Exit(True);
@@ -120,19 +65,7 @@ begin
   Result := SleepUntil(not Self.IsOpen(), RandomMode(100, 50, 1500), 600);
 end;
 
-(*
-## LoginWorldSwitcher.Open
-```pascal
-function TLoginWorldSwitcher.Open(): Boolean;
-```
-Attempts to open the login screen world switcher.
 
-Example:
-```pascal
-if not LoginWorldSwitcher.IsOpen() then
-  LoginWorldSwitcher.Open();
-```
-*)
 function TLoginWorldSwitcher.Open(): Boolean;
 begin
   if Self.IsOpen() then Exit(True);
@@ -141,41 +74,14 @@ begin
 end;
 
 
-(*
-## LoginWorldSwitcher.Read
-```pascal
-function TLoginWorldSwitcher.Read(index: Integer): Integer;
-```
-Returns the number of the world box at the `index` you specify.
 
-Example:
-```pascal
-if LoginWorldSwitcher.IsOpen() then
-  WriteLn LoginWorldSwitcher.Read(0);
-```
-*)
 function TLoginWorldSwitcher.Read(index: Integer): Integer;
 begin
   Result := OCR.RecognizeNumber(Self.WorldBoxes[index], Fonts.BOLD, [$000000, $0000FF], 0);
 end;
 
 
-(*
-## LoginWorldSwitcher Pagination
-```pascal
-function TLoginWorldSwitcher.PreviousPage(): Boolean;
-function TLoginWorldSwitcher.NextPage(): Boolean;
-```
-Attempts to switch the current login screen world switcher page using the
-`LoginWorldSwitcher.LeftButton` and `LoginWorldSwitcher.RightButton`.
-Returns True if we successfully changed page.
 
-Example:
-```pascal
-if LoginWorldSwitcher.IsOpen() then
-  LoginWorldSwitcher.NextPage();
-```
-*)
 function TLoginWorldSwitcher.PreviousPage(): Boolean;
 var
   first: Integer;
@@ -199,20 +105,7 @@ begin
 end;
 
 
-(*
-## LoginWorldSwitcher GetCurrent
-```pascal
-function TLoginWorldSwitcher.GetCurrent(): Integer;
-```
-Attempts to get our currently selected world.
-For this, if the login screen world switcher is open, we close it first, as the
-current world can only be read from the login screen.
 
-Example:
-```pascal
-WriteLn LoginWorldSwitcher.GetCurrent();
-```
-*)
 function TLoginWorldSwitcher.GetCurrent(): Integer;
 begin
   if not Self.Close() then Exit;
@@ -221,21 +114,7 @@ begin
 end;
 
 
-(*
-## LoginWorldSwitcher.Find
-```pascal
-function TLoginWorldSwitcher.Find(world: Integer; out index: Integer): Boolean;
-```
-Attempts to find the specified `world`.
-For this, {ref}`LoginWorldSwitcher Pagination` will be used if required.
-If the world we specified is found, the function returns `True` and the index of
-of the button is returned through `index`.
 
-Example:
-```pascal
-WriteLn LoginWorldSwitcher.Find(303, idx);
-```
-*)
 function TLoginWorldSwitcher.Find(world: Integer; out index: Integer): Boolean;
 begin
   repeat
@@ -248,21 +127,7 @@ begin
   index := -1;
 end;
 
-(*
-## LoginWorldSwitcher.Switch
-```pascal
-function TLoginWorldSwitcher.Switch(world: Integer): Boolean;
-```
-Attempts to switch to the specified `world`.
-For this, {ref}`LoginWorldSwitcher Pagination` will be used if required.
-If the world we specified is found and we successfully switch to it the function
-returns `True`.
 
-Example:
-```pascal
-WriteLn LoginWorldSwitcher.Switch(303);
-```
-*)
 function TLoginWorldSwitcher.Switch(world: Integer): Boolean;
 var
   idx: Integer;
@@ -286,8 +151,5 @@ end;
 
 
 var
-(*
-## LoginWorldSwitcher variable
-Global {ref}`TLoginWorldSwitcher` variable.
-*)
+
   LoginWorldSwitcher: TLoginWorldSwitcher;

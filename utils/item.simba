@@ -1,110 +1,30 @@
-(*
-# Item
-Page dedicated to game items and misc functions related to them.
-*)
+
 {$DEFINE WL_ITEM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 const
-(*
-## Quantity Constants
-```pascal
-QUANTITY_ALL = 0;
-QUANTITY_ALL_BUT_ONE = -1;
-```
-In WaspLib you have this 2 constants to use in interfaces that allows you to
-specify "all" quantities of items, e.g. the {ref}`bank` interface.
-*)
+
   QUANTITY_ALL = 0;
   QUANTITY_ALL_BUT_ONE = -1;
 
 var
-(*
-## ITEM_SHADOW
-```pascal
-ITEM_SHADOW: TColor = $202030;
-```
-`TColor` of an item gray shadow. This shadow value will change between clients
-(check {ref}`EClient`) and depending on the client certain interfaces being
-open will also change it to {ref}`ITEM_SHADOW_GRAY`, e.g. the {ref}`Bank`
-with Legacy or RuneLite.
 
-Example:
-```pascal
-WriteLn ITEM_SHADOW; //$202030
-```
-*)
   ITEM_SHADOW: TColor = $202030;
 
-(*
-## ITEM_SHADOW_GRAY
-```pascal
-ITEM_SHADOW_GRAY: TColor = $333333;
-```
-`TColor` of an item gray shadow. This shadow value will change between clients
-(check {ref}`EClient`) and depending on the client certain interfaces being
-open will also change it, e.g. the {ref}`Bank` with Legacy or RuneLite.
 
-Example:
-```pascal
-WriteLn ITEM_SHADOW; //$333333
-```
-*)
   ITEM_SHADOW_GRAY: TColor = $333333;
 
-(*
-## ITEM_BORDER
-```pascal
-ITEM_BORDER: TColor = $010000;
-```
-`TColor` of an item border. This value will change between clients
-(check {ref}`EClient`).
 
-Example:
-```pascal
-WriteLn ITEM_BORDER; //$010000
-```
-*)
   ITEM_BORDER: TColor = $010000;
 
-(*
-## ITEM_BORDER_WHITE
-```pascal
-ITEM_BORDER_WHITE: TColor = $FFFFFF;
-```
-`TColor` of a selected item border. This value will change between clients
-(check {ref}`EClient`).
 
-Example:
-```pascal
-WriteLn ITEM_BORDER_WHITE; //$FFFFFF
-```
-*)
   ITEM_BORDER_WHITE: TColor = $FFFFFF;
 
 type
-(*
-## EItemQuantity
-```pascal
-EItemQuantity = enum(ONE, FIVE, TEN, CUSTOM, ALL);
-```
-General purpose item quantity enum.
-*)
+
   EItemQuantity = enum(ONE, FIVE, TEN, CUSTOM, ALL);
 
-(*
-### EItemQuantity.Integer2Quantity
-```pascal
-function EItemQuantity.Integer2Quantity(quantity: Integer): EItemQuantity; static;
-```
-Internal helper function to convert a integer quantity into a EItemQuantity.
 
-Example:
-```pascal
-WriteLn EItemQuantity.Integer2Quantity(5);
-WriteLn EItemQuantity.Integer2Quantity(7);
-```
-*)
 function EItemQuantity.Integer2Quantity(quantity: Integer): EItemQuantity; static;
 begin
   case quantity of
@@ -116,20 +36,7 @@ begin
   end;
 end;
 
-(*
-### EItemQuantity.String2Quantity
-```pascal
-function EItemQuantity.String2Quantity(str: String): EItemQuantity; static;
-```
-Internal helper function to convert a string quantity into a EItemQuantity.
 
-Example:
-```pascal
-WriteLn EItemQuantity.String2Quantity('5');
-WriteLn EItemQuantity.String2Quantity('7');
-WriteLn EItemQuantity.String2Quantity('All');
-```
-*)
 function EItemQuantity.String2Quantity(str: String): EItemQuantity; static;
 begin
   case LowerCase(str) of
@@ -142,36 +49,10 @@ begin
 end;
 
 type
-(*
-## EStack
-```pascal
-EStack = enum(YELLOW, WHITE, GREEN);
-```
-Enum representing the types of item stacks available.
-*)
+
   EStack = enum(YELLOW, WHITE, GREEN);
 
-(*
-## EStack.Color
-```pascal
-property EStack.Color: TColor;
-```
-Returns a `TColor` of a {ref}`EStack`.
-- `EStack.YELLOW` should be stacks between `0` and `99.999`.
-- `EStack.WHITE` should be stacks between `100.000` and `9.999.999` and are
-shown with a `K` representing the 3 least significant digits, e.g. `9.999.999`
-would be seen as `9999K`.
-- `EStack.GREEN` should be stacks between `100.000` and `9.999.999` and are
-shown with an `M` representing the 6 least significant digits, e.g.
-`999.999.999` would be seen as `999M`.
 
-Example:
-```pascal
-WriteLn EStack.YELLOW.Color; //$00FFFF
-WriteLn EStack.WHITE.Color;  //$FFFFFF
-WriteLn EStack.GREEN.Color;  //$80FF00
-```
-*)
 property EStack.Color: TColor;
 begin
   case Self of
@@ -181,21 +62,7 @@ begin
   end;
 end;
 
-(*
-## EStack.Multiplier
-```pascal
-property EStack.Multiplier: Integer;
-```
-Returns the "multiplier" of a `EStack` which are:
-- `EStack.YELLOW`: 0
-- `EStack.WHITE`: 1000
-- `EStack.GREEN`: 1000000
 
-Example:
-```pascal
-WriteLn EStack.YELLOW.Multiplier;
-```
-*)
 property EStack.Multiplier: Integer;
 begin
   Result := Round(10 ** (3 * Ord(Self)));
@@ -203,31 +70,13 @@ end;
 
 
 type
-(*
-## TItem
-The main type that represents, well, a game item.
-`TItem` is a type of `String` and therefore inherits all `String` methods.
-*)
+
   TItem = String;
-(*
-## TItemArray
-Array type of `TItem`.
-*)
+
   TItemArray = array of TItem;
 
 
-(*
-## TItem.InBounds
-```pascal
-function TItem.InBounds(bounds: TBox; fadeTolerance: Single = 8.5; trgt: TTarget = Target): Boolean; static;
-```
-Checks if the specified `bounds` has an item in it.
 
-Example:
-```pascal
-WriteLn TItem.InBounds(Inventory.Slots.Box(0));
-```
-*)
 function TItem.InBounds(bounds: TBox; fadeTolerance: Single = 8.5; trgt: TTarget = Target): Boolean; static;
 begin
   Result := trgt.HasColor(ITEM_BORDER, fadeTolerance, 1, bounds) or
@@ -235,40 +84,13 @@ begin
 end;
 
 
-(*
-## TItem.HasAmount
-```pascal
-function TItem.HasAmount(): Boolean;
-```
-Checks if the `TItem` has "doses" or "charges".
 
-Example:
-```pascal
-item := 'Amulet of glory(6)';
-WriteLn item.HasAmount(); //true
-```
-*)
 function TItem.HasAmount(): Boolean;
 begin
   Result := Self.EndsWith(')', True);
 end;
 
-(*
-## TItem.Spread
-```pascal
-function TItem.Spread(): TItemArray;
-```
-Checks if the `TItem` has `(a..b)` in it's name and will spread it into a
-`TItemArray`.
 
-Example:
-```pascal
-item := 'prayer potion(1..4)';
-WriteLn item.Spread(); ['prayer potion(1)', 'prayer potion(2)', 'prayer potion(3)'. 'prayer potion(4)']
-item := 'prayer potion(2..1)';
-WriteLn item.Spread(); ['prayer potion(2)', 'prayer potion(1)']
-```
-*)
 function TItem.Spread(): TItemArray;
 var
   parts: TStringArray;
@@ -294,19 +116,7 @@ begin
     Result += name + ToStr(i) + ')';
 end;
 
-(*
-## TItem.SimplifyName
-```pascal
-function TItem.SimplifyName(): String;
-```
-Internal helper function to get a human like short item name, usually to search.
 
-Example:
-```pascal
-item := 'Amulet of glory(6)';
-WriteLn item.SimplifyName();
-```
-*)
 function TItem.SimplifyName(): String;
 var
   short, long: Integer;
@@ -323,27 +133,14 @@ begin
   Result := Result.CopyRange(0, Random(short, long));
 end;
 
-(*
-## Item.StackBox
-```pascal
-property TItem.StackBox(slot: TBox): TBox; static;
-```
-Returns the correct text box of an item's amount text based on the item box.
-*)
+
 property TItem.StackBox(slot: TBox): TBox; static;
 begin
   Result := [slot.X1, slot.Y1-1, slot.X1 + 35, slot.Y1 + 11];
 end;
 
 
-(*
-## TItem.ReadStack
-```pascal
-function TItem.ReadStack(slot: TBox): Integer; static;
-```
-For use with items in interfaces like bankscreen, inventory, shops and so on to
-get the number of stacked items.
-*)
+
 function TItem.ReadStack(slot: TBox): Integer; static;
 var
   stack: EStack;
@@ -365,59 +162,23 @@ begin
 end;
 
 type
-(*
-## TBankItem
-Helper type to handle bank items better.
-This holds information about the item name, quantity and whether it's noted or
-not.
-*)
+
   TBankItem = object
     Item: TItem;
     Quantity: Integer;
     Noted: Boolean;
   end;
 
-(*
-## TBankItemArray
-Array type of `TBankItem`.
-*)
+
   TBankItemArray = array of TBankItem;
 
-(*
-## TBankItem.Construct
-```pascal
-function TBankItem.Construct(item: TItem; quantity: Integer = QUANTITY_ALL_BUT_ONE): TBankItem; static;
-```
-Creates a TBankItem.
 
-Example:
-```pascal
-var
-  bankitem: TBankItem;
-begin
-  bankitem := new TBankItem('abyssal whip', 1);
-end.
-```
-*)
 function TBankItem.Construct(item: TItem; quantity: Integer = QUANTITY_ALL_BUT_ONE): TBankItem; static;
 begin
   Result := item.ToBankItem(quantity);
 end;
 
-(*
-## TItem.ToBankItem
-```pascal
-function TItem.ToBankItem(quantity: Integer = QUANTITY_ALL_BUT_ONE): TBankItem;
-```
-Returns a `TBankItem` based on the `TItem` in question with the specified
-`quantity`.
 
-Example:
-```pascal
-item := 'Amulet of glory(6)';
-WriteLn item.ToBankItem();
-```
-*)
 function TItem.ToBankItem(quantity: Integer = QUANTITY_ALL_BUT_ONE): TBankItem;
 begin
   Result.Quantity := quantity;
@@ -426,13 +187,7 @@ begin
   else Result.Item := Self;
 end;
 
-(*
-## TBankItem.ToItem
-```pascal
-function TBankItem.ToItem(): TItem;
-```
-The opposite of {ref}`TItem.ToBankItem`
-*)
+
 function TBankItem.ToItem(): TItem;
 begin
   Result := Self.Item;

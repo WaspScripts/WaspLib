@@ -1,20 +1,4 @@
-(*
-# Map
-This file is responsible for the TMap positioning system.
-It was made from scratch by Torwent but heavily inspired in the original
-TWalker by [slacky](https://slacky.one/) and it's future iterations made by
-Olly.
-Without them, this wouldn't be possible.
 
-For a online interactive map you can visit
-[WaspScripts map](https://map.waspscripts.com/)
-
-For something simpler and much closer to the original
-[slacky](https://slacky.one/) walker check out {ref}`Image Map`.
-
-For debugging purposes you can use `{$DEFINE WL_DEBUG_MAP}` before including
-{ref}`WaspLib`.
-*)
 
 {$DEFINE WL_MAP_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -23,13 +7,7 @@ For debugging purposes you can use `{$DEFINE WL_DEBUG_MAP}` before including
 {.$DEFINE WL_DEBUG_MAP}
 
 type
-(*
-## TPosition
-Record holding a player's full position:
-- X, Y coordinate
-- Z which is the player height on the current heightmap
-- Plane which is the player's current plane if several planes are being used.
-*)
+
   TPosition = record
     X, Y, Plane: Int32;
     Z: Single;
@@ -41,10 +19,7 @@ begin
 end;
 
 type
-(*
-## TMap
-Record responsible for positioning.
-*)
+
   TMap = record
     RegionIndex: Int32;
     Region: TMapRegion;
@@ -72,19 +47,7 @@ function TMap.Position(): TPoint; forward;
 function TMap.Height(pt: TPoint = [0,0]; global: Boolean = True): Single; forward;
 
 
-(*
-## Map.AddLocalFilter
-```pascal
-procedure TMap.AddLocalFilter(filter: TBox; inside: Boolean);
-```
-Adds a position filter to the `TMap`.
 
-This is a way to making it impossible for you to get positions inside of the
-`filter` boxes your `TMap` has.
-
-It's useful to understand the different between local and global coordinates to
-know if you should use this or {ref}`Map.AddGlobalFilter` instead.
-*)
 procedure TMap.AddLocalFilter(filter: TBox; inside: Boolean);
 begin
   with Self.Loader do
@@ -94,19 +57,7 @@ begin
     ], inside];
 end;
 
-(*
-## Map.AddGlobalFilter
-```pascal
-procedure TMap.AddGlobalFilter(regionIdx: Int32; filter: TBox; inside: Boolean);
-```
-Adds a position filter to the `TMap`.
 
-This is a way to making it impossible for you to get positions inside of the
-`filter` boxes your `TMap` has.
-
-It's useful to understand the different between local and global coordinates to
-know if you should use this or {ref}`Map.AddLocalFilter` instead.
-*)
 procedure TMap.AddGlobalFilter(regionIdx: Int32; filter: TBox; inside: Boolean);
 begin
   filter := Self.Loader.GetLocal(regionIdx, filter);
@@ -114,14 +65,7 @@ begin
   Self.AddLocalFilter(filter, inside);
 end;
 
-(*
-## Map.InternalSetup
-```pascal
-procedure TMap.InternalSetup();
-```
-Internal TMap setup method.
-This is caleld automatically for you and you shouldn't need to call it.
-*)
+
 procedure TMap.InternalSetup();
 var
   i: Int32;
@@ -152,15 +96,7 @@ begin
 end;
 
 
-(*
-## Map.Setup
-```pascal
-procedure TMap.SetupEx(boxes: TBoxArray; planes: TIntegerArray = [0]; downscale: UInt32 = 8);
-procedure TMap.Setup(chunks: TMapChunkArray; downscale: UInt32 = 8);
-procedure TMap.Setup(echunks: set of EChunk; downscale: UInt32 = 8); overload;
-```
-Sets up a {ref}`TMap`.
-*)
+
 procedure TMap.SetupEx(boxes: TBoxArray; planes: TIntegerArray = [0]; downscale: UInt32 = 8);
 var
   i: Int32;
@@ -195,15 +131,7 @@ begin
   Self.Setup(chunks, downscale);
 end;
 
-(*
-## Map.Add
-```pascal
-procedure TMap.AddEx(boxes: TBoxArray; planes: TIntegerArray = [0]; downscale: UInt32 = 8);
-procedure TMap.Add(chunks: TMapChunkArray; downscale: UInt32 = 8);
-procedure TMap.Add(echunks: set of EChunk; downscale: UInt32 = 8); overload;
-```
-TMap to add maps to an already setup TMap.
-*)
+
 procedure TMap.AddEx(boxes: TBoxArray; planes: TIntegerArray = [0]; downscale: UInt32 = 8);
 var
   i: Int32;
@@ -240,17 +168,7 @@ begin
 end;
 
 
-(*
-## Map.ScaledSearch
-```pascal
-function TMap.ScaledSearch(img: TImage): TPointArray;
-```
-Internal TMap method used to get an initial TPointArray of possible positions.
-This is performed in a downscaled map with a downscaled minimap.
-This is very innacurate by itself but by ruling down most of the map
-in a downscaled search before doing a full sized search speed has a dramatic boost.
-You probably won't ever need to call this directly.
-*)
+
 function TMap.ScaledSearch(img: TImage): TPointArray;
 var
   sample: TImage;
@@ -316,21 +234,7 @@ begin
   end;
 end;
 
-(*
-## Map.Position
-```pascal
-function TMap.Position(): TPoint;
-function TMap.FullPosition(): TPosition;
-```
-Returns the players current position on the loaded map.
-`TMap.FullPosition()` also returns the current Z level.
 
-Example:
-```pascal
-WriteLn(Map.Position());
-WriteLn(Map.Similarity); // Check to see the match percentage if needed
-```
-*)
 function TMap.Position(): TPoint;
 const
   SCALE: Int32 = 2;
@@ -416,21 +320,7 @@ begin
 end;
 
 
-(*
-## Map.Height
-```pascal
-function TMap.Height(pt: TPoint; global: Boolean = True): Single;
-```
-Returns the height of the player at the specified coordinate if there's a heightmap loaded.
-If `pt` is `Default(TPoint)` then we will use our current position.
-`global` decides wether the coordinate is converted to {ref}`global points` or if it's meant to be used
-as internal {ref}`local points`.
 
-Example:
-```pascal
-WriteLn Map.Height();
-```
-*)
 function TMap.Height(pt: TPoint = Default(TPoint); global: Boolean = True): Single;
 begin
   if Self.DisableHeightmap or Self.Loader.Regions.IsEmpty then
@@ -485,20 +375,7 @@ begin
 end;
 
 
-(*
-## Map.DebugPosition
-```pascal
-function TMap.DebugPosition(): TPoint;
-```
-Debugs the player position in the currently loaded map.
 
-Example:
-```pascal
-Map.Setup(...);
-while True do
-  Map.DebugPosition();
-```
-*)
 function TMap.DebugPosition(print: Boolean = True): TPoint;
   function _BoxStr(b: TBox): String;
   begin
@@ -603,31 +480,7 @@ begin
   Target.UnFreezeImage();
 end;
 
-(*
-## Map.DebugHeight
-```pascal
-procedure TMap.DebugHeight(img: TImage; dots: EDots);
-procedure TMap.DebugHeight(dots: EDots = [EDot.PLAYER..EDot.ITEM]); overload;
-```
-Debugs the heightmap by projecting the outline of every tile around the player onto the
-{ref}`MainScreen`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Map.Setup([EChunk.VARROCK]);
-  while True do
-  begin
-    Options.GetZoomLevel(False);
-    Map.DebugHeight();
-  end;
-end.
-```
-
-```{figure} ../../images/mm2ms_height.gif
-```
-*)
 procedure TMap.DebugHeight(img: TImage; dots: EDots);
 const
   DOT_COLORS: TColorArray = [$FFFFFF, $00FFFF, $0000FF];
@@ -726,8 +579,5 @@ end;
 
 
 var
-(*
-## Map variable
-Global {ref}`TMap` variable.
-*)
+
   Map: TMap;
