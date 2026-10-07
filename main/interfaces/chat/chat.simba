@@ -1,49 +1,21 @@
-(*
-# Chat
-The {ref}`Chat` interface is the interface that shows up at the bottom left
-corner of the game client where you can communicate with other players,
-receive game messages and even interact with some options and menus it hosts
-like the {ref}`Make` menu.
 
-```{figure} ../../images/chat_interface.png
-```
-*)
 {$DEFINE WL_CHAT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(EChatColor)=
-## EChatColor enum
-```pascal
-EChatColor = enum(BLACK, MAROON .. NAVY, GREEN);
-```
-Enum representing each of the available chat text colors.
-*)
+
   EChatColor = enum(
     BLACK, MAROON, BLUE, PURPLE, RED, LIGHT_RED, WHITE, LIGHT_PURPLE, NAVY, GREEN
   );
 
   EChatColorArray = array of EChatColor;
 
-(*
-(EIron)=
-## EIron enum
-```pascal
-EIron = enum(
-  NONE, IRONMAN, HARDCORE, ULTIMATE, GROUP, HARCORE_GROUP, UNRANKED_GROUP
-);
-```
-Enum representing each of the available ironman types.
-*)
+
   EIron = enum(
     NONE, IRONMAN, HARDCORE, ULTIMATE, GROUP, HARCORE_GROUP, UNRANKED_GROUP
   );
 
-(*
-## TChat
-Main record used to interact with the {ref}`Chat` interface.
-*)
+
   TChat = record
     Bounds: TBox;
     Scroll: TScrollBar;
@@ -54,14 +26,7 @@ Main record used to interact with the {ref}`Chat` interface.
     Colors: TColorArray;
   end;
 
-(*
-### Chat.SetupInterface
-```pascal
-procedure TChat.SetupInterface();
-```
-Internal method used to setup the {ref}`TChat` coordinates.
-This is automatically called for you on the {ref}`Chat variable`.
-*)
+
 procedure TChat.SetupInterface();
 begin
   Self.Tabs.SetupInterface();
@@ -105,35 +70,9 @@ begin
   MainScreen.Mask.DrawBoxFilled(Self.Bounds);
 end;
 
-(*
-### Chat.Tabs variable
-```pascal
-Tabs: TChatTabs;
-```
-For more information on chat tabs read {ref}`ChatTabs`.
 
-You can access the {ref}`TChat` {ref}`ChatTabs` through the `Tabs variable`:
-```pascal
-ShowOnTarget(Chat.Tabs.Bounds);
-```
-```{figure} ../../images/chattabs_bounds.png
-```
-*)
 
-(*
-#### Chat.GetColors
-```pascal
-function TChat.GetColors(colors: EChatColorArray): TColorArray;
-```
-Convenience method used to conver the human readable `colors` in a
-`EChatColorArray` format into a `TColorArray` which has the colors in BGR
-format.
 
-Example:
-```pascal
-WriteLn Chat.GetColors([EChatColor.RED, EChatColor.WHITE]);
-```
-*)
 function TChat.GetColors(colors: EChatColorArray): TColorArray;
 var
   c: EChatColor;
@@ -144,20 +83,7 @@ begin
 end;
 
 
-(*
-### Chat.GetDisplayNameBox
-```pascal
-function TChat.GetDisplayNameBox(out color: Integer): TBox;
-function TChat.GetDisplayNameBox(): TBox; overload;
-```
-Returns the bounds of the display name on the {ref}`Chat` box.
-You can optionally get the display name color back through the `color` variable.
 
-Example:
-```pascal
-ShowOnTarget(Chat.GetDisplayNameBox());
-```
-*)
 function TChat.GetDisplayNameBox(out color: Integer): TBox;
 var
   b: TBox;
@@ -182,18 +108,7 @@ begin
   Result := Self.GetDisplayNameBox(color);
 end;
 
-(*
-### Chat.GetDisplayName
-```pascal
-function TChat.GetDisplayName(): String;
-```
-Returns the account display name on the {ref}`Chat` box as a string.
 
-Example:
-```pascal
-WriteLn Chat.GetDisplayName();
-```
-*)
 function TChat.GetDisplayName(): String;
 var
   b: TBox;
@@ -210,18 +125,7 @@ begin
 end;
 
 
-(*
-### Chat.GetIronManType
-```pascal
-function TChat.GetIronManType() : EIron;
-```
-Returns the account ironman type.
 
-Example:
-```pascal
-WriteLn Chat.GetIronManType();
-```
-*)
 function TChat.GetIronManType(): EIron;
 var
   b: TBox;
@@ -263,18 +167,7 @@ begin
 end;
 
 
-(*
-### Chat.IsTransparent
-```pascal
-function TChat.IsTransparent(): Boolean;
-```
-Returns true if the {ref}`Chat` box is in transparent mode.
 
-Example:
-```pascal
-WriteLn Chat.IsTransparent();
-```
-*)
 function TChat.IsTransparent(): Boolean;
 var
   b: TBox;
@@ -288,37 +181,14 @@ begin
 end;
 
 
-(*
-### Chat.IsOpen
-```pascal
-function TChat.IsOpen(): Boolean;
-```
-Returns True/False if the {ref}`Chat` is open.
 
-Example:
-```pascal
-if Chat.IsOpen() then
-  ShowOnTarget(Chat.Bounds);
-```
-*)
 function TChat.IsOpen(): Boolean;
 begin
   if Client.Mode = EMode.FIXED then Exit(True);
   Result := Self.Tabs.GetActive() <> EChatTab.NONE;
 end;
 
-(*
-### Chat.Close
-```pascal
-function TChat.Close(): Boolean;
-```
-Attempts to close the {ref}`Chat`interface.
 
-Example:
-```pascal
-WriteLn Chat.Close();
-```
-*)
 function TChat.Close(): Boolean;
 begin
   if Client.Mode = EMode.FIXED then Exit(False);
@@ -329,89 +199,27 @@ begin
 end;
 
 
-(*
-### Chat Queries
-A chat query is when you have some kind of question on the chatbox which you have
-to reply to.
 
-For example, when you try to "withdraw-x" from the bank, you are asked for the
-quantity:
-```{figure} ../../images/chat_query.png
-A chat query.
-```
-*)
 
-(*
-#### Chat.GetQuery
-```pascal
-function TChat.GetQuery(): String;
-```
-Returns the query shown on the {ref}`Chat` interface if any as a string.
 
-Example:
-```pascal
-WriteLn Chat.Close();
-```
-*)
 function TChat.GetQuery(): String;
 begin
   Result := OCR.Recognize(Self.Bounds, Fonts.BOLD, [$0], 0);
 end;
 
-(*
-#### Chat.GetQueryAnswer
-```pascal
-function TChat.GetQueryAnswer(): String;
-```
-Returns the query current answer to the query in the {ref}`Chat` interface if
-any.
 
-Example:
-```pascal
-WriteLn Chat.GetQueryAnswer();
-```
-*)
 function TChat.GetQueryAnswer(): String;
 begin
   Result := OCR.Recognize(Self.Bounds, Fonts.BOLD, [TFonts.DARK_BLUE], 0);
 end;
 
-(*
-#### Chat.FindQuery
-```pascal
-function TChat.FindQuery(const query: String; matchCase: Boolean = False): Boolean;
-```
-Returns the True/False if the {ref}`Chat` interface currently has the specified
-`query` visible.
 
-Example:
-```pascal
-WriteLn Chat.FindQuery('Enter amount');
-```
-*)
 function TChat.FindQuery(const query: String; matchCase: Boolean = False): Boolean;
 begin
   Result := Self.GetQuery().Contains(query, matchCase);
 end;
 
-(*
-#### Chat.WaitQuery
-```pascal
-function TChat.WaitQuery(
-  const query: String;
-  matchCase: Boolean;
-  time: Integer = TICK;
-  interval: Integer = -1
-): Boolean;
-```
-Returns the true if the specified `query` is visible in the {ref}`Chat`
-interface within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn Chat.WaitQuery('Enter amount');
-```
-*)
 function TChat.WaitQuery(
   const query: String;
   matchCase: Boolean = False;
@@ -423,21 +231,7 @@ begin
   Result := SleepUntil(Self.FindQuery(query, matchCase), interval, time);
 end;
 
-(*
-#### Chat.AnswerQuery
-```pascal
-function TChat.AnswerQuery(
-  query, answer: String; waitTime: Integer = TICK; interval: Integer = -1
-): Boolean;
-```
-Attempts to reply to the specified `query` with `answer` if it's available in the
-{ref}`Chat` interface within `waitTime` milliseconds.
 
-Example:
-```pascal
-WriteLn Chat.AnswerQuery('Enter amount', '15');
-```
-*)
 function TChat.AnswerQuery(
   query, answer: String; waitTime: Integer = TICK; interval: Integer = -1
 ): Boolean;
@@ -499,22 +293,7 @@ begin
 end;
 
 
-(*
-### Chat.GetMessage
-```pascal
-function TChat.GetMessage(line: Integer): String;
-```
-Get the message in the specified `line`.
 
-For consistency reasons all the symbols are stripped from the result.
-
-Example:
-```pascal
-WriteLn Chat.GetMessage(5);
-```
-
-Credits: Original design inspired on Olly's solution for this on his 2.0 library.
-*)
 function TChat.GetMessage(line: Integer): String;
 begin
   if not Self.IsTransparent() then
@@ -522,18 +301,7 @@ begin
   Result := Self._GetTransparentMessage(line).ExtractText();
 end;
 
-(*
-### Chat.IndexOfMessage
-```pascal
-function TChat.IndexOfMessage(const msg: String; matchCase: Boolean = False): Integer;
-```
-Find which line has a specific `msg` either entirely or partially if any.
 
-Example:
-```pascal
-WriteLn Chat.IndexOfMessage('Hello world');
-```
-*)
 function TChat.IndexOfMessage(const msg: String; matchCase: Boolean = False): Integer;
 begin
   if Self.IsTransparent() then
@@ -550,47 +318,13 @@ begin
   Result := -1;
 end;
 
-(*
-### Chat.ContainsMessage
-```pascal
-function TChat.ContainsMessage(const msg: String; matchCase: Boolean = False): Boolean;
-```
-Returns True/False if the specified `msg` is visible on the {ref}`Chat` interface.
 
-Example:
-```pascal
-WriteLn Chat.ContainsMessage('Hello world');
-```
-*)
 function TChat.ContainsMessage(const msg: String; matchCase: Boolean = False): Boolean;
 begin
   Result := Self.IndexOfMessage(msg, matchCase) > -1;
 end;
 
-(*
-### Chat.CountNewMessage
-```pascal
-function TChat.CountNewMessage(const msg: String; matchCase: Boolean = False): Integer;
-```
-Counts how many time the specified `msg` repeats without any other message in
-between from the most recent one.
 
-This can be useful to know if you performed a task sometimes, for example,
-knowing if you tried to light a fire on top of another:
-```pascal
-{$I WaspLib/main.simba}
-var
-  oldCount, newCount: Integer;
-begin
-  oldCount := Chat.CountNewMessage('You can''t light a fire here.');
-  Inventory.Combine('Tinderbox', 'Logs');
-  Sleep(8*TICK);
-  newCount := Chat.CountNewMessage('You can''t light a fire here.');
-  if newCount > oldCount then
-    WriteLn('Tried to light a fire and failed.');
-end.
-```
-*)
 function TChat.CountNewMessage(const msg: String; matchCase: Boolean = False): Integer;
 var
   i: Integer;
@@ -604,18 +338,7 @@ begin
   end;
 end;
 
-(*
-### Chat.GetMessagesString
-```pascal
-function TChat.GetMessagesString(): String;
-```
-Returns every chat message visible as a string.
 
-Example:
-```pascal
-WriteLn Chat.GetMessagesString();
-```
-*)
 function TChat.GetMessagesString(): String;
 var
   i: Integer;
@@ -650,26 +373,12 @@ begin
 end;
 {$R+}
 
-(*
-### Chat.InputHasText
-```pascal
-function TChat.InputHasText(): Boolean;
-```
-Returns True/False if input line has text written that was never sent.
 
-Example:
-```pascal
-WriteLn Chat.InputHasText();
-```
-*)
 function TChat.InputHasText(): Boolean;
 begin
   Result := Target.HasColor(Self.Colors[EChatColor.BLUE], 0, 15, Self.InputLine);
 end;
 
 var
-(*
-## Chat variable
-Global {ref}`TChat` variable.
-*)
+
   Chat: TChat;

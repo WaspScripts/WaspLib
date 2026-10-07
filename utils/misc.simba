@@ -1,22 +1,8 @@
-(*
-# Misc
-Misc functions and methods that don't really fit in a single place at the moment
-*)
+
 {$DEFINE WL_MISC_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
-(*
-## Level2XP
-```pascal
-function Level2XP(level: Integer): Integer;
-```
-Converts a level to the xp required for that level.
 
-Example:
-```pascal
-  WriteLn Level2XP(70);
-```
-*)
 function Level2XP(level: Integer): Integer;
 var
   total:Double;
@@ -27,18 +13,7 @@ begin
   Result := Floor(total / 4);
 end;
 
-(*
-## XP2Level
-```pascal
-function XP2Level(xp: Integer): Integer;
-```
-Converts XP to the respective level.
 
-Example:
-```pascal
-WriteLn XP2Level(100000);
-```
-*)
 function XP2Level(xp: Integer): Integer;
 var
   total: Double;
@@ -51,18 +26,7 @@ begin
 end;
 
 
-(*
-## FormatNumber
-```pascal
-function FormatNumber(n: Double; dec: Byte = 3): String;
-```
-Truncates a number.
 
-Example:
-```pascal
-WriteLn FormatNumber(100000); //100k
-```
-*)
 function FormatNumber(n: Double; dec: Byte = 3): String;
 const
   SUFFIXES: TStringArray = ['', 'K', 'M', 'B', 'T'];
@@ -80,19 +44,7 @@ begin
 end;
 
 
-(*
-## TColor.Random
-```pascal
-function TColor.Random(min: Byte = $80): TColor; static;
-```
-Returns a random `TColor` with a `min` value of brightness.
-`min` is a `Byte` so it goes from $00 (0) to $FF (255).
 
-Example:
-```pascal
-WriteLn TColor.Random();
-```
-*)
 function TColor.Random(min: Byte = $80): TColor; static;
 var
   rest, r, g, b: Byte;
@@ -104,18 +56,7 @@ begin
   Result := (b shl 16) or (g shl 8) or r;
 end;
 
-(*
-## TColorArray.GetRarest
-```pascal
-function TColorArray.GetRarest(): TColor;
-```
-Returns a the rarest `TColor` in the `TColorArray`.
 
-Example:
-```pascal
-WriteLn arr.GetRarest();
-```
-*)
 function TColorArray.GetRarest(): TColor;
 var
   weights: TIntegerArray;
@@ -131,13 +72,7 @@ begin
   Result := Self[0];
 end;
 
-(*
-## TStringArray.AnyContains
-```pascal
-function TStringArray.AnyContains(value: String; matchCase: Boolean = True): Boolean;
-```
-Returns True/False if any String in the TStringArray contains `value`.
-*)
+
 function TStringArray.AnyContains(value: String; matchCase: Boolean = True): Boolean;
 var
   i: Integer;
@@ -147,14 +82,7 @@ begin
       Exit(True);
 end;
 
-(*
-## TImage.ColorsInLineEx
-```pascal
-function TImage.ColorsInLineEx(start, stop: TPoint; colors: TIntegerArray): Boolean;
-```
-Checks if any of the specified `colors` exist on the line between `start` and `stop`.
-Uses horizontal and vertical line checking.
-*)
+
 function TImage.ColorsInLineEx(start, stop: TPoint; colors: TIntegerArray): Boolean;
 var
   x, y: Integer;
@@ -177,16 +105,7 @@ begin
   Result := (pXCross and pYCross) or (qXCross and qYCross);
 end;
 
-(*
-## TImage.ColorsInLine
-```pascal
-function TImage.ColorsInLine(start, stop: TPoint; colors: TIntegerArray): Boolean;
-```
-Checks if any of the specified `colors` exist on the line between `start` and `stop`.
-Uses Bresenham's line algorithm for pixel-accurate line tracing.
 
-Credits: Simba1400/Source/MML/simba.tpa.pas
-*)
 function TImage.ColorsInLine(start, stop: TPoint; colors: TIntegerArray): Boolean;
 var
   Xinc, YInc: Integer;
@@ -247,14 +166,7 @@ begin
   until (current.Y = stop.Y);
 end;
 
-(*
-## SaveScreenshotEx
-```pascal
-function SaveScreenshotEx(folder: String; bounds: TBox = [-1,-1,-1,-1]): String;
-```
-Saves a screenshot to a subfolder of Simba's screenshots directory.
-Returns the file path on success, empty string on failure.
-*)
+
 function SaveScreenshotEx(folder: String; bounds: TBox = [-1,-1,-1,-1]): String;
 var
   path: String;
@@ -271,36 +183,7 @@ begin
 end;
 
 var
-(*
-## Activity
-Global `Activity` variable.
 
-You can use this to handle the activity in your script.
-
-The idea behind "Activity" is that it's a timer, by default that runs for 5
-minutes. Everytime your script is considered "active" the timer is reset back to
-the start.
-
-If `Activity.IsFinished` ever returns `True` that means your script is inactive
-or you are not restarting `Activity` properly.
-
-By default, WaspLib will restart `Activity` for your when {ref}`XPBar.EarnedXP`
-or {ref}`XPBar.WaitXP` return `True`.
-
-For more custom ways of using this kind of activity tracker you need to
-implement it but you could for example, in a fishing script, restart `Activity`
-whenever you get a fish with:
-```pascal
-Activity.Restart();
-```
-
-Using `Activity` to shutdown your script or correct course is up to you.
-A simple way to shutdown your script would be to add this to your main loop:
-```pascal
-if Activity.IsFinished then
-  raise 'Script shutdown due to no activity detected for 5 minutes.';
-```
-*)
   Activity: TCountDown;
 
 type
