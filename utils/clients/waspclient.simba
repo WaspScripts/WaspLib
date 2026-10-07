@@ -185,10 +185,10 @@ begin
   {$IFDEF WASP_LOCAL_DEVELOPMENT}
   Self.Server := 'http://localhost:3000/';
   {$ELSE}
-  Self.Server := 'https://api.waspscripts.dev/';
+  Self.Server := 'https://api.waspscripts.com/';
   {$ENDIF}
 
-  Self.Database := 'https://db.waspscripts.dev/';
+  Self.Database := 'https://db.waspscripts.com/';
   Self.APIKey := 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc1MTA0MTIwMCwiZXhwIjo0OTA2NzE0ODAwLCJyb2xlIjoiYW5vbiJ9.C_KW5x45BpIyOQrnZc7CKYKjHe0yxB4l-fTSC4z_kYY';
 
   Self.Client := new THTTPClient();

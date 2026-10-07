@@ -25,7 +25,7 @@ var
   response: String;
 begin
   if not Self.Config.Data.Assert('url', EJSONType.STR) then
-    Self.URL := 'https://db.waspscripts.dev/storage/v1/object/public/assets/'
+    Self.URL := 'https://db.waspscripts.com/storage/v1/object/public/assets/'
   else
     Self.URL := Self.Config.Data.Item['url'].AsString;
 
