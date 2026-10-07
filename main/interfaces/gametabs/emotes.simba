@@ -1,29 +1,15 @@
-(*
-# Emotes
-Methods to interact with the emotes gametab.
-```{figure} ../../images/emotes.png
-```
-*)
+
 {$DEFINE WL_EMOTES_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TEmotes
-Main record responsible with handling the emotes gametab.
-*)
+
   TEmotes = record
     Scroll: TScrollBar;
     Slots: TBoxArray;
   end;
 
-(*
-## EEmote
-```pascal
-EEmote = enum(YES, NO, BOW, ANGRY, ..., FORTIS_SALUTE, SIT_DOWN, CRAB_DANCE);
-```
-Enum representing all the available emotes in the game.
-*)
+
   EEmote = enum(
     YES, NO, BOW, ANGRY,
     THINK, WAVE, SHRUG, CHEER,
@@ -60,52 +46,19 @@ begin
   Self.Scroll.Setup();
 end;
 
-(*
-## Emotes.IsOpen
-```pascal
-function TEmotes.IsOpen(): Boolean;
-```
-Returns true if the Emotes tab is open.
 
-Example:
-```pascal
-WriteLn Emotes.IsOpen();
-```
-*)
 function TEmotes.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.EMOTES);
 end;
 
-(*
-## Emotes.Open
-```pascal
-function TEmotes.Open(): Boolean;
-```
-Attempts to open the emotes tab.
 
-Example:
-```pascal
-Emotes.Open();
-```
-*)
 function TEmotes.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.EMOTES);
 end;
 
-(*
-## Emotes.UseEmote
-```pascal
-function TEmotes.UseEmote(emote: EEmote): Boolean;
-```
-Attempts to use the specified emote. Returns true if we succeed.
 
-Example:
-```pascal
-WriteLn Emotes.UseEmote(EEmote.DANCE);
-```
-*)
 function TEmotes.UseEmote(emote: EEmote): Boolean;
 const
   EMOTE_NAMES: TStringArray =[
@@ -169,8 +122,5 @@ begin
 end;
 
 var
-(*
-## Emotes variable
-Global {ref}`TEmotes` variable.
-*)
+
   Emotes: TEmotes;

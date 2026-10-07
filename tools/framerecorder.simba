@@ -1,54 +1,17 @@
 //!PACKAGE SCRIPT
-(*
-(Frame Recorder)=
-# Tool: Frame Recorder
-Simple utility for recording frame sequences at a specified FPS.
-Useful for creating frame sequences for {ref}`videoplayer` or debugging.
 
-Example usage:
-```pascal
-{$I WaspLib/main.simba}
-{$I WaspLib/tools/framerecorder.simba}
-var
-  frames: TFrameRecorder;
-begin
-  frames.Start(25); // 25 FPS
-  frames.Run();     // Starts capture loop (press ESC to stop)
-end;
-```
-*)
 
 {$DEFINE WL_FRAMERECORDER_INCLUDED}
 
 type
-(*
-## type TFrameRecorder
-```pascal
-TFrameRecorder = record
-  FPS: Integer;
-  Directory: String;
-  FrameCount: Integer;
-end;
-```
-Simple record for recording frame sequences.
-*)
+
   TFrameRecorder = record
     FPS: Integer;
     Directory: String;
     FrameCount: Integer;
   end;
 
-(*
-## TFrameRecorder.Start
-```pascal
-procedure TFrameRecorder.Start(fps: Integer = 25; dir: String = '');
-```
-Initializes the frame recorder.
 
-Parameters:
-- `fps`: Frames per second to capture (default: 25)
-- `dir`: Directory to save frames (default: auto-generated with timestamp)
-*)
 procedure TFrameRecorder.Start(fps: Integer = 25; dir: String = '');
 var
   selectedDir: String;
@@ -83,14 +46,7 @@ begin
   WriteLn('Press ESC to stop recording');
 end;
 
-(*
-## TFrameRecorder.Run
-```pascal
-procedure TFrameRecorder.Run();
-```
-Starts the recording loop. Press ESC to stop.
-Saves frames as padded sequential numbers (00001.png, 00002.png, etc.)
-*)
+
 procedure TFrameRecorder.Run();
 var
   frameTime: Integer;

@@ -1,14 +1,4 @@
-(*
-# Image Map
-This file is responsible for the TImageMap positioning system.
-It's heavily based on [slacky](https://slacky.one/)'s original TWalker and
-while it might look different the logic related to positioning should be the
-exact same.
 
-The way it works is that you load it with an image (.png or .bmp) and you can
-retrive your position on that image by finding the most similar place to your
-{ref}`Minimap` on the image.
-*)
 
 {$DEFINE WL_IMAGEMAP_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -18,36 +8,15 @@ type
     tmplt: TIntegerMatrix; map: TImage; pos: TPoint; scale: UInt32; out match: Single
   ): TPoint of object;
 
-(*
-(EPositionMode)=
-## EPositionMode enum
-```pascal
-EPositionMode = enum(SPEED, ACCURACY);
-```
-Enum representing the modes that {ref}`Image Map` can use.
 
-The default mode is `EPositionMode.SPEED`.
-`EPositionMode.ACCURACY` gives you between 0-30% more accuracy at the cost of
-almost half the speed and is generally not worth while unless you really are
-having positioning issues.
-
-Use {ref}`ImageMap.DebugPosition` and plan accordingly whether this is worth
-using or not.
-*)
   EPositionMode = enum(SPEED, ACCURACY);
 
-(*
-## TMapSample
-Record used to customize the sample retrieved from the minimap for TMap.
-*)
+
   TMapSample = record
     Amount, Radius: Int32;
   end;
 
-(*
-## TImageMap
-Record responsible for positioning.
-*)
+
   TImageMap = record
     Map, HalfMap: TImage;
     Walker: TWalker;
@@ -63,13 +32,7 @@ Record responsible for positioning.
 
 function TImageMap.Position(): TPoint; forward;
 
-(*
-## ImageMap.Setup
-```pascal
-procedure TImageMap.Setup(path: String; downscale: UInt32 = 8);
-```
-Sets up a {ref}`TImageMap`.
-*)
+
 procedure TImageMap.Setup(path: String; downscale: UInt32 = 8);
 var
   img, sample: TImage;
@@ -93,20 +56,7 @@ begin
   end;
 end;
 
-(*
-## ImageMap.ScaledSearch
-```pascal
-function TImageMap.ScaledSearch(img: TImage): TPointArray;
-```
-Internal TImageMap method used to get an initial TPointArray of possible positions.
 
-This is performed in a downscaled map with a downscaled minimap.
-
-This is very innacurate by itself but by ruling down most of the map
-in a downscaled search before doing a full sized search speed has a dramatic boost.
-
-You probably won't ever need to call this directly.
-*)
 function TImageMap.ScaledSearch(img: TImage): TPointArray;
 var
   sample: TImage;
@@ -128,25 +78,7 @@ begin
   Result := Result.Offset([Self.Downscale div 2, Self.Downscale div 2]);
 end;
 
-(*
-## ImageMap.FullSearch
-```pascal
-function TImageMap.FullSearchEx(
-  tmplt: TIntegerMatrix; map: TImage; position: TPoint; scale: UInt32; out match: Single
-): TPoint; static;
-function TImageMap.FullSearch(
-  tmplt: TIntegerMatrix; map: TImage; position: TPoint; scale: UInt32; out match: Single
-): TPoint; static;
-```
-Internal TImageMap method used to get the player position.
 
-This is used by {ref}`ImageMap.Position` to determine how likely is the
-`position` passed in, our actual position.
-
-This likelyhood is returned with `match` which ranges from `0.0` to `1.0`.
-
-You probably won't ever need to call this directly.
-*)
 function TImageMap.FullSearchEx(
   tmplt: TIntegerMatrix; map: TImage; position: TPoint; scale: UInt32; out match: Single
 ): TPoint; static;
@@ -209,19 +141,7 @@ begin
 end;
 
 
-(*
-## ImageMap.Position
-```pascal
-function TImageMap.Position(): TPoint;
-```
-Returns the players current position on the loaded map image.
 
-Example:
-```pascal
-WriteLn(ImageMap.Position());
-WriteLn(ImageMap.Similarity); // Check to see the match percentage if needed
-```
-*)
 function TImageMap.Position(): TPoint;
 const
   SCALE: Integer = 2;
@@ -272,20 +192,7 @@ begin
   Result := Result.Offset(center);
 end;
 
-(*
-## ImageMap.DebugPosition
-```pascal
-function TImageMap.DebugPosition(): TPoint;
-```
-Debugs the player position in the currently loaded map image.
 
-Example:
-```pascal
-Map.Setup(...);
-while True do
-  Map.DebugPosition();
-```
-*)
 function TImageMap.DebugPosition(print: Boolean = True): TPoint;
   function _BoxStr(b: TBox): String;
   begin

@@ -1,43 +1,16 @@
-(*
-# Collection Box
-Methods to interact with the collection box interface.
-```{figure} ../../images/collectionbox_interface.png
-```
-*)
+
 
 {$DEFINE WL_COLLECTIONBOX_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(ECollectButton)=
-## ECollectButton enum
-```pascal
-ECollectButton = enum(INVENTORY, BANK);
-```
-Enum representing the {ref}`Collection Box` buttons.
-*)
+
   ECollectButton = enum(INVENTORY, BANK);
 
-(*
-(ECollectSlots)=
-## ECollectSlots enum
-```pascal
-ECollectSlots = enum(STATUS, OPERATION, THUMBNAIL, ITEM, CHANGE);
-```
-Enum representing the {ref}`Collection Box` slot slots.
-The {ref}`Collection Box`, like the {ref}`Grand Exchange` has 8 slots available,
-Each of those slots, has it's own 5 small slots which is what this represents:
-```{figure} ../../images/collectionbox_subslots.png
-```
-*)
+
   ECollectSlots = enum(STATUS, OPERATION, THUMBNAIL, ITEM, CHANGE);
 
-(*
-(TCollectionBox)=
-## TCollectionBox type
-Main record to interact with the {ref}`Collection Box` interface.
-*)
+
   TCollectionBox = record
     Title: TInterfaceTitle;
     Slots: TSlotInterface;
@@ -52,14 +25,7 @@ Main record to interact with the {ref}`Collection Box` interface.
     Depleted: Boolean;
   end;
 
-(*
-## CollectionBox.SetupInterface
-```pascal
-procedure TCollectionBox.SetupInterface();
-```
-Internal method used to setup the {ref}`TCollectionBox` coordinates.
-This is automatically called for you on the {ref}`CollectionBox variable`.
-*)
+
 procedure TCollectionBox.SetupInterface();
 var
   boxes: TBoxArray;
@@ -136,18 +102,7 @@ begin
 end;
 
 
-(*
-## CollectionBox.IsOpen
-```pascal
-function TCollectionBox.IsOpen(): Boolean;
-```
-Returns true if the collection box is open.
 
-Example:
-```pascal
-WriteLn CollectionBox.IsOpen();
-```
-*)
 function TCollectionBox.IsOpen(): Boolean;
 begin
   if BankPin.IsOpen() then
@@ -164,20 +119,7 @@ begin
   Result := Self.Title.IsTitle('Collection Box');
 end;
 
-(*
-## CollectionBox.WaitOpen
-```pascal
-function TCollectionBox.WaitOpen(
-  time: Integer = TICK; interval: Integer = -1
-): Boolean;
-```
-Returns true if the collection box opens within `time` milliseconds..
 
-Example:
-```pascal
-WriteLn CollectionBox.WaitOpen();
-```
-*)
 function TCollectionBox.WaitOpen(
   time: Integer = TICK; interval: Integer = -1
 ): Boolean;
@@ -187,18 +129,7 @@ begin
 end;
 
 
-(*
-## CollectionBox.HasChange
-```pascal
-function TCollectionBox.HasChange(slot: Integer): Boolean;
-```
-Returns true if the specified collection box `slot` has change.
 
-Example:
-```pascal
-WriteLn CollectionBox.HasChange(0);
-```
-*)
 function TCollectionBox.HasChange(slot: Integer): Boolean;
 begin
   if not Self.IsOpen() then Exit;
@@ -206,21 +137,7 @@ begin
 end;
 
 
-(*
-## CollectionBox.CollectSlot
-```pascal
-function TCollectionBox.CollectSlot(
-  slot: Integer; button: ECollectButton = ECollectButton.INVENTORY
-): Boolean;
-```
-Attempts to collect the item and change of  the specified collection box `slot`.
-By default it attempts to collect things to your inventory, you can change it to the bank with the `button` parameter.
 
-Example:
-```pascal
-WriteLn CollectionBox.CollectSlot(0);
-```
-*)
 function TCollectionBox.CollectSlot(
   slot: Integer; button: ECollectButton = ECollectButton.INVENTORY
 ): Boolean;
@@ -258,18 +175,7 @@ begin
 end;
 
 
-(*
-## CollectionBox.CollectToInventory
-```pascal
-function TCollectionBox.CollectToInventory(): Boolean;
-```
-Attempts to collect the items to the user {ref}`Inventory`.
 
-Example:
-```pascal
-WriteLn CollectionBox.CollectToInventory();
-```
-*)
 function TCollectionBox.CollectToInventory(): Boolean;
 begin
   if Self.Slots.Count() = 0 then Exit(True);
@@ -277,18 +183,7 @@ begin
   Result := SleepUntil(Self.Slots.Count() = 0, RandomMode(100, 50, 1500), 2*TICK);
 end;
 
-(*
-## CollectionBox.CollectToBank
-```pascal
-function TCollectionBox.CollectToBank(): Boolean;
-```
-Attempts to collect the items to the user {ref}`Bank`.
 
-Example:
-```pascal
-WriteLn CollectionBox.CollectToBank();
-```
-*)
 function TCollectionBox.CollectToBank(): Boolean;
 begin
   if Self.Slots.Count() = 0 then Exit(True);
@@ -296,22 +191,7 @@ begin
   Result := SleepUntil(Self.Slots.Count() = 0, RandomMode(100, 50, 1500), 2*TICK);
 end;
 
-(*
-## CollectionBox.Collect
-```pascal
-function TCollectionBox.Collect(
-  items: TItemArray; buttonProbability: Single = -1
-): Boolean;
-```
-Attempts to collect the specified `items` to the user {ref}`Bank`.
 
-For antiban purposes there's a small chance we just collect all items to the bank.
-
-Example:
-```pascal
-WriteLn CollectionBox.Collect(['Molten glass']);
-```
-*)
 function TCollectionBox.Collect(
   items: TItemArray; buttonProbability: Single = -1
 ): Boolean;
@@ -351,17 +231,7 @@ begin
 end;
 
 
-(*
-## CollectionBox.Hover
-```pascal
-function TCollectionBox.Hover(const obj: TObject; walk: Boolean = True): Boolean;
-function TCollectionBox.Hover(
-  const npc: TEntity; walk: Boolean = True
-): Boolean; overload;
-function TCollectionBox.Hover(walk: Boolean = True): Boolean; overload;
-```
-Same as {ref}`Bank.Hover`.
-*)
+
 function TCollectionBox.Hover(const obj: TObject; walk: Boolean = True): Boolean;
 begin
   Result := Bank.Hover(obj, walk);
@@ -377,26 +247,7 @@ begin
   Result := Bank.Hover(walk);
 end;
 
-(*
-## CollectionBox.Open
-```pascal
-function TCollectionBox.Open(const obj: TObject; walk: Boolean = True): Boolean;
-function TCollectionBox.Open(
-  const npc: TEntity; walk: Boolean = True
-): Boolean; overload;
-function TCollectionBox.Open(walk: Boolean = True): Boolean; overload;
-```
-Almost identical to {ref}`Bank.Open`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Map.Setup([EChunk.VARROCK]);
-  Bank.Open();
-end.
-```
-*)
 function TCollectionBox.Open(const obj: TObject; walk: Boolean = True): Boolean;
 begin
   if walk then
@@ -452,8 +303,5 @@ begin
 end;
 
 var
-(*
-## CollectionBox variable
-Global {ref}`TCollectionBox` variable.
-*)
+
   CollectionBox: TCollectionBox;

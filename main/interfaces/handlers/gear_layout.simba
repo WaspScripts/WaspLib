@@ -1,43 +1,13 @@
-(*
-# Gear Layouts
-The `Gear Layouts` is a handler for game gear.
-"Gear" refers to as any equippable item in the game.
 
-You can configure gear manually but the recommended way is to use {ref}`Gear Form`.
-*)
 
 {$DEFINE WL_GEAR_LAYOUTS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TGearItem
-Alias type for a {ref}`TItem` that is equippable.
-This doesn't have much use other than {ref}`GearItem.Interact` that comes next
-which can be very handy.
-*)
+
   TGearItem = type TItem;
 
-(*
-## GearItem.Interact
-```pascal
-function TGearItem.Interact(option: String = ''; attempts: Int32 = 2): Boolean;
-```
-Interact with the `TGearItem` regardless of it being on the {ref}`Inventory`
-or {ref}`Equipment` with the least amount of gametab switches possible.
 
-Example:
-```pascal
-ring.Interact('Rub');
-```
-
-Because {ref}`TGearItem` have few use cases, you are probably using
-{ref}`TItem` instead.
-You can still easily use this by casting:
-```pascal
-TGearItem(ring).Interact('Rub');
-```
-*)
 function TGearItem.Interact(option: String = ''; attempts: Int32 = 2): Boolean;
 var
   slot, i: Int32;
@@ -88,22 +58,13 @@ begin
 end;
 
 type
-(*
-## TGear
-Type that represents a gear layout.
-*)
+
   TGear = record
     Name: String;
     Items: array [EEquipment] of TItem;
   end;
 
-(*
-## Gear.ToJSON
-```pascal
-function TGear.ToJSON(): TJSONItem;
-```
-Convert the `TGear` into a `TJSONItem`.
-*)
+
 function TGear.ToJSON(): TJSONItem;
 var
   slot: EEquipment;
@@ -115,22 +76,13 @@ begin
 end;
 
 type
-(*
-## TGearLayout
-Main type for the {ref}`Gear Layouts`.
-*)
+
   TGearLayout = record
     Gear: TGear;
     Equipped: array [EEquipment] of TItem;
   end;
 
-(*
-## GearLayout.Equip
-```pascal
-function TGearLayout.Equip(): Boolean;
-```
-Attempts to equip a `GearLayout`.
-*)
+
 function TGearLayout.Equip(): Boolean;
 var
   slot: EEquipment;
@@ -179,13 +131,7 @@ begin
       Equipment.Slots.Click(Ord(slot), EMouseButton.LEFT);
 end;
 
-(*
-## GearLayout.Withdraw
-```pascal
-function TGearLayout.Withdraw(): Boolean;
-```
-Attempts to withdraw a `GearLayout` from the {ref}`Bank`.
-*)
+
 function TGearLayout.Withdraw(): Boolean;
 var
   slot: EEquipment;

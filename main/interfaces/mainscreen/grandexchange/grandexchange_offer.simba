@@ -1,92 +1,25 @@
-(*
-# GrandExchangeOffer
-Methods to interact with the GrandExchangeOffer interface:
-```{figure} ../../images/geo_interface.png
-```
 
-The {ref}`GrandExchange` is a very complex interface, probably the most complex
-available in game and for that reason, the functionality to
-fully interact with it is split into multiple files and records:
-- {ref}`GrandExchange`, the main grand exchange screen.
-- {ref}`GrandExchangeHistory`, the history screen of the grand exchange.
-- {ref}`GrandExchangeChat`, the chat interface of the grand exchange when you are setting up a buy offer.
-- {ref}`GrandExchangeOffer`, the screen of the grand exchange where you view or setup a new offer and what this page is about.
-*)
 
 {$DEFINE WL_GRANDEXCHANGE_OFFER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EGEOfferInterface
-```pascal
-EGEOfferInterface = enum(SETUP, STATUS);
-```
-Enum to represent the type of {ref}`GrandExchange` offer interfaces.
 
-There's 2 types of "Offer" interfaces:
-```{figure} ../../images/geo_setup.png
-The "Setup offer" interface.
-```
-
-```{figure} ../../images/geo_status.png
-The "Status offer" interface.
-```
-
-You can differ them by their layout and interface title.
-*)
   EGEOfferInterface = enum(SETUP, STATUS);
 
-(*
-## EGEOfferType
-```pascal
-EGEOfferType = enum(SELL, BUY);
-```
-Enum to represent the type of Grand Exchange offers.
-*)
+
   EGEOfferType = enum(SELL, BUY);
 
-(*
-## EGEOfferSpinButton
-```pascal
-EGEOfferSpinButton = enum(DECREASE, INCREASE);
-```
-Enum that represents the buttons to decrease/increase the quantity and price
-spinners of Grand Exchange offers.
 
-```{figure} ../../images/geo_spinners.png
-```
-*)
   EGEOfferSpinButton = enum(DECREASE, INCREASE);
 
-(*
-## EGEOfferQuantity
-```pascal
-EGEOfferQuantity = enum(ONE, TEN, HUNDRED, THOUSAND, CUSTOM);
-```
-Enum that represents the quantity buttons of Grand Exchange offers.
 
-```{figure} ../../images/geo_quantity_buttons.png
-```
-*)
   EGEOfferQuantity = enum(ONE, TEN, HUNDRED, THOUSAND, CUSTOM);
 
-(*
-## EGEOfferPrice
-```pascal
-EGEOfferPrice = enum(MINUS_CUSTOM, MINUS_FIVE, GUIDE, CUSTOM, PLUS_FIVE, PLUS_CUSTOM);
-```
-Enum that represents the price buttons of Grand Exchange offers.
 
-```{figure} ../../images/geo_price_buttons.png
-```
-*)
   EGEOfferPrice = enum(MINUS_CUSTOM, MINUS_FIVE, GUIDE, CUSTOM, PLUS_FIVE, PLUS_CUSTOM);
 
-(*
-## TGrandExchangeOffer
-Record responsible to handle the {ref}`GrandExchangeOffer` interface.
-*)
+
   TGrandExchangeOffer = record
     Title: TInterfaceTitle;
     Bounds: TBox;
@@ -117,14 +50,7 @@ Record responsible to handle the {ref}`GrandExchangeOffer` interface.
 
 function TGrandExchangeOffer.IsOpen(): Boolean; forward;
 
-(*
-## GrandExchangeOffer.SetupInterface
-```pascal
-procedure TGrandExchangeOffer.SetupInterface();
-```
-Internal method used to setup the {ref}`TGrandExchangeOffer` coordinates.
-This is automatically called for you on the {ref}`GrandExchangeOffer variable`.
-*)
+
 procedure TGrandExchangeOffer.SetupInterface();
 begin
   Self.Bounds := GrandExchange.Bounds;
@@ -171,18 +97,7 @@ begin
   end;
 end;
 
-(*
-## GrandExchangeOffer.IsOpen
-```pascal
-function TGrandExchangeOffer.IsOpen(): Boolean;
-```
-Returns true if the Grand Exchange is open.
 
-Example:
-```pascal
-WriteLn GrandExchangeOffer.IsOpen();
-```
-*)
 function TGrandExchangeOffer.IsOpen(): Boolean;
 begin
   if BankPin.IsOpen() then
@@ -197,38 +112,14 @@ begin
   Result := Self.Title.IsTitle('Grand Exchange:');
 end;
 
-(*
-## GrandExchangeOffer.WaitOpen
-```pascal
-function TGrandExchangeOffer.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
-```
-Returns true if the Grand Exchange is open within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn GrandExchangeOffer.WaitOpen();
-```
-*)
 function TGrandExchangeOffer.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## GrandExchangeOffer.Close
-```pascal
-function TGrandExchangeOffer.Close(escape: Boolean): Boolean;
-function TGrandExchangeOffer.Close(escapeProbability: Single = 0): Boolean; overload;
-```
-Closes the GrandExchangeOffer, Depending on `escape` or `escapeProbability the function will
-either click the button or press escape key.
 
-Example:
-```pascal
- WriteLn GrandExchangeOffer.Close();
-```
-*)
 function TGrandExchangeOffer.Close(escape: Boolean): Boolean;
 begin
   Result := Self.Title.Close(escape);
@@ -239,18 +130,7 @@ begin
   Result := Self.Title.Close(escapeProbability);
 end;
 
-(*
-## GrandExchangeOffer.Open
-```pascal
-function TGrandExchangeOffer.Open(): Boolean;
-```
-Attempts to open the {ref}`GrandExchangeOffer`, returns `True` on success.
 
-Example:
-```pascal
-WriteLn GrandExchangeOffer.Open();
-```
-*)
 function TGrandExchangeOffer.Open(): Boolean;
 begin
   if Self.IsOpen() then Exit(True);
@@ -261,19 +141,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.OfferInterface
-```pascal
-property TGrandExchangeOffer.OfferInterface: EGEOfferInterface;
-```
-Returns the {ref}`EGEOfferInterface` type of the {ref}`GrandExchangeOffer`
-screen.
 
-Example:
-```pascal
-WriteLn GrandExchangeOffer.OfferInterface;
-```
-*)
 property TGrandExchangeOffer.OfferInterface: EGEOfferInterface;
 begin
   if Self.Title.IsTitle('Grand Exchange: Offer status') then
@@ -282,21 +150,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.OfferType
-```pascal
-property TGrandExchangeOffer.OfferType: EGEOfferType;
-```
-Returns the {ref}`EGEOfferType` of the {ref}`GrandExchangeOffer` screen.
 
-```{figure} ../../images/geo_type.png
-```
-
-Example:
-```pascal
-WriteLn GrandExchangeOffer.OfferType;
-```
-*)
 property TGrandExchangeOffer.OfferType: EGEOfferType;
 begin
   if not Self.IsOpen() then Exit;
@@ -306,21 +160,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.GuidePrice
-```pascal
-property TGrandExchangeOffer.GuidePrice: Integer;
-```
-Returns the guide price for the item in the {ref}`GrandExchangeOffer` if any.
 
-```{figure} ../../images/geo_guide.png
-```
-
-Example:
-```pascal
-WriteLn GrandExchangeOffer.GuidePrice;
-```
-*)
 property TGrandExchangeOffer.GuidePrice: Integer;
 var
   txt: String;
@@ -331,42 +171,14 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.Item
-```pascal
-property TGrandExchangeOffer.Item: TItem;
-```
-Returns the item in the {ref}`GrandExchangeOffer` if any.
 
-```{figure} ../../images/geo_item.png
-```
-
-Example:
-```pascal
-WriteLn GrandExchangeOffer.Item;
-```
-*)
 property TGrandExchangeOffer.Item: TItem;
 begin
   if not Self.IsOpen() then Exit;
   Result := OCR.RecognizeStatic(Self.InfoBounds.Name, Fonts.BOLD_SHADOW, [TFonts.ORANGE], 0);
 end;
 
-(*
-## GrandExchangeOffer.Examine
-```pascal
-property TGrandExchangeOffer.Examine: String;
-```
-Returns the examine text of the item in the {ref}`GrandExchangeOffer` if any.
 
-```{figure} ../../images/geo_examine.png
-```
-
-Example:
-```pascal
-WriteLn GrandExchangeOffer.Examine;
-```
-*)
 property TGrandExchangeOffer.Examine: String;
 var
   sT: TStringArray;
@@ -379,23 +191,7 @@ begin
   Result := sT.Join(' ');
 end;
 
-(*
-## GrandExchangeOffer.Fee
-```pascal
-property TGrandExchangeOffer.Fee: Double;
-```
-Returns the fee percentage of the the {ref}`GrandExchangeOffer` if any.
 
-This is returned as a `Double`.
-
-```{figure} ../../images/geo_fee.png
-```
-
-Example:
-```pascal
-WriteLn GrandExchangeOffer.Fee;
-```
-*)
 property TGrandExchangeOffer.Fee: Double;
 var
   tpa: TPointArray;
@@ -411,23 +207,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.Quantity
-```pascal
-property TGrandExchangeOffer.Quantity: Integer;
-property TGrandExchangeOffer.Quantity(value: Integer): Boolean;
-```
-Returns or sets the quantity of the the {ref}`GrandExchange` offer:
-```{figure} ../../images/geo_quantity.png
-```
 
-Example:
-```pascal
-WriteLn GrandExchangeOffer.Quantity;
-WriteLn GrandExchangeOffer.Quantity[100];
-WriteLn GrandExchangeOffer.Quantity;
-```
-*)
 property TGrandExchangeOffer.Quantity: Integer;
 var
   font: ^TPixelFont;
@@ -481,24 +261,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.CustomPricePercent
-```pascal
-property TGrandExchangeOffer.CustomPricePercent: Double;
-property TGrandExchangeOffer.CustomPricePercent(value: Double): Boolean;
-```
-Returns or sets the custom price percentage button of the {ref}`GrandExchange`
-offer:
-```{figure} ../../images/geo_customperc.png
-```
 
-Example:
-```pascal
-WriteLn GrandExchangeOffer.CustomPricePercent;
-WriteLn GrandExchangeOffer.CustomPricePercent[0.12];
-WriteLn GrandExchangeOffer.CustomPricePercent;
-```
-*)
 property TGrandExchangeOffer.CustomPricePercent: Double;
 var
   txt: String;
@@ -542,24 +305,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.Price
-```pascal
-property TGrandExchangeOffer.Price: Integer;
-property TGrandExchangeOffer.Price(value: Integer): Boolean;
-property TGrandExchangeOffer.Price(value: Integer; tolerance: Single): Boolean;
-```
-Returns or sets the price of the the {ref}`GrandExchange` offer:
-```{figure} ../../images/geo_price.png
-```
 
-Example:
-```pascal
-WriteLn GrandExchangeOffer.Price;
-WriteLn GrandExchangeOffer.Price[1500500];
-WriteLn GrandExchangeOffer.Price;
-```
-*)
 property TGrandExchangeOffer.Price: Integer;
 var
   font: ^TPixelFont;
@@ -643,46 +389,14 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.Total
-```pascal
-property TGrandExchangeOffer.Total: Integer;
-```
-Returns the total value of the the {ref}`GrandExchange` offer the user will
-pay/receive:
-```{figure} ../../images/geo_total.png
-```
 
-This is returned as an `Integer`.
-
-Example:
-```pascal
-WriteLn GrandExchangeOffer.Total;
-```
-*)
 property TGrandExchangeOffer.Total: Integer;
 begin
   if not Self.IsOpen() then Exit;
   Result := OCR.RecognizeNumber(Self.TotalBounds, Fonts.BOLD_SHADOW, [TFonts.WHITE], 0);
 end;
 
-(*
-## GrandExchangeOffer.TrueTotal
-```pascal
-property TGrandExchangeOffer.TrueTotal: Integer;
-```
-Returns the true total value of the the {ref}`GrandExchange` offer the user will
-receive:
-```{figure} ../../images/geo_truetotal.png
-```
 
-This is returned as an `Integer` and is only available in sell offers.
-
-Example:
-```pascal
-WriteLn GrandExchangeOffer.TrueTotal;
-```
-*)
 property TGrandExchangeOffer.TrueTotal: Integer;
 var
   txt: String;
@@ -694,18 +408,7 @@ end;
 
 
 
-(*
-## GrandExchangeOffer.Change
-```pascal
-function TGrandExchangeOffer.Change(item: TItem): Boolean;
-```
-Attempts to change the offer item to the specified `item`.
 
-Example:
-```pascal
-WriteLn GrandExchangeOffer.Change('Abyssal whip');
-```
-*)
 function TGrandExchangeOffer.Change(item: TItem): Boolean;
 var
   slot: Integer;
@@ -741,22 +444,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.Confirm
-```pascal
-function TGrandExchangeOffer.Confirm(): Boolean;
-```
-Attempts to click the confirm button:
 
-```{figure} ../../images/geo_confirm.png
-```
-
-Example:
-```pascal
-if GrandExchangeOffer.Change('Abyssal whip') then
-  GrandExchangeOffer.Confirm();
-```
-*)
 function TGrandExchangeOffer.Confirm(): Boolean;
 begin
   if not Self.IsOpen() then Exit;
@@ -769,21 +457,7 @@ begin
   Result := GrandExchange.WaitOpen(2000);
 end;
 
-(*
-## GrandExchangeOffer.Back
-```pascal
-function TGrandExchangeOffer.Back(): Boolean;
-```
-Attempts to click the back button:
 
-```{figure} ../../images/geo_back.png
-```
-
-Example:
-```pascal
-GrandExchangeOffer.Back();
-```
-*)
 function TGrandExchangeOffer.Back(): Boolean;
 begin
   if not Self.IsOpen() then Exit;
@@ -792,21 +466,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.HasItems
-```pascal
-function TGrandExchangeOffer.HasItems(): Boolean;
-```
-Checks if we have items to collect in an offer:
 
-```{figure} ../../images/geo_collect.png
-```
-
-Example:
-```pascal
-WriteLn GrandExchangeOffer.HasItems();
-```
-*)
 function TGrandExchangeOffer.HasItems(): Boolean;
 begin
   if not Self.IsOpen() then Exit;
@@ -817,18 +477,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeOffer.Collect
-```pascal
-function TGrandExchangeOffer.Collect(): Boolean;
-```
-Attempts to collect items in an offer.
 
-Example:
-```pascal
-GrandExchangeOffer.Collect();
-```
-*)
 function TGrandExchangeOffer.Collect(): Boolean;
 begin
   if not Self.IsOpen() then Exit;
@@ -845,20 +494,7 @@ begin
   Result := SleepUntil(not Self.HasItems(), 200, 2000);
 end;
 
-(*
-## GrandExchangeOffer.CreateBuyOffer
-```pascal
-function TGrandExchangeOffer.CreateBuyOffer(itemName : String; price, quantity : Integer = -1) : Boolean;
-```
 
-Attempts to create a buy offer for the specified `itemName`, `price` and `quantity`.
-
-Example:
-```pascal
-if GrandExchangeOffer.CreateBuyOffer('Abyssal whip', 1500000, 1) then
-  WriteLn('Buy offer created successfully!');
-```
-*)
 function TGrandExchangeOffer.CreateBuyOffer(itemName: String; price, quantity: Integer = -1) : Boolean;
 begin
   if not Self.IsOpen() then Exit;
@@ -875,20 +511,7 @@ begin
   Result := Self.Confirm();
 end;
 
-(*
-## GrandExchangeOffer.CreateSellOffer
-```pascal
-function TGrandExchangeOffer.CreateSellOffer(itemName : String; price, quantity : Integer = -1) : Boolean;
-```
 
-Attempts to create a sell offer for the specified `itemName`, `price` and `quantity`.
-
-Example:
-```pascal
-if GrandExchangeOffer.CreateSellOffer('Abyssal whip', 1500000, 1) then
-  WriteLn('Sell offer created successfully!');
-```
-*)
 function TGrandExchangeOffer.CreateSellOffer(itemName: String; price, quantity: Integer = -1) : Boolean;
 begin
   if not Self.IsOpen() then Exit;
@@ -904,8 +527,5 @@ begin
 end;
 
 var
-(*
-## GrandExchangeOffer variable
-Global {ref}`TGrandExchangeOffer` variable.
-*)
+
   GrandExchangeOffer: TGrandExchangeOffer;

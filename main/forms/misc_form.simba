@@ -1,40 +1,8 @@
-(*
-# Misc Form
-This page is about {ref}`Misc` dedicated `TLazForm` utilities.
 
-This is meant to be used with {ref}`TScriptForm` with
-{ref}`TScriptForm.CreateMiscTab` and will setup a `TLazTabSheet` on it
-with several controls to configure {ref}`Misc`:
-```{figure} ../../images/miscform.png
-```
-*)
 {$DEFINE WL_MISC_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
-(*
-## ScriptForm CreateMiscTab
-```pascal
-function TScriptForm.CreateMiscTab(): TLazTabSheet;
-```
-Sets up a `TLazTabSheet` on your `TScriptForm` to configure your
-`misc` settings.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  form: TScriptForm;
-begin
-  form.Setup();
-  form.CreateMiscTab();
-  form.Run();
-end.
-```
-```{figure} ../../images/miscform.gif
-```
-For a more complete example check out the file
-`Simba/Includes/WaspLib/examples/misc_form.simba`.
-*)
 function TScriptForm.CreateMiscTab(): TLazTabSheet;
 var
   pageControl: TLazPageControl;
