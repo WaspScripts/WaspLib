@@ -1,14 +1,8 @@
-(*
-# Image Compare
-Utilities for comparing images using template matching.
-*)
+
 {$DEFINE WL_IMAGECOMPARE_INCLUDED}
 
 type
-(*
-## TImageMatch
-Record storing image match result with position and similarity score.
-*)
+
   TImageMatch = record
     Index: Integer;
     Box: TBox;
@@ -19,23 +13,14 @@ Record storing image match result with position and similarity score.
 
   TImageCompareFilter = procedure(constref image, template: TImage) of object;
 
-(*
-## TImageCompareUtils
-Utilities for comparing and matching images with optional cleaning and alignment.
-*)
+
   TImageCompareUtils = record
     Clean: procedure (image, template: TImage) of object;
     Align: function (image, template: TImage): Boolean of object;
     Filter: TImageCompareFilter;
   end;
 
-(*
-## TImageCompareUtils.Compare
-```pascal
-function TImageCompareUtils.Compare(image, template: TImage; var similarity: Single): Boolean;
-```
-Compares two images and returns True if similarity threshold is met.
-*)
+
 function TImageCompareUtils.Compare(image, template: TImage; out similarity: Single): Boolean;
 var
   match: Single;
@@ -76,13 +61,7 @@ begin
   Result := Self.Compare(image, template, similarity);
 end;
 
-(*
-## TImageCompareUtils.FindMatch
-```pascal
-function TImageCompareUtils.FindMatch(img, container: TImage; offset: TPoint; out match: TImageMatch): Boolean;
-```
-Finds the best match for an image within specified container using template matching.
-*)
+
 function TImageCompareUtils.FindMatch(img: TImage; container: TIntegerMatrix; offset: TPoint; out match: TImageMatch): Boolean;
 var
   matrix: TSingleMatrix;
@@ -108,13 +87,7 @@ begin
   Result := True;
 end;
 
-(*
-## TImageCompareUtils.FindExact
-```pascal
-function TImageCompareUtils.FindExact(img, container: TImage; offset: TPoint; out match: TImageMatch): Boolean;
-```
-Finds and exact match for an image within specified container.
-*)
+
 function TImageCompareUtils.FindExact(img, container: TImage; offset: TPoint; out match: TImageMatch): Boolean;
 var
   pt: TPoint;

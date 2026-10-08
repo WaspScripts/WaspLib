@@ -1,9 +1,4 @@
-(*
-# Sailing
-Methods to interact with the sailing gametab:
-```{figure} ../../images/sailingtab.png
-```
-*)
+
 {$DEFINE WL_SAILING_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -81,19 +76,10 @@ begin
 end;
 
 type
-(*
-## ESailingTab
-```pascal
-ESailingTab = enum(FACILITIES, STATS, CREW);
-```
-Enum represinting the available sailing tabs.
-*)
+
   ESailingTab = enum(UNKNOWN, FACILITIES, STATS, CREW);
 
-(*
-## TSailing
-Main record responsible with handling the Sailing gametab.
-*)
+
   TSailing = record
     CombatBox, BoatNameBox, BoatHealthBox, TabTitle: TBox;
     Tabs: TBoxArray;
@@ -121,35 +107,13 @@ begin
   Self.Scrolls[ESailingTab.CREW].Setup();
 end;
 
-(*
-## Sailing.IsOpen
-```pascal
-function TSailing.IsOpen(): Boolean;
-```
-Returns true/false if the sailing tab is open.
 
-Example:
-```pascal
-WriteLn Sailing.IsOpen();
-```
-*)
 function TSailing.IsOpen(): Boolean;
 begin
   Result := Target.HasColor([$1ABD1A, 7, EColorSpace.RGB, [1.247, 0.507, 1.247]], 1, Self.BoatHealthBox);
 end;
 
-(*
-## Sailing.Open
-```pascal
-function TSailing.Open(): Boolean;
-```
-Attempts to open the sailing gametab.
 
-Example:
-```pascal
-WriteLn Sailing.Open();
-```
-*)
 function TSailing.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.COMBAT);
@@ -161,35 +125,13 @@ begin
 end;
 
 
-(*
-## Sailing.BoatName
-```pascal
-property TSailing.BoatName: String;
-```
-Returns the boat name
 
-Example:
-```pascal
-WriteLn Sailing.BoatName;
-```
-*)
 property TSailing.BoatName: String;
 begin
   Result := OCR.Recognize(Self.BoatNameBox, Fonts.BOLD_SHADOW, [TFonts.ORANGE], 0);
 end;
 
-(*
-## Sailing.BoatHealth
-```pascal
-property TSailing.BoatHealth: Integer;
-```
-Returns the boat current health
 
-Example:
-```pascal
-WriteLn Sailing.BoatName;
-```
-*)
 property TSailing.BoatHealth: Integer;
 var
   str: String;
@@ -198,18 +140,7 @@ begin
   Result := str.Before('/').ExtractInteger();
 end;
 
-(*
-## Sailing.GetTab
-```pascal
-function TSailing.GetTab():  ESailingTab;
-```
-Returns the currently active {ref}`ESailingTab`.
 
-Example:
-```pascal
-WriteLn Sailing.GetTab();
-```
-*)
 function TSailing.GetTab(): ESailingTab;
 var
   title: String;
@@ -233,18 +164,7 @@ begin
   end;
 end;
 
-(*
-## Sailing.OpenTab
-```pascal
-function TSailing.OpenTab(tab:  ESailingTab): Boolean;
-```
-Attempts to open the specified `tab` {ref}`ESailingTab`.
 
-Example:
-```pascal
-WriteLn Sailing.OpenTab(ESailingTab.CREW);
-```
-*)
 function TSailing.OpenTab(tab: ESailingTab): Boolean;
 var
   b: TBox;
@@ -261,21 +181,7 @@ begin
 end;
 
 
-(*
-## Sailing.GetFacilitySlots
-```pascal
-function TSailing.GetFacilitySlots(): TSailingFacilitySlotArray;
-```
-Returns a {ref}`TSailingFacilitySlotArray` of the facility slots that are
-currently visible.
 
-This will only return those that have their buttons and/or icons fully visible.
-
-Example:
-```pascal
-WriteLn Sailing.GetFacilitySlots();
-```
-*)
 function TSailing.GetFacilitySlots(): TSailingFacilitySlotArray;
 var
   tpa: TPointArray;
@@ -299,8 +205,5 @@ begin
 end;
 
 var
-(*
-## Sailing variable
-Global {ref}`TSailing` variable.
-*)
+
   Sailing: TSailing;

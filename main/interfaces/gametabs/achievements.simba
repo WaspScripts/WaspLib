@@ -1,42 +1,12 @@
-(*
-# Achievements
-This page is dedicated to the achievements game tab and methods to interact with it.
-```{figure} ../../images/achievements.png
-```
-*)
+
 {$DEFINE WL_ACHIEVEMENTS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EAchievementTab
-```pascal
-EAchievementTab = enum(SUMMARY, QUESTS, DIARIES);
-```
-An enum representing each of the {ref}`Achievements` gametab tabs.
-*)
+
   EAchievementTab = enum(SUMMARY, QUESTS, DIARIES, ADVENTURE_PATHS);
 
-(*
-## EAchievementDiary
-```pascal
-EAchievementDiary = enum(
-  ARDOUGNE,
-  DESERT,
-  FALADOR,
-  FREMENNIK,
-  KANDARIN,
-  KARAMJA,
-  KOUREND_AND_KEBOS,
-  LUMBRIDGE_AND_DRAYNOR,
-  MORYTANIA,
-  VARROCK,
-  WESTERN_PROVINCES,
-  WILDERNESS
-);
-```
-An enum representing each of the achievement diaries available.
-*)
+
   EAchievementDiary = enum(
     ARDOUGNE,
     DESERT,
@@ -52,26 +22,13 @@ An enum representing each of the achievement diaries available.
     WILDERNESS
   );
 
-(*
-## TAchievementsSummary
-Helper record used to interact with the {ref]`Achievements` gametab "Summary" tab:
-```{figure} ../../images/achievements.png
-```
-*)
+
   TAchievementsSummary = record
     Username, CombatLevel, TotalLevel, TotalXP, Quests, Diaries, CombatTasks,
     CollectionLog, TimePlayed: TBox;
   end;
 
-(*
-## TAchievementsSummary.SetupGameTab
-```pascal
-procedure TAchievementsSummary.SetupGameTab();
-```
-Internal method used to setup {ref]`TAchievementsSummary` coordinates.
 
-This is automatically called for you on the `Achievements.Summary variable`.
-*)
 procedure TAchievementsSummary.SetupGameTab();
 var
   boxes: TBoxArray;
@@ -93,25 +50,12 @@ begin
 end;
 
 type
-(*
-## TQuestList
-Helper record used to interact with the {ref]`Achievements` gametab "Quests" tab:
-```{figure} ../../images/achievements_quests.png
-```
-*)
+
   TQuestList = record
     Scroll: TScrollBar;
   end;
 
-(*
-## TQuestList.SetupGameTab
-```pascal
-procedure TQuestList.SetupGameTab();
-```
-Internal method used to setup {ref]`TQuestList` coordinates.
 
-This is automatically called for you on the `Achievements.Quests variable`.
-*)
 procedure TQuestList.SetupGameTab();
 begin
   with GameTab.Bounds do
@@ -120,36 +64,20 @@ begin
 end;
 
 type
-(*
-## TDiarySlot
-Helper record used to interact with a {ref}`TDiaryList` slot.
-*)
+
   TDiarySlot = record
     Name, Number, Bounds: TBox;
     Levels: TBoxArray;
   end;
 
-(*
-## TDiaryList
-Helper record used to interact with the {ref]`Achievements` gametab "Diaries" tab:
-```{figure} ../../images/achievements_diaries.png
-```
-*)
+
   TDiaryList = record
     Names: TStringArray;
     Scroll: TScrollBar;
     Cache: array [EAchievementDiary] of Integer;
   end;
 
-(*
-## TDiaryList.SetupGameTab
-```pascal
-procedure TDiaryList.SetupGameTab();
-```
-Internal method used to setup {ref]`TDiaryList` coordinates.
 
-This is automatically called for you on the `Achievements.Diaries variable`.
-*)
 procedure TDiaryList.SetupGameTab();
 var
   diary: EAchievementDiary;
@@ -162,38 +90,7 @@ begin
   Self.Scroll.Setup();
 end;
 
-(*
-## TDiaryList.GetSlots
-```pascal
-function TDiaryList.GetSlots(): array of TDiarySlot;
-```
-Returns the slots available in the diary tab as an array of {ref}`TDiarySlot`.
 
-Example:
-```pascal
-img := Target.GetImage();
-for slot in Achievements.Diaries.GetSlots() do
-begin
-  img.DrawColor := $FFFFFF;
-  img.DrawBox(slot.Bounds);
-
-  img.DrawColor := $00FFFF;
-  img.DrawBox(slot.Name);
-
-  img.DrawColor := $FF00FF;
-  img.DrawBox(slot.Number);
-
-  img.DrawColor := $FFFF00;
-  img.DrawBoxArray(slot.Levels, False);
-end;
-
-img.Show();
-img.Free();
-```
-
-```{figure} ../../images/diary_slots.png
-```
-*)
 function TDiaryList.GetSlots(): array of TDiarySlot;
 var
   tpa: TPointArray;
@@ -219,37 +116,7 @@ begin
   end;
 end;
 
-(*
-## TDiaryList.GetSlot
-```pascal
-function TDiaryList.GetSlot(diary: EAchievementDiary): TDiarySlot;
-```
-Returns the slot of the specified `diary` as a {ref}`TDiarySlot`.
 
-Example:
-```pascal
-img := Target.GetImage();
-slot := Achievements.Diaries.GetSlot(EAchievementDiary.FREMENNIK);
-
-img.DrawColor := $FFFFFF;
-img.DrawBox(slot.Bounds);
-
-img.DrawColor := $00FFFF;
-img.DrawBox(slot.Name);
-
-img.DrawColor := $FF00FF;
-img.DrawBox(slot.Number);
-
-img.DrawColor := $FFFF00;
-img.DrawBoxArray(slot.Levels, False);
-
-img.Show();
-img.Free();
-```
-
-```{figure} ../../images/diary_slot.png
-```
-*)
 function TDiaryList.GetSlot(diary: EAchievementDiary): TDiarySlot;
 var
   slot: TDiarySlot;
@@ -260,18 +127,7 @@ begin
 end;
 
 
-(*
-## TDiaryList.ScrollTo
-```pascal
-procedure TDiaryList.ScrollTo(diary : EAchievementDiary);
-```
-Scrolls to the specified `diary`.
 
-Example:
-```pascal
-Achievements.Diaries.ScrollTo(EAchievementDiary.MORYTANIA);
-```
-*)
 procedure TDiaryList.ScrollTo(diary : EAchievementDiary);
 var
   lo, hi: Integer;
@@ -284,20 +140,7 @@ begin
 end;
 
 type
-(*
-## TAchievements
-Main record used to interact with the {ref]`Achievements` gametab.
 
-Each tab has it's own specific variable:
-- `TAchievements.Summary: TAchievementsSummary`
-- `TAchievements.Quests: TQuestList`
-- `TAchievements.Diaries: TDiaryList`
-
-So if you want to use {ref}`TDiaryList.GetLevel` for example you would do this:
-```pascal
-WriteLn Achievements.Diaries.GetLevel(EAchievementDiary.ARDOUGNE);
-```
-*)
   TAchievements = record
     TabsArea, TabTitle: TBox;
     Tabs: TBoxArray;
@@ -306,15 +149,7 @@ WriteLn Achievements.Diaries.GetLevel(EAchievementDiary.ARDOUGNE);
     Diaries: TDiaryList;
   end;
 
-(*
-## Achievements.SetupGameTab();
-```pascal
-procedure TAchievements.SetupGameTab();
-```
-Internal method used to setup the {ref}`TAchievements` coordinates.
 
-This is automatically called for you on the {ref}`Achievements variable`.
-*)
 procedure TAchievements.SetupGameTab();
 begin
   with GameTab.Bounds do
@@ -328,69 +163,27 @@ begin
   end;
 end;
 
-(*
-## Achievements.IsOpen
-```pascal
-function TAchievements.IsOpen(): Boolean;
-```
-Returns true/false if the inventory is open.
 
-Example:
-```pascal
-WriteLn Achievements.IsOpen();
-```
-*)
 function TAchievements.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.ACHIEVEMENTS);
 end;
 
-(*
-## Achievements.Open
-```pascal
-function TAchievements.Open(): Boolean;
-```
-Attempts to open the inventory gametab.
 
-Example:
-```pascal
-WriteLn Achievements.Open();
-```
-*)
 function TAchievements.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.ACHIEVEMENTS);
 end;
 
-(*
-## Achievements Tabs
-The {ref}`Achievements` tabs are dynamic as one of them can be hidden away on certain types of accounts:
-![3 tabs](../../images/achievements_tabs3.png) ![4 tabs](../../images/achievements_tabs4.png)
-To handle this, you have the 2 following methods, they are used automatically for you on the
-{ref}`Achievements variable`.
-*)
 
-(*
-### Achievements.CountTabs
-```pascal
-function TAchievements.CountTabs(): Integer;
-```
-Internal method used to count the available tabs on the {ref}`Achievements` gametab.
-*)
+
+
 function TAchievements.CountTabs(): Integer;
 begin
   Result := Length(Target.FindColor(TInterface.Border, 0, Self.TabsArea).Cluster(1.5));
 end;
 
-(*
-### Achievements.SetupTabs
-```pascal
-procedure TAchievements.SetupTabs();
-```
-Internal method used to update the coordinates of the tabs on the {ref}`Achievements` gametab.
 
-This is automatically used for you.
-*)
 procedure TAchievements.SetupTabs();
 begin
   case Self.CountTabs() of
@@ -400,18 +193,7 @@ begin
   end;
 end;
 
-(*
-## Achievements.GetTab
-```pascal
-function TAchievements.GetTab():  EAchievementTab;
-```
-Returns the currently active {ref}`EAchievementTab`.
 
-Example:
-```pascal
-WriteLn Achievements.GetTab();
-```
-*)
 function TAchievements.GetTab(): EAchievementTab;
 var
   title: String;
@@ -432,18 +214,7 @@ begin
   end;
 end;
 
-(*
-## Achievements.OpenTab
-```pascal
-function TAchievements.OpenTab(tab:  EAchievementTab): Boolean;
-```
-Attempts to open the specified `tab` {ref}`EAchievementTab`.
 
-Example:
-```pascal
-WriteLn Achievements.OpenTab(EAchievementTab.DIARIES);
-```
-*)
 function TAchievements.OpenTab(tab: EAchievementTab): Boolean;
 var
   b: TBox;
@@ -468,25 +239,10 @@ end;
 
 
 var
-(*
-## Achievements variable
-Global {ref}`TAchievements` variable.
-*)
+
   Achievements: TAchievements;
 
-(*
-## TDiaryList.GetLevel
-```pascal
-function TDiaryList.GetLevel(diary: EAchievementDiary): Integer;
-```
-Returns the current completion level of the specified `diary`.
-The level will be between -1 and 4. -1 is returned if we fail.
 
-Example:
-```pascal
-WriteLn Achievements.Diaries.GetLevel(EAchievementDiary.MORYTANIA);
-```
-*)
 function TDiaryList.GetLevel(diary: EAchievementDiary): Integer;
 var
   i: Integer;

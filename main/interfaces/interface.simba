@@ -1,16 +1,10 @@
-(*
-# Interface
-The core of interface handling.
-*)
+
 
 {$DEFINE WL_INTERFACE_CORE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TInterface
-Core record for `Interfaces` with a lot of interface coordinate data.
-*)
+
   TInterface = record
     Bounds: TBox;
     Width, Height: Integer;

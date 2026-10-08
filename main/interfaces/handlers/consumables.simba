@@ -1,28 +1,12 @@
-(*
-# Consumables
-Manages consumable items like food and potions.
 
-It handles loading, inventory scanning, and consumption logic with cooldowns and effects.
-*)
 {$DEFINE WL_CONSUMABLES_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
-(*
-(ERSConsumable)=
-## Enum ERSConsumable
-```pascal
-ERSConsumable = (BOOST, ENERGY, POISON, ANTIFIRE);
-```
-Defines the categories of consumables available.
-*)
+
 type
   ERSConsumable = (ENERGY, POISON, ANTIFIRE);
 
-(*
-(TConsumableItem)=
-## type TConsumableItem
-Represents a single consumable item with its properties.
-*)
+
   TConsumableItem = record
     Item: TItem;
     Points, Order, Cooldown, Duration: Integer;
@@ -80,11 +64,7 @@ end;
 
 
 type
-(*
-(TBoostItem)=
-## type TBoostItem
-Represents a single boost item with its properties.
-*)
+
   TBoostItem = record
     Item: TItem;
     Skill: ESkill;
@@ -94,16 +74,7 @@ Represents a single boost item with its properties.
     Multiplier: Single;
   end;
 
-(*
-## TBoostItem.Points
-```pascal
-property TBoostItem.Points: Integer;
-property TBoostItem.Points(value: Integer);
-```
-Getter and setter `Points` property.
 
-Only set a new value if you want to permanently override it.
-*)
 property TBoostItem.Points: Integer;
 begin
   if Self._Points > 0 then
@@ -180,11 +151,7 @@ end;
 
 
 type
-(*
-(TConsumables)=
-## type TConsumables
-Manages all aspects of item consumption.
-*)
+
   TConsumables = record
     Boosts: array [ESkill] of record
       Names: TStringArray;
@@ -233,24 +200,7 @@ begin
   Self.Cooldowns[2].Start(3*TICK);
 end;
 
-(*
-## Consumables.Setup
-```pascal
-procedure TConsumables.Setup(consumable: ERSConsumable);
-procedure TConsumables.Setup(skill: ESkill); overload;
-```
-Sets up the specified type of consumable.
-To setup a `ERSConsumable.BOOST` you should use a `ESkill` value instead with
-the `ESkill` you want to boost.
 
-For example, to setup food, prayer potions and antifires you would do the
-following:
-```pascal
-Consumables.Setup(ESkill.HITPOINTS);
-Consumables.Setup(ESkill.PRAYER);
-Consumables.Setup(ERSConsumable.ANTIFIRE);
-```
-*)
 procedure TConsumables.Setup(consumable: ERSConsumable);
 var
   filename: String;
@@ -310,17 +260,7 @@ begin
 end;
 
 
-(*
-## TConsumables.Enable
-```pascal
-procedure TConsumables.Enable(consumable: ERSConsumable; item: TItem);
-procedure TConsumables.Enable(boost: ESkill; item: TItem); overload;
-```
-Enabled a specific item to use for a category.
 
-If this is not used any item available will that is valid for the category will
-be used.
-*)
 procedure TConsumables.Enable(consumable: ERSConsumable; item: TItem);
 var
   name: TItem;
@@ -354,14 +294,7 @@ begin
 end;
 
 
-(*
-## TConsumables.Find
-```pascal
-function TConsumables.Find(consumable: ERSConsumable): TConsumableItemArray;
-function TConsumables.Find(boost: ESkill): TBoostItemArray; overload;
-```
-Scans inventory for all consumables of a specific category.
-*)
+
 function TConsumables.Find(consumable: ERSConsumable): TConsumableItemArray;
 var
   items: TItemArray;
@@ -406,14 +339,7 @@ begin
 end;
 
 
-(*
-## TConsumables.HasEnoughPoints
-```pascal
-function TConsumables.HasEnoughPoints(consumable: ERSConsumable): Boolean;
-function TConsumables.HasEnoughPoints(skill: ESkill): Boolean; overload;
-```
-Checks if total points of a consumable type meet the `MinInvPoints` threshold.
-*)
+
 function TConsumables.HasEnoughPoints(consumable: ERSConsumable): Boolean;
 var
   consumables: TConsumableItemArray;
@@ -447,14 +373,7 @@ begin
 end;
 
 
-(*
-## TConsumables.CanConsume
-```pascal
-function TConsumables.CanConsume(consumable: ERSConsumable): Boolean;
-function TConsumables.CanConsume(boost: ESkill): Boolean; overload;
-```
-Checks if a consumable can be used, considering active effects.
-*)
+
 function TConsumables.CanConsume(consumable: ERSConsumable): Boolean;
 begin
   Result := Self.Consumables[consumable].Timer.IsFinished;
@@ -466,14 +385,7 @@ begin
 end;
 
 
-(*
-## TConsumables.Consume
-```pascal
-function TConsumables.Consume(consumable: ERSConsumable): Boolean;
-function TConsumables.Consume(skill: ESkill): Boolean; overload;
-```
-Consumes the best item of a specified category from inventory.
-*)
+
 function TConsumables.Consume(consumable: ERSConsumable): Boolean;
 var
   consumables: TConsumableItemArray;
