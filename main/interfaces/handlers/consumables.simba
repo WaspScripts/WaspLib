@@ -291,7 +291,7 @@ begin
 
   filename := ToStr(skill) + '.json';
   if not FileExists(Self.CacheDir + filename) then
-    if not ZipExtract(WLEnv.AssetsDir + 'jsons' + PATH_SEP + 'consumables.zip', Self.CacheDir, [filename]) then
+    if not ZipExtract(WLEnv.AssetsDir + 'files' + PATH_SEP + 'consumables.zip', Self.CacheDir, [filename]) then
       raise GetDebugLn('Consumables', 'File does not exist: ' + filename);
 
   json := new TJSONParser();

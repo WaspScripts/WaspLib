@@ -230,7 +230,10 @@ begin
   if tpa.IsEmpty then
     Exit;
 
-  Result := tpa.Cluster(Self.Distance);
+  if Self.Distance <= 0 then
+    Result := [tpa]
+  else
+    Result := tpa.Cluster(Self.Distance);
 
   if (Self.ShortSide.Max <= 0) and (Self.LongSide.Max <= 0) then
     Exit(Result.SortBySize(True)); //sort by size

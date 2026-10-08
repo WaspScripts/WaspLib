@@ -590,12 +590,8 @@ begin
   path := Self.GraphsDir + plane + PATH_SEP + name + '-' +
           ToStr(WebGraphGenerator.CRC) + PATH_SEP;
 
-  if
-    not FileExists(path + 'nodes.txt') or
-    not FileExists(path + 'paths.txt') or
-    not FileExists(path + 'walkablespace.txt') or
-    not FileExists(path + 'walkableclusters.txt') or
-    not FileExists(path + 'objectclusters.txt') then
+  //the other files are only written when they aren't empty
+  if not FileExists(path + 'nodes.txt') or not FileExists(path + 'paths.txt') then
   begin
     if not DirCreate(path) then
       raise GetDebugLn('MapLoader', 'Failed to create cache directory: ' + path);

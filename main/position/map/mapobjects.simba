@@ -178,23 +178,16 @@ end;
 function TMapObjects.DrawnPlane(constref region: TRegion; constref loc: TWorldLocation): Integer; static;
 ```
 The plane `loc` is drawn on, and so the one it's seen and clicked on, which isn't always the one
-it's stored on. The same rule the client uses:
-- A tile flagged to be drawn on the ground has everything on it drawn on plane `0`, like the
-  walls of a building that are stored upstairs but stand on the ground.
-- Under a bridge, what's stored on a plane is drawn on the plane below it.
+it's stored on. The same rule the client uses: under a bridge, what's stored on a plane is drawn
+on the plane below it.
+
+A tile flagged with `8` doesn't move what's on it. The flag only lets the tile be seen from the
+planes below it, like a rooftop seen from the street.
 *)
 function TMapObjects.DrawnPlane(constref region: TRegion; constref loc: TWorldLocation): Integer; static;
-var
-  x, y: Integer;
 begin
-  x := loc.X - region.BaseX;
-  y := loc.Y - region.BaseY;
-
-  if (region.TileSettings[loc.Z, x, y] and 8) <> 0 then
-    Exit(0);
-
   Result := loc.Z;
-  if (Result > 0) and ((region.TileSettings[1, x, y] and 2) <> 0) then
+  if (Result > 0) and ((region.TileSettings[1, loc.X - region.BaseX, loc.Y - region.BaseY] and 2) <> 0) then
     Dec(Result);
 end;
 
