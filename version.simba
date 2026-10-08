@@ -6,9 +6,9 @@ const
 
   WL_VERSION_YEAR: Integer = 2026;
   WL_VERSION_MONTH: Integer = 10;
-  WL_VERSION_DAY: Integer = 07;
+  WL_VERSION_DAY: Integer = 08;
 
-  WL_VERSION_COMMIT_HASH: String = '6f64211';
+  WL_VERSION_COMMIT_HASH: String = 'a664b96';
 
 
 
