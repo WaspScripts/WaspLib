@@ -351,17 +351,18 @@ jobs:
 
       - name: Discord notification
         shell: bash
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+          AUTHOR: ${{ github.event.head_commit.author.name }}
+          WEBHOOK: ${{ secrets.UPDATES_WEBHOOK }}
         run: |
           BODY=$(jq -nc \
             --arg title "WaspLib Version $TAG_NAME" \
-            --arg desc "${{ github.event.head_commit.message || 'No commit message available' }}
+            --arg desc "${MSG:-No commit message available}
 
             Download: https://github.com/WaspScripts/WaspLib/releases/tag/$TAG_NAME" \
-            --arg url  "https://github.com/WaspScripts/WaspLib/commit/${{ github.sha }}" \
-            --arg foot "Author: ${{ github.event.head_commit.author.name }}" \
+            --arg url  "https://github.com/WaspScripts/WaspLib/commit/$GITHUB_SHA" \
+            --arg foot "Author: $AUTHOR" \
             --argjson color 16742912 \
             '{embeds:[{title:$title,description:$desc,url:$url,color:$color,footer:{text:$foot}}]}')
-          curl \
-              -H "Content-Type: application/json" \
-              -d "$BODY" \
-              ${{ secrets.UPDATES_WEBHOOK }}
+          curl -sS -H "Content-Type: application/json" -d "$BODY" "$WEBHOOK"
