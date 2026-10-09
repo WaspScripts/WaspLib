@@ -1,16 +1,4 @@
-(*
-# Level Up Listener
-The {ref}`Level Up Listener` is a tool that allows you to listen for
-the level up messages and run `OnMessage` callbacks which should be thread safe.
 
-You can debug incoming level up messages by adding this compiler directive
-before you include WaspLib:
-```pascal
-{$DEFINE WL_DEBUG_LEVEL_UP_LISTENER}
-```
-
-For more information on listeners and how to run them check {ref}`Listeners`.
-*)
 {$DEFINE WL_LEVELUP_LISTENER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -68,21 +56,7 @@ begin
   );
 end;
 
-(*
-## LevelUpListener.LeveledUp
-```pascal
-function TLevelUpListener.LeveledUp(img: TImage): Boolean;
-```
-Very similar to the start of `Chat.LeveledUp`.
 
-Basically looks for a message containing "Congratulations" at the start and
-returns true if it's found.
-
-Example:
-```pascal
-WriteLn LevelUpListener.LeveledUp(Target.GetImage());
-```
-*)
 function TLevelUpListener.LeveledUp(img: TImage): Boolean;
 var
   i: Integer;
@@ -105,18 +79,7 @@ begin
       Exit(True);
 end;
 
-(*
-## LevelUpListener.Check
-```pascal
-function TLevelUpListener.Check(): Boolean;
-```
-Returns true if there's been new messages.
 
-Example:
-```pascal
-WriteLn LevelUpListener.Check();
-```
-*)
 function TLevelUpListener.Check(): Boolean;
 var
   img, tmp: TImage;
@@ -151,8 +114,5 @@ begin
 end;
 
 var
-(*
-## LevelUpListener variable
-Global {ref}`TLevelUpListener` variable.
-*)
+
   LevelUpListener: TLevelUpListener;

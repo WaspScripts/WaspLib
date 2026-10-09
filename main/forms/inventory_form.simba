@@ -1,27 +1,9 @@
-(*
-# Inventory Form
-This page is about {ref}`Inventory Layouts` dedicated `TLazForm` utilities.
 
-This is meant to be used with {ref}`TScriptForm` with
-{ref}`TScriptForm.CreateInventoryTab` and will setup a a `TLazTabSheet` on it
-with several controls to configure the {ref}`Inventory Layouts`:
-```{figure} ../../images/inventoryform.png
-```
-*)
 {$DEFINE WL_INVENTORY_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TInventoryFormHelper
-The `TInventoryFormHelper` type is, as it's name implies a helper type for the
-`Inventory Form`.
 
-It has a lot of methods and callbacks that are hidden by default and won't be
-mentioned on this page because they are internal methods you shouldn't touch.
-
-Do feel free to read the source code though if you so desire.
-*)
   TInventoryFormHelper = record
     Layouts: array of TInventoryLayoutSlots;
     Index: Integer;
@@ -135,18 +117,7 @@ begin
     Self.AmountEdit.Text := '1';
 end;
 
-(*
-## TInventoryFormHelper.SlotImage
-```pascal
-function TInventoryFormHelper.SlotImage(item: String; amount: Integer): TImage;
-```
-Returns the sprite a slot holding `amount` of `item` is drawn with, stack text
-included.
 
-The result is kept, keyed by both the item and the amount, because a redraw asks
-for the same sprites over and over and rendering the stack text is the most
-expensive part of drawing a slot.
-*)
 function TInventoryFormHelper.SlotImage(item: String; amount: Integer): TImage;
 var
   key, txt: String;
@@ -201,18 +172,7 @@ begin
   );
 end;
 
-(*
-## TInventoryFormHelper.UpdateDrag
-```pascal
-procedure TInventoryFormHelper.UpdateDrag();
-```
-Draws the item being dragged at the cursor over the slot composite
-{ref}`TInventoryFormHelper.UpdateBackground` built, and pushes the result to the
-imagebox.
 
-This is the path the cursor takes, so it reuses that composite rather than
-rebuilding it: nothing behind the cursor changes while the cursor moves.
-*)
 procedure TInventoryFormHelper.UpdateDrag();
 var
   bg: TImage;
@@ -231,18 +191,7 @@ begin
   Self.ImageBox.SetImage(bg.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, FormUtils.Scale));
 end;
 
-(*
-## TInventoryFormHelper.UpdateBackground
-```pascal
-procedure TInventoryFormHelper.UpdateBackground();
-```
-Redraws the slot composite into `TInventoryFormHelper.SlotsImg`: the gametab
-background, every slot's item and the slot outlines.
 
-All of that only changes when the layout, the selection or the drag source does,
-so the composite is kept for {ref}`TInventoryFormHelper.UpdateDrag` to reuse, and
-this is only called from the callbacks that change one of them.
-*)
 procedure TInventoryFormHelper.UpdateBackground();
 var
   slot: Integer;
@@ -620,15 +569,7 @@ begin
   Self.UpdateBackground();
 end;
 
-(*
-## InventoryForm.CreateGearCombobox
-```pascal
-function TInventoryFormHelper.CreateGearCombobox(owner: Pointer; caption: TLazLabel = nil): TLazComboBox;
-```
-This is the only method from {ref}`Gear Form` you might need to use.
-This will create a combobox for you whose contents auto-update with changes made
-on the `Gear Form`.
-*)
+
 function TInventoryFormHelper.CreateInventoryCombobox(owner: Pointer; caption: String = 'Inventory Layout:'; left, top: Integer = 0): TLazComboBox;
 var
   i: Integer;
@@ -643,34 +584,10 @@ begin
 end;
 
 var
-(*
-## InventoryForm variable
-Global {ref}`TInventoryFormHelper` variable.
-*)
+
   InventoryForm: TInventoryFormHelper;
 
-(*
-## ScriptForm.CreateInventoryTab
-```pascal
-function TScriptForm.CreateInventoryTab(): TLazTabSheet;
-```
-Sets up a `TLazTabSheet` on your `TScriptForm` to configure your `Inventory Layouts`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  form: TScriptForm;
-begin
-  form.Setup();
-  form.CreateInventoryTab();
-  form.Run();
-end.
-```
-```{figure} ../../images/inventoryform.gif
-```
-For a more complete example check out the file `Simba/Includes/WaspLib/examples/inventory_form.simba`.
-*)
 function TScriptForm.CreateInventoryTab(): TLazTabSheet;
 var
   save, read: TLazButton;

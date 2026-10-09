@@ -1,38 +1,14 @@
-(*
-# Lobby
-The lobby screen is the first screen you see after logging in:
-```{figure} ../../images/lobby.png
-```
-*)
+
 {$DEFINE WL_LOBBY_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TLobbyScreen
-Simple record that handles the login lobby screen.
 
-The lobby screen is the screen you see after logging in with the large red
-button with "CLICK HERE TO PLAY".
-
-The record is extremely simply and basically only has information about the
-bounds of the lobby screen and the bounds ofthe "CLICK HERE TO PLAY" button,
-as you can see in this image:
-```{figure} ../../images/lobbydebug.png
-```
-*)
   TLobbyScreen = record
     Bounds, Button: TBox;
   end;
 
-(*
-## Lobby.Setup
-```pascal
-procedure TLobbyScreen.Setup();
-```
-Internal function that sets up the lobby screen coordinates.
-This is automatically called for you on the {ref}`Lobby variable`.
-*)
+
 procedure TLobbyScreen.Setup();
 begin
   Self.Bounds.X1 := Target.Width div 2 - 382;
@@ -50,56 +26,20 @@ begin
 end;
 
 
-(*
-## Lobby.IsOpen
-```pascal
-function TLobbyScreen.IsOpen(): Boolean;
-```
-Returns True/False depending on whether the lobby screen is currently open.
 
-Example:
-```pascal
-if Lobby.IsOpen() then
-  Lobby.EnterGame();
-```
-*)
 function TLobbyScreen.IsOpen(): Boolean;
 begin
   Result := OCR.Locate(Self.Button, 'CLICK HERE TO PLAY', [$FFFFFF], 0, Fonts.BOLD_SHADOW) > 0.999;
 end;
 
-(*
-## Lobby.WaitOpen
-```pascal
-function TLobbyScreen.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
-```
-Returns True/False if the lobby screen opens within `time` milliseconds.
 
-Example:
-```pascal
-if Lobby.WaitOpen(2000) then
-  Lobby.EnterGame();
-```
-*)
 function TLobbyScreen.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## Lobby.EnterGame
-```pascal
-function TLobbyScreen.EnterGame(): Boolean;
-```
-Attempts to enter the game from the lobby screen.
-This is automatically called for you with {ref}`Login.DoLogin`.
 
-Example:
-```pascal
-WriteLn Lobby.EnterGame();
-```
-*)
 function TLobbyScreen.EnterGame(): Boolean;
 begin
   if Client.IsLoggedIn() then Exit(True);
@@ -109,8 +49,5 @@ begin
 end;
 
 var
-(*
-## Lobby variable
-Global {ref}`TLobbyScreen` variable.
-*)
+
   Lobby: TLobbyScreen;

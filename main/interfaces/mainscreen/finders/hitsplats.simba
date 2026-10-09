@@ -1,30 +1,12 @@
-(*
-# HitSplats
-Find and read hitsplats on the screen.
 
-```{figure} ../../images/hitsplats.png
-```
-
-At the moment only your hitsplats are supported, tinted ones by other players or
-NPCs are not.
-*)
 {$DEFINE WL_HITSPLATS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EHitSplat
-```pascal
-EHitSplat = enum(BLUE, RED, MAX);
-```
-Enum representing the main hitsplat colors.
-*)
+
   EHitSplat = enum(BLUE, RED, MAX);
 
-(*
-## THitSplat
-Hitsplat record that holds the methods used to find hitsplats.
-*)
+
   THitsplat = record
     Position: TPoint;
     Value: Integer;
@@ -68,19 +50,7 @@ begin
   end;
 end;
 
-(*
-## THitSplat.Find
-```pascal
-function THitSplat.Find(out splats: THitSplatArray; areas: TBoxArray): Boolean; static;
-function THitSplat.Find(out splats: THitSplatArray; areas: TPolygonArray): Boolean; static; overload;
-function THitSplat.Find(out splats: THitSplatArray; areas: TCuboidArray): Boolean; static; overload;
-function THitSplat.Find(out splats: THitSplatArray): Boolean; static; overload;
-```
-Attempts to find hitsplats on the given `area` a {ref}`TColorFinder`.
-If `area` is not specified, {ref}`MainScreen` Bounds are used.
-The function returns true if we find at least one hitsplat and found splats are
-returned via `splats`.
-*)
+
 function THitSplat.Find(out splats: THitSplatArray; areas: TBoxArray): Boolean; static;
 var
   area, b: TBox;

@@ -1,7 +1,4 @@
-(*
-# XPBar
-Methods to interact with the XP bar.
-*)
+
 
 {$DEFINE WL_XPBAR_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -29,10 +26,7 @@ begin
 end;
 
 type
-(*
-## TXPBar
-Record responsible with interacting with the {ref}`XPBar`.
-*)
+
   TXPBar = record
     Button: TCircle;
     Bounds: TBox;
@@ -47,15 +41,7 @@ Record responsible with interacting with the {ref}`XPBar`.
     const OUTER_BORDER: TColor = $233038;
   end;
 
-(*
-## XPBar.SetupInterface
-```pascal
-procedure TXPBar.SetupInterface();
-```
-Internal method used to setup the {ref}`TXPBar` coordinates and core values.
 
-This is automatically called for you on the {ref}`XPBar variable`.
-*)
 procedure TXPBar.SetupInterface();
 begin
   case Client.Mode of
@@ -71,58 +57,20 @@ begin
 end;
 
 
-(*
-## XPBar.IsOpen
-```pascal
-function TXPBar.IsOpen(): Boolean;
-```
-Checks if the XPBar circle is enabled.
-This does not mean that the XPBar is actually visible, simply that according to the
-XPBar circle, it is enabled.
 
-Example:
-```pascal
-WriteLn XPBar.IsEnabled();
-```
-*)
 function TXPBar.IsOpen(): Boolean;
 begin
   Result := Target.HasColor($B0E4EF, 0, 50, Self.Button.Bounds);
 end;
 
-(*
-## XPBar.WaitOpen
-```pascal
-function TXPBar.WaitOpen(time: Integer = TICK; interval: Integer = -1): Boolean;
-```
-Waits for the XPBar to be open.
-This does not mean that the XPBar is actually visible, simply that according to the
-XPBar button, it is enabled.
 
-Example:
-```pascal
-WriteLn XPBar.WaitOpen();
-```
-*)
 function TXPBar.WaitOpen(time: Integer = TICK; interval: Integer = -1): Boolean;
 begin
   if interval = -1 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## XPBar.Open
-```pascal
-function TXPBar.Open(): Boolean;
-```
-Opens the XPBar by clicking the XPBar circle.
 
-Example:
-```pascal
-if not XPBar.IsOpen() then
-  WriteLn XPBar.Open();
-```
-*)
 function TXPBar.Open(): Boolean;
 begin
   if Self.IsOpen() then
@@ -131,19 +79,7 @@ begin
   Result := Self.WaitOpen();
 end;
 
-(*
-## XPBar.Close
-```pascal
-function TXPBar.Close(): Boolean;
-```
-Closes the XPBar by clicking the XPBar circle.
 
-Example:
-```pascal
-if XPBar.IsOpen() then
-  WriteLn XPBar.Close();
-```
-*)
 function TXPBar.Close(): Boolean;
 begin
   if not Self.IsOpen() then Exit(True);
@@ -152,14 +88,7 @@ begin
 end;
 
 
-(*
-## XPBar.Setup
-```pascal
-function TXPBar.Setup(): Boolean;
-```
-Internal method automatically called by WaspLib once when attempting to read the XPBar.
-Should only ever run once.
-*)
+
 function TXPBar.Setup(): Boolean;
 var
   border: TPointArray;
@@ -204,18 +133,7 @@ begin
 end;
 
 
-(*
-## XPBar.Read
-```pascal
-function TXPBar.Read(): UInt64;
-```
-Reads the XP in the XPBar.
 
-Example:
-```pascal
-WriteLn XPBar.Read();
-```
-*)
 function TXPBar.Read(): UInt64;
 var
   str: String;
@@ -262,22 +180,7 @@ begin
   Self.OnlineTracker.Current := Result;
 end;
 
-(*
-## XPBar.EarnedXP
-```pascal
-function TXPBar.EarnedXP(): Boolean;
-```
-Returns True/False if we earned XP since the last time this, {ref}`XPBar.Read`
-or {ref}`XPBar.WaitXP` were called.
 
-When this returns true it also resets {ref}`Activity`.
-
-Example:
-```pascal
-while True do
-  WriteLn XPBar.EarnedXP();
-```
-*)
 function TXPBar.EarnedXP(): Boolean;
 var
   read: UInt64;
@@ -294,13 +197,7 @@ begin
   end;
 end;
 
-(*
-## XPBar.WaitXP
-```pascal
-function TXPBar.WaitXP(time: Integer = TICK; interval: Integer = -1): Boolean;
-```
-Waits a set amount of time until XPBar.EarnedXP() is true.
-*)
+
 function TXPBar.WaitXP(time: Integer = TICK; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -308,15 +205,7 @@ begin
 end;
 
 
-(*
-## XPBar.TotalEarnedXP
-```pascal
-function TXPBar.TotalEarnedXP(update: Boolean = False): UInt64;
-```
-Returns the total amount of earned experience tracked since the script started running.
-This is pretty reliable but should be taken with a grain of salt since XPBar can be misread
-due to several reasons, like open interfaces.
-*)
+
 function TXPBar.TotalEarnedXP(update: Boolean = True): UInt64;
 begin
   if update then
@@ -325,8 +214,5 @@ begin
 end;
 
 var
-(*
-## XPBar variable
-Global {ref}`TXPBar` variable.
-*)
+
   XPBar: TXPBar;

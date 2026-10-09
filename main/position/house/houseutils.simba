@@ -1,11 +1,4 @@
-(*
-# House Misc
-Collection of enums and function utilities for the WaspLib's {ref}`House`
-handler.
 
-Everything in this page are helper utilities that you are unlikely to ever need
-to use directly.
-*)
 
 {$DEFINE WL_HOUSEUTILS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -15,13 +8,7 @@ type
     Outdoors, Indoors, Dungeon: TColor;
   end;
 
-(*
-## EHouseLocation
-```pascal
-EHouseLocation = enum(RIMMINGTON..PRIFDDINAS);
-```
-Enum representing the {ref}`House`  locations in game.
-*)
+
   EHouseLocation = enum(
     RIMMINGTON, TAVERLEY, POLLNIVNEACH, HOSIDIUS, RELLEKKA, ALDARIN, BRIMHAVEN,
     YANILLE, PRIFDDINAS
@@ -42,29 +29,12 @@ begin
 end;
 
 type
-(*
-## EHouseDecoration
-```pascal
-EHouseDecoration = enum(WOOD..WINTER);
-Enum representing the {ref}`House`
-```
-*)
+
   EHouseDecoration = enum(
     WOOD, STONE, WHITE, FREMENNIK, TROPICAL, FANCY, DEATHLY, TWISTED,
     HOSIDIUS, WINTER
   );
-(*
-## EHouseDecoration.GetColors
-```pascal
-function EHouseDecoration.GetColors(): THouseColor;
-```
-Returns the color palette of the current {ref}`EHouseDecoration` as a {ref}`THouseColor`.
 
-Example:
-```pascal
-WriteLn EHouseDecoration.FREMENNIK.GetColors();
-```
-*)
 function EHouseDecoration.GetColors(): THouseColor;
 begin
   case Self of
@@ -80,13 +50,7 @@ begin
 end;
 
 type
-(*
-## EHouseRoom
-```pascal
-EHouseRoom = enum(UNKNOWN, GARDEN..WORKSHOP);
-```
-Enum representing the {ref}`House` rooms available.
-*)
+
   EHouseRoom = enum(
     UNKNOWN, PARLOUR, GARDEN, KITCHEN, DINING, WORKSHOP, BEDROOM, SKILL_HALL,
     LEAGUE_HALL, GAMES, COMBAT, QUEST_HALL, MENAGERIE_OUTDOORS,
@@ -94,18 +58,7 @@ Enum representing the {ref}`House` rooms available.
     THRONE, SUPERIOR_GARDEN, PORTAL_NEXUS, ACHIEVEMENT_GALLERY
   );
 
-(*
-## EHouseRoom.IsOutdoors
-```pascal
-function EHouseRoom.IsOutdoors(): Boolean;
-```
-Returns True/False whether a EHouseRoom is an outdoors room or not.
 
-Example:
-```pascal
-WriteLn EHouseRoom.GARDEN.IsOutdoors();
-```
-*)
 function EHouseRoom.IsOutdoors(): Boolean;
 begin
   case Self of
@@ -115,16 +68,7 @@ begin
 end;
 
 type
-(*
-## EHouseObject
-```pascal
-EHouseObject = enum(EXIT, REPAIR_STAND..OCCULT_ALTAR, CAPE_HANGER);
-```
-Enum representing the {ref}`TObject`s available in a {ref}`House`.
 
-This doesn't cover everything a house can have but should cover everything that
-is of interest for a script.
-*)
   EHouseObject = enum(
     EXIT, LARDER, OAK_LARDER, TEAK_LARDER, REPAIR_STAND, SERVANT_BAG,
 
@@ -153,21 +97,7 @@ is of interest for a script.
   EHouseObjectSet = set of EHouseObject;
 
 const
-(*
-## Constants
-```pascal
-KITCHEN_LARDERS
-STUDY_LECTERNS
-CHAPEL_BURNERS
-CHAPEL_ALTARS
-SUPERIOR_GARDEN_POOLS
-SUPERIOR_GARDEN_TELEPORTS
-JEWELLERY_BOXES
-ACHIEVEMENT_GALLERY_ALTARS
-```
-Several constants represeting multiple tiers of house objects that functional
-virtually the same way.
-*)
+
   KITCHEN_LARDERS:            EHouseObjectSet = [EHouseObject.LARDER..EHouseObject.TEAK_LARDER];
   STUDY_LECTERNS:             EHouseObjectSet = [EHouseObject.OAK_LECTERN..EHouseObject.MARBLE_LECTERN];
   CHAPEL_BURNERS:             EHouseObjectSet = [EHouseObject.LEFT_BURNER, EHouseObject.RIGHT_BURNER];
@@ -177,18 +107,7 @@ virtually the same way.
   JEWELLERY_BOXES:            EHouseObjectSet = [EHouseObject.BASIC_JEWELLERY_BOX..EHouseObject.ORNATE_JEWELLERY_BOX];
   ACHIEVEMENT_GALLERY_ALTARS: EHouseObjectSet = [EHouseObject.ANCIENT_ALTAR..EHouseObject.OCCULT_ALTAR];
 
-(*
-## EHouseObject.GetSize
-```pascal
-function EHouseObject.GetSize(): TVector3;
-```
-Returns the `TVector3` that represents the object size in 3D space, `X` and `Y`
-is measured in tiles.
 
-For example, an object that is `[1, 2, 6]` would be the size of an object that
-is 1 tile from West to East, 2 tiles from North to South and roughly the player
-height.
-*)
 function EHouseObject.GetSize(): TVector3;
 begin
   case Self of
@@ -225,15 +144,7 @@ begin
     WriteLn Result;
 end;
 
-(*
-## EHouseObject.GetOffset
-```pascal
-function EHouseObject.GetOffset(): TPoint;
-```
-Returns the coordinate of the object in the room it belongs to.
-This assumes the room is not rotated, if you think you need this, in reality you
-probably want to use {ref}`EHouseObject.RotatedOffset`.
-*)
+
 function EHouseObject.GetOffset(): TPoint;
 begin
   //Result should be the coordinate of the object within the room without rotation
@@ -294,31 +205,14 @@ begin
 end;
 {%codetools on}
 
-(*
-## EHouseObject.RotatedOffset
-```pascal
-function EHouseObject.RotatedOffset(size, rotation: Integer): TPoint;
-```
-Returns the coordinate of the object in the room regardeless of it's rotation.
-*)
+
 function EHouseObject.RotatedOffset(size, rotation: Integer): TPoint;
 begin
   Result := _RotateRoomOffset(Self.GetOffset(), size, rotation);
 end;
 
 
-(*
-## EHouseObject.GetUpText
-```pascal
-function EHouseObject.GetUpText(): TStringArray;
-```
-Returns a {ref}`UpText` for the current {ref}`EHouseObject`.
 
-Example:
-```pascal
-WriteLn EHouseObject.SPIRIT_TREE.GetUpText();
-```
-*)
 function EHouseObject.GetUpText(): TStringArray;
 begin
   //Some uptext were not checked and might be wrong.
@@ -354,19 +248,7 @@ begin
   end;
 end;
 
-(*
-## EHouseObject.GetFinder
-```pascal
-function EHouseObject.GetFinder(): TColorFinder;
-```
-Returns a {ref}`TColorFinder` for the current {ref}`EHouseObject`.
 
-Example:
-```pascal
-EHouseObject.SPIRIT_TREE.GetFinder().Find(atpa);
-ShowOnTarget(atpa);
-```
-*)
 function EHouseObject.GetFinder(): TColorFinder;
 begin
   Result := [];
@@ -529,13 +411,7 @@ begin
 end;
 
 type
-(*
-## EHouseTeleport
-```pascal
-EHouseTeleport = enum(EMPTY, ARCEUUS_LIBRARY..XERIC);
-```
-Enum represinting all the available teleports in a {ref}`House`.
-*)
+
   EHouseTeleport = enum(
     EMPTY, ARCEUUS_LIBRARY, DRAYNOR_MANOR, BATTLEFRONT, VARROCK,
     MIND_ALTAR, LUMBRIDGE, FALADOR, SALVE_GRAVEYARD, CAMELOT,
@@ -547,18 +423,7 @@ Enum represinting all the available teleports in a {ref}`House`.
     DIGSITE, XERIC
   );
 
-(*
-## EHouseTeleport.GetUpText
-```pascal
-function EHouseTeleport.GetUpText(): TStringArray;
-```
-Returns a {ref}`UpText` for the current {ref}`EHouseTeleport`.
 
-Example:
-```pascal
-WriteLn EHouseTeleport.FALADOR.GetUpText();
-```
-*)
 function EHouseTeleport.GetUpText(): TStringArray;
 begin
   //TODO... same as `EHouseObject.GetUpText()` but for each portal uptext lol
@@ -601,19 +466,7 @@ begin
   end;
 end;
 
-(*
-## EHouseTeleport.GetFinder
-```pascal
-function EHouseTeleport.GetFinder(): TColorFinder;
-```
-Returns a {ref}`TColorFinder` for the current {ref}`EHouseTeleport`.
 
-Example:
-```pascal
-EHouseTeleport.FALADOR.GetFinder().Find(atpa);
-ShowOnTarget(atpa);
-```
-*)
 function EHouseTeleport.GetFinder(): TColorFinder;
 begin
   Result := [];
@@ -664,31 +517,17 @@ end;
 
 
 type
-(*
-## THouseRoom
-Type helper to represent a house room. This type will hold the `Room`
-{ref}`EHouseRoom` type, information about it's `Rotation` and the `Objects`
-it holds as a `set of `{ref}`EHouseObject`.
-*)
+
   THouseRoom = record
     Room: EHouseRoom;
     Rotation: Integer;
     Objects: EHouseObjectSet;
   end;
 
-(*
-### THouseRoomMatrix
-2D array of {ref}`THouseRoom`.
-*)
+
   THouseRoomMatrix = array of array of THouseRoom;
 
-(*
-### THouseRoomMatrix.ToBytes
-```pascal
-function THouseRoomMatrix.ToBytes(): TByteArray;
-```
-Encode a `THouseRoomMatrix` into bytes. Useful for storing them.
-*)
+
 function THouseRoomMatrix.ToBytes(): TByteArray;
 const
   INT_SIZE: Integer = SizeOf(Int64);
@@ -733,13 +572,7 @@ begin
   Result := bytes;
 end;
 
-(*
-### THouseRoomMatrix.CreateFromBytes
-```pascal
-function THouseRoomMatrix.CreateFromBytes(bytes: TByteArray): THouseRoomMatrix; static;
-```
-Decode a `THouseRoomMatrix` from bytes. Useful to load them from storage.
-*)
+
 function THouseRoomMatrix.CreateFromBytes(bytes: TByteArray): THouseRoomMatrix; static;
 const
   INT_SIZE: Integer = SizeOf(Int64);
@@ -782,27 +615,15 @@ begin
 end;
 
 type
-(*
-## TTeleportRoom
-Type helper to represent a house teleport room.
-*)
+
   TTeleportRoom = record
     Left, Middle, Right: EHouseTeleport;
   end;
 
-(*
-### TTeleportRoomMatrix
-2D array of {ref}`TTeleportRoom`.
-*)
+
   TTeleportRoomMatrix = array of array of TTeleportRoom;
 
-(*
-### TTeleportRoomMatrix.ToBytes
-```pascal
-function TTeleportRoomMatrix.ToBytes(): TByteArray;
-```
-Encode a `TTeleportRoomMatrix` into bytes. Useful for storing them.
-*)
+
 function TTeleportRoomMatrix.ToBytes(): TByteArray;
 const
   INT_SIZE: Integer = SizeOf(Int32);
@@ -844,13 +665,7 @@ begin
   Result := bytes;
 end;
 
-(*
-### TTeleportRoomMatrix.CreateFromBytes
-```pascal
-function TTeleportRoomMatrix.CreateFromBytes(bytes: TByteArray): TTeleportRoomMatrix; static;
-```
-Decode a `TTeleportRoomMatrix` from bytes. Useful to load them from storage.
-*)
+
 function TTeleportRoomMatrix.CreateFromBytes(bytes: TByteArray): TTeleportRoomMatrix; static;
 const
   INT_SIZE: Integer = SizeOf(Int32);
@@ -890,20 +705,8 @@ begin
 end;
 
 type
-(*
-## EHouseTeleportMode
-```pascal
-EHouseTeleportMode = enum(SPELL, TABLET, CAPE);
-```
-Enum representing modes of teleporting the the POH.
-*)
+
   EHouseTeleportMode = enum(SPELL, TABLET, CAPE);
 
-(*
-## EHouseTeleportPlace
-```pascal
-EHouseTeleportPlace = enum(UNKNOWN, INSIDE, OUTSIDE);
-```
-Enum representing modes of teleporting the the POH.
-*)
+
   EHouseTeleportPlace = enum(UNKNOWN, INSIDE, OUTSIDE);

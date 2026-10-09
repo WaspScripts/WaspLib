@@ -1,26 +1,10 @@
-(*
-# GrandExchangeChat
-Methods to interact with the GrandExchangeChat interface:
-```{figure} ../../images/gec_interface.png
-```
 
-The {ref}`GrandExchange` is a very complex interface, probably the most complex
-available in game and for that reason, the functionality to
-fully interact with it is split into multiple files and records:
-- {ref}`GrandExchange`, the main grand exchange screen.
-- {ref}`GrandExchangeHistory`, the history screen of the grand exchange.
-- {ref}`GrandExchangeChat`, the chat interface of the grand exchange when you are setting up a buy offer and what this page is about.
-- {ref}`GrandExchangeOffer`, the screen of the grand exchange where you view or setup a new offer.
-*)
 
 {$DEFINE WL_GRANDEXCHANGE_CHAT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TGrandExchangeChat
-Record responsible to handle the {ref}`GrandExchangeChat` interface.
-*)
+
   TGrandExchangeChat = record
     Bounds, Header: TBox;
     Scroll: TScrollBar;
@@ -30,24 +14,7 @@ Record responsible to handle the {ref}`GrandExchangeChat` interface.
 
 function TGrandExchangeChat.IsOpen(): Boolean; forward;
 
-(*
-## GrandExchangeChat.Grid
-```pascal
-property TGrandExchangeChat.Grid: TBoxArray;
-```
-Returns the {ref}`GrandExchangeChat` search grid.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  while True do
-    ShowOnTarget(GrandExchangeChat.Grid);
-end.
-```
-```{figure} ../../images/gec_grid.gif
-```
-*)
 property TGrandExchangeChat.Grid: TBoxArray;
 var
   b, tmp: TBox;
@@ -88,14 +55,7 @@ begin
   Result := Result.Sort(weights, False);
 end;
 
-(*
-## GrandExchangeChat.SetupInterface
-```pascal
-procedure TGrandExchangeChat.SetupInterface();
-```
-Internal method used to setup the {ref}`TGrandExchangeChat` coordinates.
-This is automatically called for you on the {ref}`GrandExchangeChat variable`.
-*)
+
 procedure TGrandExchangeChat.SetupInterface();
 begin
   Self.Bounds := Chat.Bounds;
@@ -116,18 +76,7 @@ begin
   Self.Items.Setup('GrandExchangeChat.Items', @Self.Slots, [0, 1], @Self.IsOpen);
 end;
 
-(*
-## GrandExchangeChat.IsOpen
-```pascal
-function TGrandExchangeChat.IsOpen(): Boolean;
-```
-Returns true if the Grand Exchange is open.
 
-Example:
-```pascal
-WriteLn GrandExchangeChat.IsOpen();
-```
-*)
 function TGrandExchangeChat.IsOpen(): Boolean;
 var
   match: Single;
@@ -145,46 +94,14 @@ begin
   Result := match >= 0.8;
 end;
 
-(*
-## GrandExchangeChat.WaitOpen
-```pascal
-function TGrandExchangeChat.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
-```
-Returns true if the Grand Exchange is open within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn GrandExchangeChat.WaitOpen();
-```
-*)
 function TGrandExchangeChat.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## GrandExchangeChat.SearchText
-```pascal
-property TGrandExchangeChat.SearchText: String;
-property TGrandExchangeChat.SearchText(search: String): Boolean;
-```
-Returns the current {ref}`GrandExchangeChat` search or updates it.
 
-```{figure} ../../images/gec_search.png
-```
-
-Example:
-```pascal
-WriteLn GrandExchangeChat.SearchText;
-WriteLn GrandExchangeChat.SearchText['Bandos tassets'];
-WriteLn GrandExchangeChat.SearchText;
-WriteLn GrandExchangeChat.SearchText['Bandos chestplate'];
-WriteLn GrandExchangeChat.SearchText;
-WriteLn GrandExchangeChat.SearchText['Banana'];
-WriteLn GrandExchangeChat.SearchText;
-```
-*)
 property TGrandExchangeChat.SearchText: String;
 begin
   Result := OCR.Recognize(Self.Header, Fonts.BOLD, [TFonts.DARK_BLUE], 0).Before('*');
@@ -228,29 +145,7 @@ begin
   Result := search = Self.SearchText;
 end;
 
-(*
-## GrandExchangeChat.Find
-```pascal
-function TGrandExchangeChat.Find(item: TItem; out bounds: TBox): Boolean;
-```
-Returns true if the specified `item` text is found on the
-{ref}`GrandExchangeChat.Grid`.
 
-`bounds` will return the grid box where the item text was found.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  b: TBox;
-begin
-  if GrandExchangeChat.Find('Abyssal whip', b) then
-    ShowOnTarget(b);
-end.
-```
-```{figure} ../../images/gec_find.png
-```
-*)
 function TGrandExchangeChat.Find(item: TItem; out bounds: TBox): Boolean;
 var
   str: String;
@@ -264,19 +159,7 @@ begin
   end;
 end;
 
-(*
-## GrandExchangeChat.Contains
-```pascal
-function TGrandExchangeChat.Contains(item: TItem): Boolean;
-```
-Returns true if the specified `item` text is found on the
-{ref}`GrandExchangeChat.Grid`.
 
-Example:
-```pascal
-WriteLn GrandExchangeChat.Contains('Abyssal whip');
-```
-*)
 function TGrandExchangeChat.Contains(item: TItem): Boolean;
 var
   bounds: TBox;
@@ -284,18 +167,7 @@ begin
   Result := Self.Find(item, bounds);
 end;
 
-(*
-## GrandExchangeChat.Click
-```pascal
-function TGrandExchangeChat.Click(item: TItem): Boolean;
-```
-Attempts to click the specified `item` on the {ref}`GrandExchangeChat.Grid`.
 
-Example:
-```pascal
-WriteLn GrandExchangeChat.Click('Abyssal whip');
-```
-*)
 function TGrandExchangeChat.Click(item: TItem): Boolean;
 var
   bounds: TBox;
@@ -315,19 +187,7 @@ begin
 end;
 
 
-(*
-## GrandExchangeChat.FindScroll
-```pascal
-function TGrandExchangeChat.FindScroll(item: TItem): Integer;
-```
-Attempts to find the scroll level the specified `item` is found on the
-{ref}`GrandExchangeChat.Grid`.
 
-Example:
-```pascal
-WriteLn GrandExchangeChat.FindScroll('Bandos tassets');
-```
-*)
 function TGrandExchangeChat.FindScroll(item: TItem): Integer;
 var
   next: Integer;
@@ -364,19 +224,7 @@ begin
   Result := -1;
 end;
 
-(*
-## GrandExchangeChat.ScrollTo
-```pascal
-function TGrandExchangeChat.ScrollTo(item: TItem): Boolean;
-```
-Attempts to scroll until the specified `item` is found on the
-{ref}`GrandExchangeChat.Grid`.
 
-Example:
-```pascal
-WriteLn GrandExchangeChat.ScrollTo('Bandos tassets');
-```
-*)
 function TGrandExchangeChat.ScrollTo(item: TItem): Boolean;
 begin
   Result := Self.FindScroll(item) > -1;
@@ -384,8 +232,5 @@ end;
 
 
 var
-(*
-## GrandExchangeChat variable
-Global {ref}`TGrandExchangeChat` variable.
-*)
+
   GrandExchangeChat: TGrandExchangeChat;

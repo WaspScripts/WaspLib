@@ -1,40 +1,19 @@
-(*
-# HouseOptions
-Methods to interact with the house options that live on the options gametab.
-```{figure} ../../images/houseoptions.png
-```
-*)
+
 
 {$DEFINE WL_HOUSEOPTIONS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EHouseOptionsButton
-```pascal
-EHouseOptionsButton = enum(CLOSE, VIEWER, EXPEL, SERVANT, LEAVE);
-```
-It should be self explanatory what they represent.
-*)
+
   EHouseOptionsButton = enum(CLOSE, VIEWER, EXPEL, SERVANT, LEAVE);
 
-(*
-## THouseOptions
-Main record responsible with interacting with the house options.
-*)
+
   THouseOptions = record
     Buttons: TBoxArray;
   end;
 
 
-(*
-## HouseOptions.SetupGameTab
-```pascal
-procedure THouseOptions.SetupGameTab();
-```
-Internal method used to setup the {ref}`THouseOptions` coordinates.
-This is automatically called for you on the {ref}`HouseOptions` variable.
-*)
+
 procedure THouseOptions.SetupGameTab();
 begin
   SetLength(Self.Buttons, 5);
@@ -81,99 +60,29 @@ begin
 end;
 
 
-(*
-## THouseOptions.Buttons
-```pascal
-Buttons: TBoxArray;
-```
-`TBoxes` for each of the {ref}`HouseOptions` buttons.
-
-Example:
-```pascal
-ShowOnTarget(HouseOptions.Buttons);
-```
-```{figure} ../../images/houseoptions_buttons.png
-```
-
-You can also access each button with an index or, more conveniently, with a
-{ref}`EHouseOptionsButton`.
-
-Example:
-```pascal
-ShowOnTarget(HouseOptions.Buttons[EHouseOptionsButton.VIEWER]);
-```
-```{figure} ../../images/houseoptions_button.png
-```
-*)
 
 
-(*
-## HouseOptions.IsOpen
-```pascal
-function THouseOptions.IsOpen(): Boolean;
-```
-Returns True/False on whether the house options are open.
 
-Example:
-```pascal
-WriteLn HouseOptions.IsOpen();
-```
-*)
+
 function THouseOptions.IsOpen(): Boolean;
 begin
   Result := Target.HasColor(ColorTolerance($4C9055, 2.496, EColorSpace.HSV, [2.389, 0.261, 0.351]), 148, GameTab.Bounds);
 end;
 
-(*
-## HouseOptions.WaitOpen
-```pascal
-function THouseOptions.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
-```
-Returns true if the house options open within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn HouseOptions.WaitOpen();
-```
-*)
 function THouseOptions.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## HouseOptions.Open
-```pascal
-function THouseOptions.Open(): Boolean;
-```
-Attempts to open the house options on the options gametab.
 
-This method is overriden after {ref}`Options`, for more information check
-{ref}`HouseOptions.Open override`.
-
-Example:
-```pascal
-WriteLn HouseOptions.Open();
-```
-*)
 function THouseOptions.Open(): Boolean;
 begin
   Result := Self.WaitOpen();
 end;
 
-(*
-## HouseOptions.Close
-```pascal
-function THouseOptions.Close(): Boolean;
-```
-Attempts to close the house options.
 
-Example:
-```pascal
-WriteLn HouseOptions.Close();
-```
-*)
 function THouseOptions.Close(): Boolean;
 begin
   if not Self.IsOpen() then Exit(True);
@@ -182,18 +91,7 @@ begin
 end;
 
 
-(*
-## HouseOptions.ExpelGuests
-```pascal
-function THouseOptions.ExpelGuests(): Boolean;
-```
-Attempts to expel guests through the house options button.
 
-Example:
-```pascal
-WriteLn HouseOptions.ExpelGuests();
-```
-*)
 function THouseOptions.ExpelGuests(): Boolean;
 begin
   if not Self.Open() then Exit();
@@ -201,21 +99,7 @@ begin
   Result := True; //TODO: Check if need anything else here.
 end;
 
-(*
-## HouseOptions.CallServant
-```pascal
-function THouseOptions.CallServant(): Boolean;
-```
-Attempts to call the house servant through the house options button.
 
-For this to work you need to have a servant at your house and a
-[bell-pull](https://oldschool.runescape.wiki/w/Bell_pull_space).
-
-Example:
-```pascal
-WriteLn HouseOptions.CallServant();
-```
-*)
 function THouseOptions.CallServant(): Boolean;
 begin
   if not Self.Open() then
@@ -227,18 +111,7 @@ begin
   );
 end;
 
-(*
-## HouseOptions.LeaveHouse
-```pascal
-function THouseOptions.LeaveHouse(): Boolean;
-```
-Attempts to leave the house through the house options button.
 
-Example:
-```pascal
-WriteLn HouseOptions.LeaveHouse();
-```
-*)
 function THouseOptions.LeaveHouse(): Boolean;
 begin
   if not Self.Open() then
@@ -248,8 +121,5 @@ begin
 end;
 
 var
-(*
-## HouseOptions variable
-Global {ref}`THouseOptions` variable.
-*)
+
   HouseOptions: THouseOptions;

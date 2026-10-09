@@ -1,38 +1,14 @@
-(*
-# House Viewer
-Methods to interact with the house viewer interface:
 
-```{figure} ../../images/houseviewer_interface.png
-```
-
-The house viewer allows your to see your house layout at a glance and
-move/rotate rooms.
-
-The functionality provided by the following functions was done from scratch but
-heavily inspired in Skunkworks original "layout_finder.simba".
-In other words, it provides you the ability to load the house layout from the
-viewer into {ref}`House` and it's {ref}`HouseLoader`.
-*)
 {$DEFINE WL_HOUSE_VIEWER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## THouseViewer
-Main record used to interact with the {ref}`House Viewer`.
-*)
+
   THouseViewer = record
     Bounds, LayoutPanel: TBox;
   end;
 
-(*
-## HouseViewer.SetupInterface
-```pascal
-procedure THouseViewer.SetupInterface();
-```
-Internal method used to setup the {ref}`THouseViewer` coordinates.
-This is automatically called for you on the {ref}`HouseViewer variable`.
-*)
+
 procedure THouseViewer.SetupInterface();
 begin
   case Client.Mode of
@@ -46,14 +22,7 @@ begin
     Self.LayoutPanel := [X1+35, Y1+35, X1+269, Y2-35];
 end;
 
-(*
-## HouseViewer.LayoutBounds
-```pascal
-property THouseViewer.LayoutBounds: TBox;
-```
-Internal property used to get the house layout bounds from the
-{ref}`THouseViewer`.
-*)
+
 property THouseViewer.LayoutBounds: TBox;
 begin
   Result := Target.FindColor(
@@ -68,17 +37,7 @@ begin
 end;
 
 
-(*
-## HouseViewer.LoadHouse
-```pascal
-procedure THouseViewer.LoadHouse();
-```
-Loads the current layout visible in the {ref}`HouseViewer` into
-{ref}`THouse` {ref}`HouseLoader` (`THouse.Loader`).
 
-For a easy usage of this and instant visualization of the results, check out:
-{ref}`ScriptForm CreateHouseTab`.
-*)
 procedure THouseViewer.LoadHouse();
 var
   boxes: TBoxArray;
@@ -103,8 +62,5 @@ begin
 end;
 
 var
-(*
-## HouseViewer variable
-Global {ref}`THouseViewer` variable.
-*)
+
   HouseViewer: THouseViewer;
