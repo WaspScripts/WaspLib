@@ -1,60 +1,22 @@
-(*
-# Options
-Methods to interact with the options gametab.
-```{figure} ../../images/options.png
-```
-*)
+
 
 {$DEFINE WL_OPTIONS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(EOptionsTab)=
-## EOptionsTab enum
-```pascal
-EOptionsTab = enum(CONTROLS, AUDIO, DISPLAY);
-```
-Enum representing each of the options tabs.
-*)
+
   EOptionsTab = enum(CONTROLS, AUDIO, DISPLAY);
 
-(*
-(EOptionsSlider)=
-## EOptionsSlider enum
-```pascal
-EOptionsSlider = enum(BRIGHTNESS, ZOOM);
-```
-Enum representing the 2 important sliders the options gametab has available.
-Could be expanded in the future to include the sound sliders but for now only has this 2.
-*)
+
   EOptionsSlider = enum(BRIGHTNESS, ZOOM);
 
-(*
-(EOptionsDropDown)=
-## EOptionsDropDown enum
-```pascal
-EOptionsDropDown = enum(PLAYER_ATTACK, NPC_ATTACK, CLIENT_MODE);
-```
-Enum representing each of the options gametab dropdowns.
-*)
+
   EOptionsDropDown = enum(PLAYER_ATTACK, NPC_ATTACK, CLIENT_MODE);
 
-(*
-(EOptionsButton)=
-## EOptionsButton enum
-```pascal
-EOptionsButton = enum(AID, RUN, HOUSE, BOND, ALL_SETTINGS);
-```
-Enum representing each of the options gametab buttons.
-*)
+
   EOptionsButton = enum(AID, RUN, HOUSE, BOND, ALL_SETTINGS);
 
-(*
-(TOptions)=
-## TOptions type
-Main record responsible with interacting with the {ref}`Options` gametab.
-*)
+
   TOptions = record
     Tabs: TBoxArray;
     Sliders: array [EOptionsSlider] of TSlider;
@@ -77,15 +39,7 @@ begin
   Self.ZoomLevel := -1;
 end;
 
-(*
-## Options.SetupGameTab
-```pascal
-procedure TOptions.SetupGameTab();
-```
-Internal method used to setup the {ref}`TOptions` coordinates.
 
-This is automatically called for you on the {ref}`Options variable`.
-*)
 procedure TOptions.SetupGameTab();
 var
   boxes: TBoxArray;
@@ -146,78 +100,22 @@ begin
   end;
 end;
 
-(*
-## TOptions.Buttons
-```pascal
-Buttons: array [EOptionsButton] of TButton;
-```
-`TButton` for each of the {ref}`Options` buttons.
 
-Example:
-```pascal
-ShowOnTarget(Options.Buttons);
-```
-```{figure} ../../images/options_buttons.png
-```
 
-You can also access each button with an index or, more conveniently, with a
-{ref}`EHouseOptionsButton`.
 
-Example:
-```pascal
-ShowOnTarget(Options.Buttons[EOptionsButton.HOUSE]);
-```
-```{figure} ../../images/options_button.png
-```
-*)
-
-(*
-## Options.IsOpen
-```pascal
-function TOptions.IsOpen(): Boolean;
-```
-Returns true/false if the options gametab is open or not.
-
-Example:
-```pascal
-WriteLn Options.IsOpen();
-```
-*)
 function TOptions.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.OPTIONS);
 end;
 
-(*
-## Options.Open
-```pascal
-function TOptions.Open(): Boolean;
-```
-Attempts to open the options gametab.
 
-Example:
-```pascal
-WriteLn Options.Open();
-```
-*)
 function TOptions.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.OPTIONS);
 end;
 
 
-(*
-## Options.GetTab
-```pascal
-function TOptions.GetTab(): EOptionsTab;
-```
-Returns the currently active {ref}`EOptionsTab`.
 
-Example:
-```pascal
-WriteLn Options.GetTab();
-```
-*)
 function TOptions.GetTab(): EOptionsTab;
 var
   tab: EOptionsTab;
@@ -228,18 +126,7 @@ begin
       Exit(tab);
 end;
 
-(*
-## Options.OpenTab
-```pascal
-function TOptions.OpenTab(tab: EOptionsTab): Boolean;
-```
-Attempts to open the specified `tab` {ref}`EOptionsTab`.
 
-Example:
-```pascal
-WriteLn Options.OpenTab(EOptionsTab.DISPLAY);
-```
-*)
 function TOptions.OpenTab(tab: EOptionsTab): Boolean;
 begin
   if not Self.Open() then Exit;
@@ -251,18 +138,7 @@ begin
 end;
 
 
-(*
-## Options._GetZoomLevel
-```pascal
-function TOptions._GetZoomLevel(): Integer;
-```
-Retrieves the current zoom level assuming the display tab is currently open.
 
-Example:
-```pascal
-WriteLn Options._GetZoomLevel();
-```
-*)
 function TOptions._GetZoomLevel(): Integer;
 begin
   Result := Self.Sliders[EOptionsSlider.ZOOM].GetLevel();
@@ -279,21 +155,7 @@ begin
   end;
 end;
 
-(*
-## Options.GetZoomLevel
-```pascal
-function TOptions.GetZoomLevel(useCache: Boolean = True): Integer;
-```
-Retrieves the current zoom level.
-By default it uses the value cached in `TOptions.ZoomLevel` if it is already set.
-If it's not set or if you decide to use this with `useCache` set to `False`,
-`TOptions.ZoomLevel` will be updated with the value this returns.
 
-Example:
-```pascal
-WriteLn Options.GetZoomLevel();
-```
-*)
 function TOptions.GetZoomLevel(useCache: Boolean = True): Integer;
 begin
   if useCache and (Self.ZoomLevel > -1) then
@@ -305,20 +167,7 @@ begin
   Self.OpenTab(EOptionsTab.DISPLAY);
 end;
 
-(*
-## Options.SetZoomLevel
-```pascal
-function TOptions.SetZoomLevel(level: Integer): Boolean;
-```
-Sets a new zoom level through the options gametab.
-If we successfully update the zoom level we update the cached
-`TOptions.ZoomLevel`, if we don't, we reset it to `-1`.
 
-Example:
-```pascal
-Options.SetZoomLevel(30);
-```
-*)
 function TOptions.SetZoomLevel(level: Integer): Boolean;
 begin
   if not Self.OpenTab(EOptionsTab.DISPLAY) then Exit;
@@ -337,20 +186,7 @@ begin
 end;
 
 
-(*
-## Options.SetPlayerAttack
-```pascal
-function TOptions.SetPlayerAttack(index: Integer): Boolean;
-function TOptions.SetPlayerAttack(option: String): Boolean; overload;
-```
-Attempts to set the specified attack option for players.
 
-Example:
-```pascal
-WriteLn Options.SetPlayerAttack('Depends on combat levels');
-WriteLn Options.SetPlayerAttack(2);
-```
-*)
 function TOptions.SetPlayerAttack(index: Integer): Boolean;
 begin
   if not Self.OpenTab(EOptionsTab.CONTROLS) then Exit;
@@ -364,20 +200,7 @@ begin
 end;
 
 
-(*
-## Options.SetNPCAttack
-```pascal
-function TOptions.SetNPCAttack(index: Integer): Boolean;
-function TOptions.SetNPCAttack(option: String): Boolean; overload;
-```
-Attempts to set the specified attack option for NPCs.
 
-Example:
-```pascal
-WriteLn Options.SetNPCAttack('Depends on combat levels');
-WriteLn Options.SetNPCAttack(2);
-```
-*)
 function TOptions.SetNPCAttack(index: Integer): Boolean;
 begin
   if not Self.OpenTab(EOptionsTab.CONTROLS) then Exit;
@@ -391,18 +214,7 @@ begin
 end;
 
 
-(*
-## Options.SetClientMode
-```pascal
-function TOptions.SetClientMode(mode: EMode): Boolean;
-```
-Attempts to set the specified `mode` client mode.
 
-Example:
-```pascal
-WriteLn Options.SetClientMode('Fixed');
-```
-*)
 function TOptions.SetClientMode(mode: EMode): Boolean;
 begin
   if not Self.OpenTab(EOptionsTab.DISPLAY) then Exit;
@@ -413,20 +225,7 @@ begin
 end;
 
 
-(*
-## Options.RenderSelf
-```pascal
-TOptions.RenderSelf();
-```
-Writes "::renderself" on the chat and presses enter.
 
-This toggles your character being rendered.
-
-Example:
-```pascal
-Options.RenderSelf();
-```
-*)
 procedure TOptions.RenderSelf();
 begin
   if Chat.InputHasText() then Keyboard.KeyPress(EKeyCode.RETURN);
@@ -434,35 +233,13 @@ begin
 end;
 
 
-(*
-## Options.GetRoofsState
-```pascal
-function TOptions.GetRoofsState(): Boolean;
-```
-Returns the roofs state.
 
-Example:
-```pascal
-Options.GetRoofsState();
-```
-*)
 function TOptions.GetRoofsState(): Boolean;
 begin
   Result := CacheParser.RoofsHidden();
 end;
 
-(*
-## Options.HideRoofs
-```pascal
-function TOptions.HideRoofs(): Boolean;
-```
-Attempts to hide roofs.
 
-Example:
-```pascal
-Options.HideRoofs();
-```
-*)
 function TOptions.HideRoofs(): Boolean;
 begin
   if CacheParser.Disabled then Exit(True);
@@ -477,18 +254,7 @@ begin
   else CacheParser.Disabled := True;
 end;
 
-(*
-## Options.ShowRoofs
-```pascal
-function TOptions.ShowRoofs(): Boolean;
-```
-Attempts to show roofs.
 
-Example:
-```pascal
-Options.ShowRoofs();
-```
-*)
 function TOptions.ShowRoofs(): Boolean;
 begin
   if CacheParser.Disabled then Exit(True);
@@ -504,19 +270,7 @@ begin
 end;
 
 
-(*
-## Options.GetBrightness
-```pascal
-function TOptions.GetBrightness(): Integer;
-```
-Returns the current brightness level. By default it uses {ref}`CacheParser` for
-this so it doesn't need to open the options tab.
 
-Example:
-```pascal
-WriteLn Options.GetBrightness();
-```
-*)
 function TOptions.GetBrightness(): Integer;
 var
   tmp: Integer;
@@ -543,18 +297,7 @@ begin
   Self.MaxBrightness := Result = 100;
 end;
 
-(*
-## Options.SetMaxBrightness
-```pascal
-function TOptions.SetMaxBrightness(): Boolean;
-```
-Attempts to set your brightness to 100, which is the only value supported by WaspLib.
 
-Example:
-```pascal
-WriteLn Options.SetMaxBrightness();
-```
-*)
 function TOptions.SetMaxBrightness(): Boolean;
 begin
   if Self.GetBrightness() = 100 then Exit(True);
@@ -567,8 +310,5 @@ begin
 end;
 
 var
-(*
-## Options variable
-Global {ref}`TOptions` variable.
-*)
+
   Options: TOptions;

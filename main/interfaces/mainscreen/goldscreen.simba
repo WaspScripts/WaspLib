@@ -1,27 +1,10 @@
-(*
-# GoldScreen
-Methods to interact with the gold‑crafting **Gold Screen** interface.
 
-```{figure} ../../images/goldscreen_interface.png
-```
-
-```{note}
-Credits to Flight and Skunkworks
-```
-*)
 
 {$DEFINE WL_GOLDSCREEN_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(EGoldItem)=
-## EGoldItem enum
-```pascal
-EGoldItem = enum(GOLD_RING..ZENYTE_BRACELET);
-```
-Enum of all jewellery items that can be crafted on the {ref}`GoldScreen`.
-*)
+
   EGoldItem = enum(
     { Rings }
       GOLD_RING, SAPPHIRE_RING, EMERALD_RING, RUBY_RING, DIAMOND_RING,
@@ -37,11 +20,7 @@ Enum of all jewellery items that can be crafted on the {ref}`GoldScreen`.
       DIAMOND_BRACELET, DRAGONSTONE_BRACELET, ONYX_BRACELET, ZENYTE_BRACELET
   );
 
-(*
-(TGoldScreen)=
-## TGoldScreen type
-Main record to interact with the {ref}`GoldScreen` interface.
-*)
+
   TGoldScreen = record
     Title: TInterfaceTitle;
     Bounds: TBox;
@@ -52,14 +31,7 @@ Main record to interact with the {ref}`GoldScreen` interface.
     ];
   end;
 
-(*
-## GoldScreen.SetupInterface
-```pascal
-procedure TGoldScreen.SetupInterface();
-```
-Internal method used to setup the {ref}`TGoldScreen` coordinates.
-Automatically called for you on the `GoldScreen` variable.
-*)
+
 procedure TGoldScreen.SetupInterface();
 var
   btnGrid, topRow, gridBelow: TBoxArray;
@@ -99,27 +71,13 @@ begin
       new TButton(btnGrid[i], [[$25323B, 1.294, EColorSpace.RGB, [1,1,1]]]);
 end;
 
-(*
-## GoldScreen.IsOpen
-```pascal
-function TGoldScreen.IsOpen(): Boolean;
-```
-Returns `True` if the gold‑crafting interface is visible.
-*)
+
 function TGoldScreen.IsOpen(): Boolean;
 begin
   Result := Self.Title.IsOpen();
 end;
 
-(*
-## GoldScreen.WaitOpen
-```pascal
-function TGoldScreen.WaitOpen(
-  time: Integer = TICK; interval: Integer = -1
-): Boolean;
-```
-Waits up to `time` ms for the interface to appear.
-*)
+
 function TGoldScreen.WaitOpen(
   time: Integer = TICK; interval: Integer = -1
 ): Boolean;
@@ -129,14 +87,7 @@ begin
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## GoldScreen.Close
-```pascal
-function TGoldScreen.Close(PressEscape: Boolean = False): Boolean;
-function TGoldScreen.Close(escapeProbability: Single = -1): Boolean; overload;
-```
-Closes the interface via its close button or by pressing **Escape**.
-*)
+
 function TGoldScreen.Close(pressEscape: Boolean): Boolean;
 begin
   if not Self.IsOpen() then
@@ -159,14 +110,7 @@ begin
   Result := Self.Close(RandomBoolean(escapeProbability));
 end;
 
-(*
-## GoldScreen.SetQuantity
-```pascal
-function TGoldScreen.SetQuantity(amount: Integer): Boolean;
-```
-Selects the desired quantity button (1/5/10/X/All).
-Pass `0` or any negative value for "All".
-*)
+
 function TGoldScreen.SetQuantity(amount: Integer): Boolean;
 var
   txt: String;
@@ -199,13 +143,7 @@ begin
     end;
 end;
 
-(*
-## GoldScreen.CanCraft
-```pascal
-function TGoldScreen.CanCraft(Item: EGoldItem): Boolean;
-```
-Returns `True` if the given item icon is available for crafting.
-*)
+
 function TGoldScreen.CanCraft(gold: EGoldItem): Boolean;
 begin
   if not Self.IsOpen() then
@@ -213,13 +151,7 @@ begin
   Result := Target.HasColor($2AD3EB, 20, 1, Self.SlotBoxes[gold]);
 end;
 
-(*
-## GoldScreen.IsHighlighted
-```pascal
-function TGoldScreen.IsHighlighted(Item: EGoldItem): Boolean;
-```
-Returns `True` if the given item is currently highlighted.
-*)
+
 function TGoldScreen.IsHighlighted(i: EGoldItem): Boolean;
 var
   highlight: TColorTolerance := [4807018,2];
@@ -233,23 +165,7 @@ begin
   Result := Target.FindColor(highlight, Self.SlotBoxes[i]).Length > 0;
 end;
 
-(*
-## GoldScreen.CraftItem
-```pascal
-function TGoldScreen.CraftItem(
-  gold: EGoldItem; amount: Integer; useSpace: Boolean
-): Boolean;
 
-function TGoldScreen.CraftItem(
-  gold: EGoldItem;
-  amount: Integer = QUANTITY_ALL;
-  spaceProbability: Single = -1
-): Boolean; overload;
-```
-Sets the `amount` then crafts the requested item.
-If `useSpace = True` and the item is highlighted it presses **Space**,
-otherwise it clicks the item icon.
-*)
 function TGoldScreen.CraftItem(
   gold: EGoldItem; amount: Integer; useSpace: Boolean
 ): Boolean;
@@ -277,8 +193,5 @@ begin
 end;
 
 var
-(*
-## GoldScreen variable
-Global {ref}`TGoldScreen` variable.
-*)
+
   GoldScreen: TGoldScreen;
