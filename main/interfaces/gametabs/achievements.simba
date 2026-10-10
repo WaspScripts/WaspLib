@@ -251,12 +251,18 @@ img.Free();
 ```
 *)
 function TDiaryList.GetSlot(diary: EAchievementDiary): TDiarySlot;
+const
+  FONT_COLORS = [TFonts.RED, TFonts.YELLOW, TFonts.LIGHT_GREEN, TFonts.WHITE];
 var
   slot: TDiarySlot;
+  txt: String;
 begin
   for slot in Self.GetSlots() do
-    if OCR.Locate(slot.Name, Self.Names[diary], [TFonts.RED, TFonts.YELLOW, TFonts.LIGHT_GREEN, TFonts.WHITE], 0, Fonts.PLAIN_11) > 0.9 then
+  begin
+    txt := OCR.Recognize(slot.Name, Fonts.PLAIN_11, FONT_COLORS, 0);
+    if txt.Similarity(Self.Names[diary]) > 0.9 then
       Exit(slot);
+  end;
 end;
 
 
@@ -495,12 +501,13 @@ begin
   if Self.Cache[diary] > 0 then
     Exit(Self.Cache[diary]-1);
 
-  if not Achievements.OpenTab(EAchievementTab.DIARIES) then Exit(-1);
+  if not Achievements.OpenTab(EAchievementTab.DIARIES) then
+    Exit(-1);
   Self.ScrollTo(diary);
   slot := Self.GetSlot(diary);
 
   if slot = Default(TDiarySlot) then
-    Exit;
+    Exit(-1);
 
   for i := 0 to 3 do
   begin

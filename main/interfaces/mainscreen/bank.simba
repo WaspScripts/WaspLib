@@ -1152,20 +1152,17 @@ WriteLn Bank.Withdraw(item);
 function TBank.Withdraw(item: TBankItem; useQuantityButton, useCache: Boolean = True; waitConfirmation: Boolean = False): Boolean;
 var
   data: TBankPosition;
-  tmp: TItem;
-  count: Integer;
-  attempt: Integer;
+  count, attempt: Integer;
 begin
   if useCache and Self._Cache.Items.Exists(item.Item) then
-    data := Self._Cache.Items.Value[item.Item]
-  else if not Self.Find(item.Item, data) then
+  begin
+    data := Self._Cache.Items.Value[item.Item];
+    if Self.OpenTab(data.Tab) and (data.Scroll > -1) then
+      Self.Scroll.SetLevel(data.Scroll);
+  end;
+
+  if not Self.Find(item.Item, data) then
     Exit;
-
-  if not Self.OpenTab(data.Tab) then Exit;
-  if not InRange(Self.Scroll.GetLevel() - data.Scroll, -5, 5) then
-    Self.Scroll.SetLevel(data.Scroll);
-
-  tmp := item.ToItem();
 
   for attempt := 0 to 2 do
   begin
