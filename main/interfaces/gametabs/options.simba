@@ -386,8 +386,8 @@ end;
 
 function TOptions.SetNPCAttack(option: String): Boolean; overload;
 begin
-  if not Self.OpenTab(EOptionsTab.CONTROLS) then Exit;
-  Result := Self.DropDowns[EOptionsDropDown.NPC_ATTACK].Select(option);
+  if Self.OpenTab(EOptionsTab.CONTROLS) then
+    Result := Self.DropDowns[EOptionsDropDown.NPC_ATTACK].Select(option);
 end;
 
 

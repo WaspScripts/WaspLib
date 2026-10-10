@@ -682,6 +682,26 @@ begin
 end;
 
 
+function TDropDown._GetSelected(): Integer;
+var
+  txt: String;
+  match: Single;
+begin
+  for Result := 0 to High(Self.Options) do
+  begin
+    txt := OCR.Recognize(Self.Bounds, Self.Font, Self.Colors, 0);
+    match := txt.Similarity(Self.Options[Result].Text);
+    if match >= 0.85 then
+    begin
+      Self.Index := Result;
+      Exit;
+    end;
+  end;
+
+  Result := -1;
+  Self.Index := -1;
+end;
+
 (*
 ### TDropDown.GetSelected
 ```pascal
@@ -695,24 +715,10 @@ WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].GetSelected();
 ```
 *)
 function TDropDown.GetSelected(): Integer;
-var
-  match: Single;
 begin
   if Self.Index > -1 then
     Exit(Self.Index);
-
-  for Result := 0 to High(Self.Options) do
-  begin
-    match := OCR.Locate(Self.Bounds, Self.Options[Result].Text, Self.Colors, 0, Self.Font);
-    if match >= 0.85 then
-    begin
-      Self.Index := Result;
-      Exit;
-    end;
-  end;
-
-  Result := -1;
-  Self.Index := -1;
+  Result := Self._GetSelected();
 end;
 
 
@@ -734,7 +740,7 @@ WriteLn Options.DropDowns[EOptionsDropDown.CLIENT_MODE].Select('Fixed');
 *)
 function TDropDown.Select(index: Integer): Boolean;
 begin
-  if (Self.Index < 0) and (Self.GetSelected() < 0) then
+  if (Self.Index < 0) and (Self._GetSelected() < 0) then
     Exit;
   if Self.Index = index then
     Exit(True);
