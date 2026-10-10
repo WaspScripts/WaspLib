@@ -4,7 +4,7 @@ The NPCs of the loaded map: where each one spawns, what it's called, what it can
 and what it looks like.
 
 The game cache doesn't say where NPCs spawn, the server places them, so the spawns come from the
-`map/npcspawns.txt` asset. Everything else is read out of the game cache, so it's always in step
+`files/npcspawns.txt` asset. Everything else is read out of the game cache, so it's always in step
 with the game, and the NPCs of a region are only read once that region is part of the map.
 
 Example:
@@ -87,7 +87,7 @@ begin
   if Self.SpawnStarts <> [] then
     Exit;
 
-  lines := FileReadLines(WLEnv.AssetsDir + 'map' + PATH_SEP + 'npcspawns.txt');
+  lines := FileReadLines(WLEnv.AssetsDir + 'files' + PATH_SEP + 'npcspawns.txt');
   SetLength(Self.SpawnIDs,    Length(lines));
   SetLength(Self.SpawnPlanes, Length(lines));
   SetLength(Self.SpawnTiles,  Length(lines));
