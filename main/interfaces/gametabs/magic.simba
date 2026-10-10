@@ -1,7 +1,4 @@
-(*
-# Magic
-Methods to interact with the magic gametab.
-*)
+
 
 {$DEFINE WL_MAGIC_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -76,10 +73,7 @@ const
   ]);
 
 type
-(*
-## TMagic
-Main record reponsible for handling the magic gametab.
-*)
+
   TMagic = record
     SpellCache: array [ESpell] of record
       Box: TBox;
@@ -87,35 +81,13 @@ Main record reponsible for handling the magic gametab.
     end;
   end;
 
-(*
-## Magic.IsOpen
-```pascal
-function TMagic.IsOpen(): Boolean;
-```
-Returns true if the Magic tab is open.
 
-Example:
-```pascal
-WriteLn Magic.IsOpen();
-```
-*)
 function TMagic.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.MAGIC);
 end;
 
-(*
-## Magic.Open
-```pascal
-function TMagic.Open(): Boolean;
-```
-Attempts to open the magic tab.
 
-Example:
-```pascal
-Magic.Open();
-```
-*)
 function TMagic.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.MAGIC);
@@ -133,35 +105,13 @@ begin
 end;
 {%codetools on}
 
-(*
-## Magic.IsSpellBook
-```pascal
-function TMagic.IsSpellBook(book: ESpellBook): Boolean;
-```
-Returns true if we are using the specified spell book.
 
-Example:
-```pascal
-WriteLn Magic.IsSpellBook(ESpellBook.LUNAR);
-```
-*)
 function TMagic.IsSpellBook(book: ESpellBook): Boolean;
 begin
   Result := Self._IsSpellBook(book, GameTabs.Tabs[EGameTab.MAGIC].Expand(-5));
 end;
 
-(*
-## Magic.GetSpellBook
-```pascal
-function TMagic.GetSpellBook(): ESpellBook;
-```
-Returns the current spell book.
 
-Example:
-```pascal
-WriteLn Magic.GetSpellBook();
-```
-*)
 function TMagic.GetSpellBook(): ESpellBook;
 var
   bounds: TBox;
@@ -174,37 +124,14 @@ begin
 end;
 
 
-(*
-## Magic.InfoIsOpen
-```pascal
-function TMagic.InfoIsOpen(): Boolean;
-```
-Returns true if the info black box about a spell is open.
 
-Example:
-```pascal
-WriteLn Magic.IsSpellBook(ESpellBook.LUNAR);
-```
-*)
 function TMagic.InfoIsOpen(): Boolean;
 begin
   Result := Target.HasColor(1731247, 0, 1, GameTab.Bounds);
 end;
 
 
-(*
-## Magic.CloseInfo
-```pascal
-function TMagic.CloseInfo(): Boolean;
-function TMagic.CloseInfo(spell: ESpell): Boolean; overload;
-```
-Returns true if the info black box about a spell is open.
 
-Example:
-```pascal
-WriteLn Magic.CloseInfo();
-```
-*)
 function TMagic.CloseInfo(): Boolean;
 var
   destination: TPoint;
@@ -228,13 +155,7 @@ begin
 end;
 
 
-(*
-## Magic.FindSpell
-```pascal
-function TMagic.FindSpell(spell: ESpell; out box: TBox): Boolean;
-```
-Return true or false wether we found a spell or not and return it's bounds if found.
-*)
+
 function TMagic.FindSpell(spell: ESpell; out b: TBox; attempts: Int32 = 2): Boolean;
 var
   match: TImageMatch;
@@ -285,13 +206,7 @@ begin
   end;
 end;
 
-(*
-## Magic.ContainsSpell
-```pascal
-function TMagic.ContainsSpell(spell: ESpell): Boolean;
-```
-Return true or false wether we found a spell or not.
-*)
+
 function TMagic.ContainsSpell(spell: ESpell): Boolean;
 var
   b: TBox;
@@ -300,18 +215,7 @@ begin
 end;
 
 
-(*
-## Magic.Hover
-```pascal
-function TMagic.Hover(spell: ESpell): Boolean;
-```
-Used to move the mouse to the specified spell.
 
-Example:
-```pascal
-Magic.Hover(ESpell.HIGH_LEVEL_ALCHEMY);
-```
-*)
 function TMagic.Hover(spell: ESpell): Boolean;
 var
   b: TBox;
@@ -339,36 +243,14 @@ begin
   end;
 end;
 
-(*
-## Magic.Click
-```pascal
-function TMagic.Click(spell: ESpell; button: EMouseButton = EMouseButton.LEFT): Boolean;
-```
-Used to Click on a specified spell.
 
-Example:
-```pascal
-Magic.Click(ESpell.HIGH_LEVEL_ALCHEMY);
-```
-*)
 function TMagic.Click(spell: ESpell; button: EMouseButton = EMouseButton.LEFT): Boolean;
 begin
   Result := Self.Hover(spell);
   if Result then Target.MouseClick(button);
 end;
 
-(*
-## Magic.Interact
-```pascal
-function TMagic.Interact(spell: ESpell; option: String = ''): Boolean;
-```
-Used to interact with the specified spell. You can just click it or choose an option on it.
 
-Example:
-```pascal
-Magic.Interact(ESpell.HIGH_LEVEL_ALCHEMY);
-```
-*)
 function TMagic.Interact(spell: ESpell; option: String = ''): Boolean;
 begin
   if not Self.Hover(spell) then
@@ -382,19 +264,7 @@ begin
 end;
 
 
-(*
-## Magic.FindSelected
-```pascal
-function TMagic.FindSelected(out tpa: TPointArray): Boolean;
-```
-Returns the true if we have a selected spell and returns it's tpa.
 
-Example:
-```pascal
-if Magic.FindSelected(tpa) then
-  Debug(tpa);
-```
-*)
 function TMagic.FindSelected(out tpa: TPointArray): Boolean;
 var
   searchBox: TBox;
@@ -413,18 +283,7 @@ begin
   tpa := [];
 end;
 
-(*
-## Magic.ContainsSelected
-```pascal
-function TMagic.ContainsSelected(): Boolean;
-```
-Returns the true if we have a selected spell.
 
-Example:
-```pascal
-WriteLn Magic.ContainsSelected();
-```
-*)
 function TMagic.ContainsSelected(openTab: Boolean = False): Boolean;
 var
   tpa: TPointArray;
@@ -435,19 +294,7 @@ begin
 end;
 
 
-(*
-## Magic.IsSelected
-```pascal
-function TMagic.IsSelected(spell: ESpell): Boolean;
-function TMagic.IsSelected(spell: ESpell; selected: TPointArray): Boolean; overload;
-```
-Returns true if the specified spell is currently active (with white outline).
 
-Example:
-```pascal
-WriteLn Magic.IsSpellSelected(ESpell.ICE_BARRAGE);
-```
-*)
 function TMagic.IsSelected(spell: ESpell): Boolean;
 var
   bounds: TBox;
@@ -486,36 +333,13 @@ begin
   end;
 end;
 
-(*
-## Magic.CanActivate
-```pascal
-function TMagic.CanActivate(spell: ESpell): Boolean;
-```
 
-Returns true if we can activate the spell (we have runes, level and the spell unlocked).
-
-Example:
-```pascal
-Magic.CanActivate(ESpell.HIGH_LEVEL_ALCHEMY);
-```
-*)
 function TMagic.CanActivate(spell: ESpell): Boolean;
 begin
   Result := Self.ContainsSpell(spell);
 end;
 
-(*
-## Magic.SpellWasCast
-```pascal
-function TMagic.SpellWasCast(spell: ESpell): Boolean;
-```
-Returns true if we are in a state that casting a spell would leave you.
 
-Example:
-```pascal
-Magic.SpellWasCast(ESpell.ICE_BARRAGE);
-```
-*)
 function TMagic.SpellWasCast(spell: ESpell): Boolean;
 begin
   if spell in INSTANT_THROW_SPELLS then
@@ -525,18 +349,7 @@ begin
   Result := Self.IsSelected(spell) or Inventory.IsOpen();
 end;
 
-(*
-## Magic.Cast
-```pascal
-function TMagic.Cast(spell: ESpell): Boolean;
-```
-Attempts to cast the specified spell.
 
-Example:
-```pascal
-Magic.Cast(ESpell.LOW_LEVEL_ALCHEMY);
-```
-*)
 function TMagic.Cast(spell: ESpell; option: String = ''): Boolean;
 var
   selected: TPointArray;
@@ -561,18 +374,7 @@ begin
 end;
 
 
-(*
-## Magic.GetBookSpellCount
-```pascal
-function TMagic.GetBookSpellCount(): Int32;
-```
-Returns the number of spells declared in SRL for the current spellbook.
 
-Example:
-```pascal
-WriteLn Magic.GetBookSpellCount();
-```
-*)
 function TMagic.GetBookSpellCount(): Int32;
 begin
   case Self.GetSpellBook() of
@@ -586,8 +388,5 @@ begin
 end;
 
 var
-(*
-## Magic variable
-Global {ref}`TMagic` variable.
-*)
+
   Magic: TMagic;

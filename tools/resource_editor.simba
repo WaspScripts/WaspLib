@@ -1,19 +1,5 @@
 //!PACKAGE SCRIPT
-(*
-(Resource Editor)=
-# Tool: Resource Editor
-Tool to inspect and edit resource files created by Simba's `TResourceWriter`:
 
-```{figure} ../../images/resource_editor.png
-```
-
-These files usually end in a `.bin` extension and are an optimized way to store
-multiple compressed files for Simba to read from.
-
-This tool is also a little bit slow at doing certain things like loading the
-files bytes, adding and removing files/images because Simba is not optimized for
-what this tool does.
-*)
 {$I WaspLib/main.simba}
 
 var

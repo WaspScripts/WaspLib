@@ -1,20 +1,4 @@
-(*
-# Recorder
-Records video in separate thread for debugging script crashes and issues.
 
-Basic usage:
-```pascal
-SimbaRecorder.Start(30); // Start recording with 30 second buffer
-SimbaRecorder.Start(30, 'MyVideos'); // Custom save directory
-// Videos are automatically saved on script end
-```
-
-You may debug the recorder with the compiler directive:
-```pascal
-{$DEFINE WL_DEBUG_RECORDER}
-```
-Which should be added to your script before {ref}`WaspLib`.
-*)
 
 {$DEFINE WL_RECORDER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -23,30 +7,12 @@ Which should be added to your script before {ref}`WaspLib`.
 {.$DEFINE WL_DEBUG_RECORDER}
 
 type
-(*
-## type TSimbaRecorder
-```pascal
-TSimbaRecorder = record
-  Thread: TThread;
-  IsRecording: Boolean;
-  BufferSeconds: Integer;
-  VideoPath: String;
-  RecorderTarget: TTarget;
-end;
-```
-Manages video recording with buffered capture.
-*)
+
   TSimbaRecorder = record
     Enabled, IsRecording: Boolean;
     BufferSeconds: UInt64;
   end;
-(*
-## TSimbaRecorder.Start
-```pascal
-procedure TSimbaRecorder.Start(BufferSeconds: Integer = 30; VideoPath: String = 'Videos');
-```
-Starts recording with specified buffer duration and save path.
-*)
+
 procedure TSimbaRecorder.Start();
 var
   window, plugin: String;

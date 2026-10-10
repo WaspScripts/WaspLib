@@ -1,53 +1,9 @@
-(*
-# WaspClient
-Client to interact with the WaspScripts API and database.
 
-The following compiler directives are available and are useful for local
-development:
-```pascal
-{$DEFINE WASP_LOCAL_DEVELOPMENT}
-{$DEFINE WASP_REFRESH_TOKEN := 'refresh_token'}
-{$DEFINE SCRIPT_ID := 'script_uuid'}
-{$DEFINE SCRIPT_REVISION := 'script_revision'}
-```
-`WASP_LOCAL_DEVELOPMENT` is meant to be used with local server running the
-(wasp-api)[https://github.com/WaspScripts/wasp-api], by default this server
-runs on [http://localhost:3000/]
-
-As for the others, you can get values for them by running Simba through
-(wasp-launcher)[https://github.com/WaspScripts/wasp-launcher] and running
-something like this:
-```pascal
-begin
-  WriteLn GetEnvVar('WASP_REFRESH_TOKEN');
-  WriteLn GetEnvVar('SCRIPT_ID');
-  WriteLn GetEnvVar('SCRIPT_REVISION');
-end.
-```
-Simply open a new tab and run that.
-
-Things to keep in mind:
-- The `WASP_REFRESH_TOKEN` you get may expire from time to time.
-WaspLib automatically renews it every 5 mins and if you are using
-`{$DEFINE WASP_REFRESH_TOKEN := 'refresh_token'}` you will get the new one
-printed.
-- Once you've done this once, your last refreshed token gets saved in a config
-file, so you don't have keep refreshing tokens manually
-between script runs you can set `{$DEFINE WASP_REFRESH_TOKEN := 'file'}` to load
-the last one saved. Once it expires you will have to go get another one from the
-launcher.
-- You only get a `SCRIPT_ID` and `SCRIPT_REVISION` if you run a script through
-(wasp-launcher)[https://github.com/WaspScripts/wasp-launcher]. Simply using it
-to open a dev environment won't get those.
-*)
 
 {$DEFINE WL_WASPCLIENT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
-(*
-## TWaspClient
-Responsible for connecting to waspscripts.com database.
-*)
+
 type
   TWaspClient = record
     Script: record
