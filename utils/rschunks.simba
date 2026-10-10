@@ -1,28 +1,15 @@
-(*
-# MapChunks
-Helper enum and functions for a more "human" accessible way of using map chunks.
-*)
+
 {$DEFINE WL_CHUNKS_INCLUDED}
 
 type
-(*
-## TMapChunk
-Helper record to store chunk data with a name associated with.
-*)
+
   TMapChunk = record
     Box: TBox;
     Planes: TIntegerArray;
   end;
   TMapChunkArray = array of TMapChunk;
 
-(*
-### Chunk
-```pascal
-function Chunk(b: TBox; planes: TIntegerArray): TMapChunk;
-function Chunk(b: TBox; plane: Integer): TMapChunk; overload;
-```
-Helper functions to create {ref}`TMapChunk`s.
-*)
+
 function Chunk(b: TBox; planes: TIntegerArray): TMapChunk;
 begin
   Result.Box := b;
@@ -44,37 +31,7 @@ begin
   Result := [Max(Self.Box.X1, Self.Box.X2), Min(Self.Box.Y1, Self.Box.Y2)];
 end;
 
-(*
-### TMapChunkArray.CreateFromString
-```pascal
-function TMapChunkArray.CreateFromString(str: String): TMapChunkArray; static;
-```
-Creates a `TMapChunkArray` from a string. This is quite tolerant but extects
-the string to have a certain format.
 
-Some example of valid strings this will be able to handle are:
-```
-Map.Setup([Chunk(Box(45,51,46,50), 0)]);
-Map.Setup([[[45,51,46,50], 0]]);
-Map.Setup([[[45,51,46,50], [0,2]]]);
-Map.Setup([[[45,51,46,50], [0,2]], Chunk([45,51,46,50], [0]);
-Map.SetupChunk(Chunk([45,51,46,50], 0));
-[[[45,51,46,50], [0,2]]
-[[[45,51,46,50], 2]
-45,51,46,50 - 0
-```
-To put it simply, it will try it's best to parse the string and look for the box
-coordinates first and then plane numbers.
-
-It can also handle multiple chunks in a string.
-
-```{note}
-While it's very flexible, it does not validate anything. If what you pass in is
-not a valid chunk your script will probably crash.
-
-E.G. plane 55 which doesn't exist.
-```
-*)
 function TMapChunkArray.CreateFromString(str: String): TMapChunkArray; static;
 var
   i, j: Integer;
@@ -227,10 +184,7 @@ end;
 
 
 type
-(*
-## EBankChunk
-EBankChunk is a enumerator that contains all bank chunks supported by WaspLib.
-*)
+
   EBankChunk = enum(
     AL_KHARID,
     ARDOUGNE,

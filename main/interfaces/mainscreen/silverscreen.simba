@@ -1,26 +1,10 @@
-(*
-# SilverScreen
-Methods to interact with the silver‑smelting **Silver Screen** interface.
 
-```{figure} ../../images/silverscreen_interface.png
-```
-
-```{note}
-Credits to Flight and Skunkworks
-```
-*)
 
 {$DEFINE WL_SILVERSCREEN_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## ESilverItem enum
-```pascal
-ESilverItem = enum(OPAL_RING, OPAL_NECKLACE.., TIARA, DEMONIC_SIGIL);
-```
-Enum representing the silver jewelry that can be crafted.
-*)
+
   ESilverItem = enum(
     OPAL_RING,     OPAL_NECKLACE,  OPAL_AMULET,  OPAL_BRACELET,
     JADE_RING,     JADE_NECKLACE,  JADE_AMULET,  JADE_BRACELET,
@@ -29,10 +13,7 @@ Enum representing the silver jewelry that can be crafted.
     UNHOLY_SYMBOL, LIGHTNING_ROD,  TIARA,        DEMONIC_SIGIL
   );
 
-(*
-## TSilverScreen type
-Main record to interact with the {ref}`SilverScreen` interface.
-*)
+
   TSilverScreen = record
     Title: TInterfaceTitle;
     Bounds: TBox;
@@ -44,14 +25,7 @@ Main record to interact with the {ref}`SilverScreen` interface.
 
 function TSilverScreen.IsOpen(): Boolean; forward;
 
-(*
-## SilverScreen.SetupInterface
-```pascal
-procedure TSilverScreen.SetupInterface();
-```
-Internal method used to setup the {ref}`TSilverScreen` coordinates.
-This is automatically called for you on the {ref}`SilverScreen variable`.
-*)
+
 procedure TSilverScreen.SetupInterface();
 var
   boxes: TBoxArray;
@@ -86,35 +60,13 @@ begin
     );
 end;
 
-(*
-## SilverScreen.IsOpen
-```pascal
-function TSilverScreen.IsOpen(): Boolean;
-```
-Returns true if the SilverScreen interface is open.
 
-Example:
-```pascal
-WriteLn SilverScreen.IsOpen();
-```
-*)
 function TSilverScreen.IsOpen(): Boolean;
 begin
   Result := Self.Title.IsOpen();
 end;
 
-(*
-## SilverScreen.WaitOpen
-```pascal
-function TSilverScreen.WaitOpen(time, interval: Integer): Boolean;
-```
-Returns true if the SilverScreen interface opens within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn SilverScreen.WaitOpen(5000);
-```
-*)
 function TSilverScreen.WaitOpen(time, interval : Integer) : Boolean;
 begin
   if interval < 0 then
@@ -122,23 +74,7 @@ begin
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## SilverScreen.Close
-```pascal
-function TSilverScreen.Close(PressEscape: Boolean): Boolean;
 
-function TSilverScreen.Close(
-  escapeProbability: Single = -1
-): Boolean; overload;
-```
-Attempts to close the {ref}`SilverScreen` interface. If `pressEscape` is true,
-the escape key is pressed to close, otherwise the close button is clicked.
-
-Example:
-```pascal
-WriteLn SilverScreen.Close(True);
-```
-*)
 function TSilverScreen.Close(pressEscape : Boolean) : Boolean;
 begin
   if not Self.IsOpen() then
@@ -163,24 +99,7 @@ begin
   Result := Self.Close(RandomBoolean(escapeProbability));
 end;
 
-(*
-## SilverScreen.SetQuantity
-```pascal
-function TSilverScreen.SetQuantity(amount: Integer): Boolean;
-```
-Sets the quantity to craft. Pass 0 or any negative value for "All".
 
-If a preset button (1, 5, 10, All) matches the amount, it will be clicked.
-Otherwise, the "X" button is used to enter a custom amount.
-
-Example:
-```pascal
-SilverScreen.SetQuantity(10);
-SilverScreen.SetQuantity(0); // All
-SilverScreen.SetQuantity(-1); // All
-SilverScreen.SetQuantity(QUANTITY_ALL); // All
-```
-*)
 function TSilverScreen.SetQuantity(amount: Integer): Boolean;
 var
   txt: String;
@@ -213,18 +132,7 @@ begin
     end;
 end;
 
-(*
-## SilverScreen.CanCraft
-```pascal
-function TSilverScreen.CanCraft(silver: ESilverItem): Boolean;
-```
-Checks if the specified `silver` can be crafted.
 
-Example:
-```pascal
-WriteLn SilverScreen.CanCraft(ESilverItem.OPAL_RING);
-```
-*)
 function TSilverScreen.CanCraft(silver: ESilverItem): Boolean;
 begin
   if not Self.IsOpen() then
@@ -234,21 +142,7 @@ begin
 end;
 
 
-(*
-## SilverScreen.IsHighlighted
-```pascal
-function TSilverScreen.IsHighlighted(silver: ESilverItem): Boolean;
-```
-Returns true if the specified `silver` is currently highlighted/selected in the
-interface.
-You probably won't need to work with this directly.
 
-Example:
-```pascal
-if SilverScreen.IsHighlighted(ESilverItem.OPAL_RING) then
-  Keyboard.KeyPress(EKeyCode.SPACE);
-```
-*)
 function TSilverScreen.IsHighlighted(silver: ESilverItem): Boolean;
 begin
   if not Self.IsOpen() or not Self.CanCraft(silver) then
@@ -256,28 +150,7 @@ begin
   Result := Target.HasColor($49596A, 2, 1, Self.SlotBoxes[silver]);
 end;
 
-(*
-## SilverScreen.CraftItem
-```pascal
-function TSilverScreen.CraftItem(
-  silver: ESilverItem; amount: Integer; useSpace: Boolean
-): Boolean;
 
-function TSilverScreen.CraftItem(
-  item: Tilver;
-  amount: Integer = QUANTITY_ALL;
-  spaceProbability: Single = -1
-): Boolean; overload;
-```
-Crafts the specified item with the given `amount`.
-If `useSpace` is true and the item is already highlighted, spacebar will be
-pressed instead of clicking.
-
-Example:
-```pascal
-SilverScreen.CraftItem('Opal ring', 10, True);
-```
-*)
 function TSilverScreen.CraftItem(
   silver: ESilverItem; amount: Integer; useSpace: Boolean
 ): Boolean;
@@ -305,8 +178,5 @@ begin
 end;
 
 var
-(*
-## SilverScreen variable
-Global {ref}`TSilverScreen` variable.
-*)
+
   SilverScreen: TSilverScreen;

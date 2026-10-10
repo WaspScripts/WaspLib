@@ -1,23 +1,4 @@
-(*
-# GameTabs
-Methods to interact with the gametab buttons.
 
-```{figure} ../../images/gametabs_compact.png
-```
-```{figure} ../../images/gametabs_flat.png
-```
-
-By default it will attempt to use "F-Keys" to open gametabs.
-You can turn this off by setting `TGameTabs.KeybindsEnabled` to `False`.
-
-The way keybindings work in WaspLib is that it will try a random "F-Key" everytime
-you want to open a gametab. Because it uses a random "F-Key", it will probably
-not open the gametab you want but whatever opens, gets cached and mapped to the
-random "F-Key" used.
-
-Next time you want to open a gametab that has already been mapped, it will use
-the correct "F-Key".
-*)
 {$DEFINE WL_GAMETABS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -25,26 +6,13 @@ the correct "F-Key".
 {.$DEFINE WL_DEBUG_KEYBINDS}
 
 type
-(*
-(EGameTab)=
-## EGameTab enum
-```pascal
-EGameTab = enum(
-  COMBAT, STATS, ACHIEVEMENTS, INVENTORY, EQUIPMENT, PRAYER, MAGIC,
-  CLAN, FRIENDS, ACCOUNT, LOGOUT, OPTIONS, EMOTES, MUSIC, NONE
-);
-```
-*)
+
   EGameTab = enum(
     COMBAT, STATS, ACHIEVEMENTS, INVENTORY, EQUIPMENT, PRAYER, MAGIC,
     CLAN, FRIENDS, ACCOUNT, LOGOUT, OPTIONS, EMOTES, MUSIC, NONE
   );
 
-(*
-(TGameTabs)=
-## TGameTabs type
-Main record responsible for handling the gametabs.
-*)
+
   TGameTabs = record
     Bounds: TBox;
     Tabs: TBoxArray;
@@ -57,15 +25,7 @@ Main record responsible for handling the gametabs.
   end;
 
 {$R-}
-(*
-## GameTabs.SetupInterface
-```pascal
-procedure TGameTabs.SetupInterface();
-```
-Internal method responsible for setting up coordinates for the {ref}`TGameTabs`.
 
-This is automatically called for you on the {ref}`GameTabs variable`.
-*)
 procedure TGameTabs.SetupInterface();
 var
   bounds: TBox;
@@ -143,20 +103,7 @@ begin
   end;
 end;
 
-(*
-## GameTabs.GetCurrent
-```pascal
-function TGameTabs.GetCurrent(): EGametab;
-```
-Get the currently active EGameTab.
 
-Example:
-```pascal
-ShowOnTarget(GameTabs.Tabs[GameTabs.GetCurrent()]);
-```
-```{figure} ../../images/gametabs_selected.png
-```
-*)
 function TGameTabs.GetCurrent(): EGametab;
 var
   tab: EGameTab;
@@ -171,38 +118,13 @@ begin
   Result := EGameTab.NONE;
 end;
 
-(*
-## GameTabs.IsOpen
-```pascal
-function TGameTabs.IsOpen(tab: EGameTab): Boolean;
-```
-Returns true/false if the specified `tab` is currently open.
 
-Example:
-```pascal
-WriteLn GameTabs.IsOpen(EGameTab.INVENTORY);
-```
-*)
 function TGameTabs.IsOpen(tab: EGameTab): Boolean;
 begin
   Result := Self.GetCurrent() = tab;
 end;
 
-(*
-## GameTabs.WaitOpen
-```pascal
-function TGameTabs.WaitOpen(
-  tab: EGameTab; time: Integer = TICK; interval: Integer = -1
-): Boolean;
-```
-Returns true/false if the specified `tab` opens within the specified `time`.
 
-Example:
-```pascal
-Mouse.Click(GameTabs.Get(EGameTab.INVENTORY), EMouseButton.LEFT);
-WriteLn GameTabs.WaitOpen(EGameTab.INVENTORY);
-```
-*)
 function TGameTabs.WaitOpen(
   tab: EGameTab; time: Integer = TICK; interval: Integer = -1
 ): Boolean;
@@ -212,22 +134,7 @@ begin
 end;
 
 
-(*
-## GameTabs.FKeyOpen
-```pascal
-function TGameTabs.FKeyOpen(tab: EGameTab): Boolean;
-```
-Attempts to open the specified `tab` gametab with an FKey.
-This works by randomly using FKeys that haven't been tried yet and slowly
-caching which gametabs they open. At first most times this is used it won't
-open the `tab` specified, but as more EKeyCode/EGameTab pairs get mapped
-this starts getting them right.
 
-Example:
-```pascal
-WriteLn GameTabs.FKeyOpen(EGameTab.INVENTORY);
-```
-*)
 function TGameTabs.FKeyOpen(tab: EGameTab): Boolean;
 var
   current, newTab: EGameTab;
@@ -279,20 +186,7 @@ begin
 end;
 
 
-(*
-## GameTabs.Open
-```pascal
-function TGameTabs.Open(tab: EGameTab; fkeyProbability: Single = -1): Boolean;
-```
-Attempts to open the specified `tab` gametab.
-If `TGameTabs.KeybindsEnabled` is true, we might attempt to open the tab
-with {ref}`GameTabs.FKeyOpen`, subject to `fkeyProbability`.
 
-Example:
-```pascal
-WriteLn GameTabs.Open(EGameTab.INVENTORY);
-```
-*)
 function TGameTabs.Open(tab: EGameTab; fkeyProbability: Single = -1): Boolean;
 begin
   if Self.IsOpen(tab) then
@@ -314,37 +208,15 @@ end;
 {$R+}
 
 var
-(*
-## GameTabs variable
-Global {ref}`TGameTabs` variable.
-*)
+
   GameTabs: TGameTabs;
 
-(*
-# GameTab
-Gametabs interfaces core.
-Whenever you want to use gametab coordinates that are not unique to a specific
-tab you should use this.
 
-Check {ref}`TInterface` to see what coordinates it has available.
-*)
 type
-(*
-(TGameTab)=
-## TGameTab type
-The TGameTab type that holds the core coordinates of a gametab.
-*)
+
   TGameTab = type TInterface;
 
-(*
-## GameTab.SetupInterface
-```pascal
-procedure TGameTab.SetupInterface();
-```
-Internal method used to setup the {ref}`TGameTab` coordinates.
 
-This is automatically called for you on the {ref}`GameTab variable`.
-*)
 procedure TGameTab.SetupInterface();
 begin
   case Client.Mode of
@@ -392,8 +264,5 @@ begin
 end;
 
 var
-(*
-## GameTab variable
-Global {ref}`TGameTab` variable.
-*)
+
   GameTab: TGameTab;
