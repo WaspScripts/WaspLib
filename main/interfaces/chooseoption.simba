@@ -67,7 +67,7 @@ begin
 
     glyph := Fonts.BOLD.Glyphs[idx];
     Self.TitleImg.DrawTPA(glyph.Points.Offset([4+x, 2]));
-    x += glyph.Width + 1;
+    x += glyph.Width;
   end;
 
   //no right edge on purpose. We don't know the width of mini-menu.
