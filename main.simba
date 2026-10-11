@@ -14,6 +14,7 @@ less confusing way.
 ## Compiler Directives
 ```pascal
 {$DEFINE WL_DISABLE_FAKE_INPUT}
+{$DEFINE WL_READ_ONLY}
 {$DEFINE WL_GENERATE_GRAPH_ALWAYS}
 {$DEFINE WL_DEBUG_MAPLOADER}
 {$DEFINE WL_DEBUG_MOUSE}
@@ -29,6 +30,9 @@ less confusing way.
 These are the main compiler directives available in the library.
 
 They should be self-explanatory.
+
+`WL_READ_ONLY` makes WaspLib's setup send no input to the client: fake input is
+disabled and the camera and options fixes done on login are skipped.
 
 You also have the following to override versions, for more information read {ref}`Version`
 ```pascal

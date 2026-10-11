@@ -120,8 +120,10 @@ begin
 end;
 
 procedure OnLogin(sender: PClient; mode: EMode);
+{$IFNDEF WL_READ_ONLY}
 var
   zoom: Integer;
+{$ENDIF}
 begin
   if mode <> sender^.Mode then
   begin
@@ -130,7 +132,7 @@ begin
     SetupInterfaces();
   end;
 
-  {$IFNDEF WL_TEST}
+  {$IFNDEF WL_READ_ONLY}
   if not MainScreen.HighestPitch and (RSCamera.Pitch = RSCamera.MAX_PITCH) then
     MainScreen.SetHighestPitch();
 
@@ -185,6 +187,8 @@ begin
   Client.Typ := EClient.RUNELITE;
   {$ELSE}
   Client.Typ := Client.GetClient();
+  {$ENDIF}
+  {$IFNDEF WL_READ_ONLY}
   Client.InjectInput();
   {$ENDIF}
 

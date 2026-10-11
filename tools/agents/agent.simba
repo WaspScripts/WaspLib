@@ -1,0 +1,34 @@
+(*
+# Agent
+Shared helpers for {ref}`Probe` and {ref}`Act`. Include one of those instead of
+this file.
+
+Everything agents save goes in `Agents/` in the Simba directory. Snippets go in
+`Agents/probes/` or `Agents/actions/`.
+*)
+type
+  TAgent = record
+    const DIR: String = SimbaEnv.SimbaPath + 'Agents' + PATH_SEP;
+  end;
+
+(*
+## TAgent.Save
+```pascal
+procedure TAgent.Save(img: TImage; name: String); static;
+```
+Saves `img` as `Agents/<name>.png` in the Simba directory, overwriting any
+previous file with that name, and prints the path.
+*)
+procedure TAgent.Save(img: TImage; name: String); static;
+var
+  path: String;
+begin
+  path := TAgent.DIR + name + '.png';
+  img.Save(path, True);
+  WriteLn(path);
+end;
+
+begin
+  if not DirCreate(TAgent.DIR) then
+    raise GetDebugLn('Agent', 'Failed to create path: ' + TAgent.DIR);
+end;

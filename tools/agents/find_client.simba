@@ -1,0 +1,38 @@
+(*
+# Find Client
+Prints every open game client, one per line, tab separated:
+```
+<handle>	<client>	<pid>	<title>
+```
+Pass the handle to Simba to run a script headless against that client:
+```
+Simba --target=<handle> --run script.simba
+```
+This doesn't include WaspLib so it runs instantly.
+*)
+var
+  window: TWindowHandle;
+  client, title: String;
+begin
+  for window in GetVisibleWindows() do
+  begin
+    title := window.GetRootWindow().GetTitle();
+
+    if window.GetClassName() = 'JagRenderView' then
+      client := 'official'
+    //java clients have several windows, the game is the canvas: SunAwtCanvas on windows, XCanvasPeer on linux.
+    else if (window.GetClassName() = 'SunAwtCanvas') or (window.GetTitle() = 'sun-awt-X11-XCanvasPeer') then
+    begin
+      if title.Contains('RuneLite') then
+        client := 'runelite'
+      else if title = 'Old School RuneScape' then
+        client := 'legacy'
+      else
+        Continue;
+    end
+    else
+      Continue;
+
+    WriteLn(window, #9, client, #9, window.GetPID(), #9, title);
+  end;
+end.

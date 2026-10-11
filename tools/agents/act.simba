@@ -1,0 +1,27 @@
+(*
+# Act
+Prelude for short scripts that act on a running client headless, without
+opening Simba. It's meant for external tools such as LLM agents.
+
+Unlike {ref}`Probe`, this sets WaspLib up exactly like a normal script: it
+pairs fake input with the client and runs the usual login setup. Input goes into
+the client without moving your real mouse, but it can't run on a client a script
+is already botting on.
+
+Write the snippet to `Agents/actions/<name>.simba`:
+```pascal
+{$I WaspLib/tools/agents/act.simba}
+begin
+  if not Client.IsLoggedIn() then
+    Login.DoLogin();
+  Inventory.Open();
+  TAgent.Save(Target.GetImage(), 'client');
+end.
+```
+Then run it against the client handle printed by `tools/agents/find_client.simba`:
+```
+Simba --target=<handle> --run Agents/actions/<name>.simba
+```
+*)
+{$I WaspLib/main.simba}
+{$I WaspLib/tools/agents/agent.simba}
