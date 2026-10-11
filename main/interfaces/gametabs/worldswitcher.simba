@@ -1,37 +1,19 @@
-(*
-# WorldSwitcher
-WorldSwitcher is resposible for changing worlds with the logged in world
-switcher in the {ref}`Logout` gametab.
-```{figure} ../../images/worldswitcher.png
-```
-*)
+
 {$DEFINE WL_WORLDSWITCHER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EWorldSwitcherButton enum
-```pascal
-EWorldSwitcherButton = enum(CONFIGURE, CLOSE, LOGOUT);
-```
-Enum representing the world switcher buttons.
-*)
+
   EWorldSwitcherButton = enum(CONFIGURE, CLOSE, LOGOUT);
 
-(*
-## TWorld type
-Helper record for {ref}`TworldSwitcher`.
-*)
+
   TWorld = record
     Number: Integer;
     Bounds: TBox;
     Available: Boolean;
   end;
 
-(*
-## TWorldArray type
-Helper type for {ref}`TworldSwitcher`.
-*)
+
   TWorldArray = array of TWorld;
 
 {$R-}
@@ -57,10 +39,7 @@ begin
 end;
 
 type
-(*
-## TWorldSwitcher type
-Main record that interacts with the {ref}`WorldSwitcher`.
-*)
+
   TWorldSwitcher = record
     Scroll: TScrollBar;
     Cooldown: TCountDown;
@@ -71,15 +50,7 @@ Main record that interacts with the {ref}`WorldSwitcher`.
     const P2P: TColor = $00F0F0;
   end;
 
-(*
-## TWorldSwitcher.Setup
-```pascal
-procedure TWorldSwitcher.Setup();
-```
-Interal method used to setup the {ref}`TWorldSwitcher` cooldown.
 
-This is automatically called for you on the {ref}`WorldSwitcher variable`.
-*)
 procedure TWorldSwitcher.Setup();
 var
   t: Int64;
@@ -91,15 +62,7 @@ begin
   Self.Cooldown.FPauseTime := 0;
 end;
 
-(*
-## TWorldSwitcher.SetupGameTab
-```pascal
-procedure TWorldSwitcher.SetupGameTab();
-```
-Interal method used to setup the {ref}`TWorldSwitcher` coordinates.
 
-This is automatically called for you on the {ref}`WorldSwitcher variable`.
-*)
 procedure TWorldSwitcher.SetupGameTab();
 begin
   with GameTab.Bounds do
@@ -123,76 +86,27 @@ begin
   Result := Target.HasColor([$0A0B0E, 5, EColorSpace.HSV, [0.368, 0.761, 1.873]], 90, Self.Buttons[EWorldSwitcherButton.CLOSE].Bounds);
 end;
 
-(*
-## WorldSwitcher.IsOpen
-```pascal
-function TWorldSwitcher.IsOpen(): Boolean;
-```
-Returns true if the world switcher is open.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.IsOpen();
-```
-*)
 function TWorldSwitcher.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.LOGOUT) and Self._IsOpen();
 end;
 
 
-(*
-## WorldSwitcher.IsLoading
-```pascal
-function TWorldSwitcher.IsLoading(): Boolean;
-```
-Returns true if the world switcher is loading.
-The world switcher takes a few milliseconds to load.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.IsLoading();
-```
-*)
 function TWorldSwitcher.IsLoading(): Boolean;
 begin
   Result := not Target.HasColor(TFonts.ORANGE, 0, 50, Self.CurrentWorldBounds);
 end;
 
-(*
-## WorldSwitcher.WaitLoading
-```pascal
-function TWorldSwitcher.WaitLoading(time: Integer = 600; interval: Integer = -1): Boolean;
-```
-Waits for the world switcher to finish loading.
-For more information on loading read {ref}`WorldSwitcher.IsLoading`.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.WaitLoading();
-```
-*)
 function TWorldSwitcher.WaitLoading(time: Integer = 600; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(not Self.IsLoading(), interval, time);
 end;
 
-(*
-## WorldSwitcher.Open
-```pascal
-function TWorldSwitcher.Open(waitLoad: Boolean = True): Boolean;
-```
-Attempts to open the world switcher.
 
-This method is overriden after {ref}`Logout`, for more information check
-{ref}`WorldSwitcher.Open override`.
-
-Example:
-```pascal
-WriteLn WorldSwitcher.Open();
-```
-*)
 function TWorldSwitcher.Open(waitLoad: Boolean = True): Boolean;
 begin
   //overriden in TLogout.
@@ -203,18 +117,7 @@ end;
 
 
 
-(*
-## Logout.CloseWorldSwitcher
-```pascal
-function TLogout.CloseWorldSwitcher(): Boolean;
-```
-Closes the world switcher.
 
-Example:
-```pascal
-Logout.CloseWorldSwitcher();
-```
-*)
 function TWorldSwitcher.Close(): Boolean;
 begin
   if not Self.IsOpen() then Exit(True);
@@ -222,18 +125,7 @@ begin
   Result := SleepUntil(not Self._IsOpen(), RandomMode(100, 50, 1500), 600);
 end;
 
-(*
-## WorldSwitcher.Logout
-```pascal
-function TWorldSwitcher.Logout(attempts: UInt32 = 5; time: UInt32 = 20000): Boolean;
-```
-Clicks the logout button. Returns true if we succesfully logout of the game.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.Logout();
-```
-*)
 function TWorldSwitcher.Logout(attempts: UInt32 = 5; time: UInt32 = 20000): Boolean;
 var
   i: Integer;
@@ -254,18 +146,7 @@ begin
 end;
 
 
-(*
-## WorldSwitcher.GetWorlds
-```pascal
-function TWorldSwitcher.GetWorlds(): TWorldArray;
-```
-Returns the currently visible {ref}`TWorldArray`.
 
-Example:
-```pascal
-ShowOnTarget(WorldSwitcher.Worlds);
-```
-*)
 function TWorldSwitcher.GetWorlds(): TWorldArray;
 var
   img: TImage;
@@ -333,20 +214,7 @@ begin
   Result.Sort(weights, True);
 end;
 
-(*
-## WorldSwitcher.FindWorld
-```pascal
-function TWorldSwitcher.FindWorld(number: Integer; out world: TWorld): Boolean;
-```
-Returns true if the specified world `number` is found.
-The world data is returned through the `world` variable.
 
-Example:
-```pascal
-if WorldSwitcher.FindWorld(311, world) then
-  ShowOnTarget([world]);
-```
-*)
 function TWorldSwitcher.FindWorld(number: Integer; out world: TWorld): Boolean;
 var
   img: TImage;
@@ -400,18 +268,7 @@ begin
 end;
 
 
-(*
-## WorldSwitcher.IsSorted
-```pascal
-function TWorldSwitcher.IsSorted(): Boolean;
-```
-Checks if the worlds in the world switcher are sorted.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.IsSorted();
-```
-*)
 function TWorldSwitcher.IsSorted(): Boolean;
 var
   arrow : TPointArray;
@@ -423,18 +280,7 @@ begin
   Result := Self.SortArrow.Center = arrow.Mean();
 end;
 
-(*
-## WorldSwitcher.Sort
-```pascal
-function TWorldSwitcher.Sort(): Boolean;
-```
-Sorts the worlds from lower to higher numbers.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.Sort();
-```
-*)
 function TWorldSwitcher.Sort(): Boolean;
 begin
   if not Self.IsOpen() then
@@ -508,24 +354,7 @@ begin
   until not InRange(Self.Scroll.GetLevel(), 1, 99) or timeout.IsFinished;
 end;
 
-(*
-## WorldSwitcher.World property
-```pascal
-property TWorldSwitcher.World: Integer;
-property TWorldSwitcher.World(next: Integer): Boolean;
-```
-Returns or sets the current world we are on.
 
-Setting a new world will only happen if `TWorldSwitcher.Cooldown` is finished,
-which is a cooldown that starts everytime you change worlds.
-
-Example:
-```pascal
-WriteLn WorldSwitcher.World;
-WorldSwitcher.World := 311;
-WriteLn WorldSwitcher.World;
-```
-*)
 property TWorldSwitcher.World: Integer;
 begin
   Result := OCR.RecognizeNumber(Self.CurrentWorldBounds, Fonts.BOLD, [TFonts.ORANGE], 0);
@@ -543,21 +372,7 @@ begin
   Result := Self._Hop(next);
 end;
 
-(*
-## WorldSwitcher.Next
-```pascal
-function TWorldSwitcher.Next(): Boolean;
-```
-Hops to the world that follows our current world according to the contents of
-`Profiles.Get().Worlds`.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.World;
-WorldSwitcher.Next();
-WriteLn WorldSwitcher.World;
-```
-*)
 function TWorldSwitcher.Next(): Boolean;
 var
   profile: TProfile;
@@ -581,21 +396,7 @@ begin
   Result := Self._Hop(profile.Worlds[next]);
 end;
 
-(*
-## WorldSwitcher.Previous
-```pascal
-function TWorldSwitcher.Previous(): Boolean;
-```
-Hops to the world that comes before our current world according to the contents
-of `Profiles.Get().Worlds`.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.World;
-WorldSwitcher.Previous();
-WriteLn WorldSwitcher.World;
-```
-*)
 function TWorldSwitcher.Previous(): Boolean;
 var
   profile: TProfile;
@@ -619,21 +420,7 @@ begin
   Result := Self._Hop(profile.Worlds[prev]);
 end;
 
-(*
-## WorldSwitcher.Random
-```pascal
-function TWorldSwitcher.Random(): Boolean;
-```
-Hops to a random world that's in `Profiles.Get().Worlds` and is not our
-current world.
 
-Example:
-```pascal
-WriteLn WorldSwitcher.World;
-WorldSwitcher.Random();
-WriteLn WorldSwitcher.World;
-```
-*)
 function TWorldSwitcher.Random(): Boolean;
 var
   profile: TProfile;
@@ -658,15 +445,7 @@ begin
 end;
 
 
-(*
-## WorldSwitcher.WaitSwitch
-```pascal
-function TWorldSwitcher.WaitSwitch(world: Integer; failCooldown: Boolean = True): Boolean;
-```
-Exits false if "Please wait" not found, presumably due to combat.
-Returns true if we find "Please wait" and finish world hopping successfully to
-the specified `world`
-*)
+
 function TWorldSwitcher.WaitSwitch(world: Integer; failCooldown: Boolean = True): Boolean;
 begin
   if not SleepUntil(MainScreen.IsServerMessage('Please wait'), 200, 3*TICK) then
@@ -681,8 +460,5 @@ end;
 {$R+}
 
 var
-(*
-## WorldSwitcher variable
-Global {ref}`TWorldSwitcher` variable.
-*)
+
   WorldSwitcher: TWorldSwitcher;

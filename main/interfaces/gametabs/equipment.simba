@@ -1,40 +1,20 @@
-(*
-# Equipment
-Methods to interact with the Equipment gametab.
-```{figure} ../../images/equipment.png
-```
-*)
+
 {$DEFINE WL_EQUIPMENT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 
 type
-(*
-## EEquipment
-```pascal
-EEquipment = enum(HEAD, CAPE, NECK, AMMO, WEAPON, BODY, SHIELD, LEGS, HANDS, FEET, RING, SECONDARY_AMMO);
-```
-Enumerator of the equipment slots.
-*)
+
   EEquipment = enum(
     HEAD, CAPE, NECK, AMMO, WEAPON, BODY, SHIELD, LEGS, HANDS, FEET, RING,
     SECONDARY_AMMO
   );
 
 type
-(*
-## EEquipmentButton
-```pascal
-EEquipmentButton = (STATS, PRICES, DEATH, FOLLOWER);
-```
-Enumerator of the equipment buttons.
-*)
+
   EEquipmentButton = enum(STATS, PRICES, DEATH, FOLLOWER);
 
-(*
-## TEquipment
-Main record reponsible for handling the equipment gametab.
-*)
+
   TEquipment = record
     Slots: TSlotInterface;
     Items: TItemInterface;
@@ -42,15 +22,7 @@ Main record reponsible for handling the equipment gametab.
     Buttons: array [EEquipmentButton] of TButton;
   end;
 
-(*
-## Equipment.SetupGameTab
-```pascal
-procedure TEquipment.SetupGameTab();
-```
-Internal method used to setup the {ref}`TEquipment` coordinates.
 
-This is automatically called for you on the {ref}`Equipment variable`.
-*)
 
 function TEquipment.Open(): Boolean; forward;
 
@@ -91,44 +63,18 @@ begin
     Self.Buttons[i] := new TButton(btns[i]);
 end;
 
-(*
-## Equipment.IsOpen
-```pascal
-function TEquipment.IsOpen(): Boolean;
-```
-Returns True/False whether the equipment tab is open or not.
 
-Example:
-```pascal
-WriteLn Equipment.IsOpen();
-```
-*)
 function TEquipment.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.EQUIPMENT);
 end;
 
-(*
-## Equipment.Open
-```pascal
-function TEquipment.Open(): Boolean;
-```
-Attempts to open the equipment tab.
-Returns true if we succeed.
 
-Example:
-```pascal
-WriteLn Equipment.Open();
-```
-*)
 function TEquipment.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.EQUIPMENT);
 end;
 
 var
-(*
-## Equipment variable
-Global {ref}`TEquipment` variable.
-*)
+
   Equipment: TEquipment;

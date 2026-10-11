@@ -1,16 +1,9 @@
-(*
-# LLM Client
-Client to interact with LLMs.
-*)
+
 
 {$DEFINE WL_LLMCLIENT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
-(*
-## TLLMClient
-Responsible for connecting to a LLM server.
-This expects an Ollama/OpenAI compatible REST API to talk to.
-*)
+
 type
   ELLMService = enum(LOCAL, DEEPSEEK, OPENAI, OLLAMA, GEMINI);
 
