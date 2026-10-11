@@ -1,17 +1,11 @@
-(*
-# Keyboard
-Methods to use the keyboard.
-*)
+
 {$DEFINE WL_KEYBOARD_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
 type
   EKeycodeArray = array of EKeyCode;
 
-(*
-## TKeyboard
-Main record responsible with handling {ref}`Keyboard` input.
-*)
+
   TKeyboard = record
     LastKey: EKeyCode;
     const ARROWS: EKeycodeArray = [EKeyCode.LEFT, EKeycode.UP, EKeycode.Right, EKeycode.DOWN];
@@ -19,15 +13,7 @@ Main record responsible with handling {ref}`Keyboard` input.
     const MISC: EKeycodeArray = [EKeyCode.LCONTROL, EKeyCode.CONTROL, EKeyCode.SPACE, EKeyCode.SHIFT, EKeyCode.RSHIFT];
   end;
 
-(*
-## Keyboard.Setup
-```pascal
-procedure TKeyboard.Setup();
-```
-Sets up internal {ref}`TKeyboard` values.
 
-This is automatically called for you on the {ref}`Keyboard variable`.
-*)
 procedure TKeyboard.Setup();
 begin
   Target.Options.KeyPressMin := 30;
@@ -35,25 +21,9 @@ begin
 end;
 
 
-(*
-## Keyboard properties
-The following are some of the properties that `TKeyboard` has available to
-control it's behaviour.
-*)
 
-(*
-### Keyboard.PressMin
-```pascal
-property TKeyboard.PressMin: Integer;
-property TKeyboard.PressMin(value: Integer);
-```
-Get/Set `TKeyboard` PressMin value.
 
-Basically the minimum time the `TKeyboard` keys will be held when typing.
 
-When typing the keys will be held a random time between {ref}`TKeyboard.PressMin`
-and {ref}`TKeyboard.PressMax`.
-*)
 property TKeyboard.PressMin: Integer;
 begin
   Result := Target.Options.KeyPressMin;
@@ -64,19 +34,7 @@ begin
   Target.Options.KeyPressMin := value;
 end;
 
-(*
-### Keyboard.PressMax
-```pascal
-property TKeyboard.PressMax: Integer;
-property TKeyboard.PressMax(value: Integer);
-```
-Get/Set `TKeyboard` PressMax value.
 
-Basically the minimum time the `TKeyboard` keys will be held when typing.
-
-When typing the keys will be held a random time between {ref}`TKeyboard.PressMin`
-and {ref}`TKeyboard.PressMax`.
-*)
 property TKeyboard.PressMax: Integer;
 begin
   Result := Target.Options.KeyPressMax;
@@ -87,63 +45,33 @@ begin
   Target.Options.KeyPressMax := value;
 end;
 
-(*
-### Keyboard.IntervalMin
-```pascal
-property TKeyboard.IntervalMin: Integer;
-```
-Get `TKeyboard` minimum interval time between key presses.
-*)
+
 property TKeyboard.IntervalMin: Integer;
 begin
   Result := Target.Options.KeyPressMin + 10;
 end;
 
-(*
-### Keyboard.IntervalMax
-```pascal
-property TKeyboard.IntervalMax: Integer;
-```
-Get `TKeyboard` maximum interval time between key presses.
-*)
+
 property TKeyboard.IntervalMax: Integer;
 begin
   Result := Target.Options.KeyPressMax + 25;
 end;
 
 
-(*
-## Keyboard.KeyDown
-```pascal
-procedure TKeyboard.KeyDown(key: EKeyCode);
-```
-Presses down the given virtual key.
-*)
+
 procedure TKeyboard.KeyDown(key: EKeyCode);
 begin
   Target.KeyDown(key);
   Self.LastKey := key;
 end;
 
-(*
-## Keyboard.KeyUp
-```pascal
-procedure TKeyboard.KeyUp(key: EKeyCode);
-```
-Releases the given virtual key.
-*)
+
 procedure TKeyboard.KeyUp(key: EKeyCode);
 begin
   Target.KeyUp(key);
 end;
 
-(*
-## Keyboard.KeyPress
-```pascal
-procedure TKeyboard.KeyPress(key: EKeyCode);
-```
-Presses the given virtual key.
-*)
+
 procedure TKeyboard.KeyPress(key: EKeyCode);
 begin
   Target.KeyPress(key);
@@ -151,29 +79,13 @@ begin
 end;
 
 
-(*
-## Keyboard.IsKeyDown
-```pascal
-procedure TKeyboard.IsKeyDown(Key: EKeyCode);
-```
-Returns True if the given virtual key is currently down.
-*)
+
 function TKeyboard.IsKeyDown(key: EKeyCode): Boolean;
 begin
   Result := Target.KeyPressed(key);
 end;
 
-(*
-## Keyboard.Send
-```pascal
-procedure TKeyboard.Send(text: String);
-procedure TKeyboard.Send(text: String; keyPressAfter: EKeyCode); overload;
-```
-Writes the given text to whatever window is currently in focus.
 
-First overload allows you to pass KeyWait, KeyModWait, and KeyPressWait, all are timing modifiers.
-Last overload allows you to pass a long a key to be pressed after the text has been typed, for example ``VK_ENTER``.
-*)
 procedure TKeyboard.Send(text: String);
 var
   i: Integer;
@@ -211,8 +123,5 @@ end;
 
 
 var
-(*
-## Keyboard variable
-Global {ref}`TKeyboard` variable.
-*)
+
   Keyboard: TKeyboard;

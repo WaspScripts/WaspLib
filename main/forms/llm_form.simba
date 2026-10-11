@@ -1,27 +1,9 @@
-(*
-# LLM Form
-This page is about the {ref}`LLM Client` dedicated `TLazForm` utilities.
 
-This is meant to be used with {ref}`TScriptForm` with
-{ref}`TScriptForm.CreateLLMTab` and will setup a a `TLazTabSheet` on it
-with several controls to configure the {ref}`LLM Client`:
-```{figure} ../../images/llmform.png
-```
-*)
 {$DEFINE WL_LLM_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TLLMFormHelper
-The `TLLMFormHelper` type is, as it's name implies a helper type for the
-`LLM Form`.
 
-It has a lot of methods and callbacks that are hidden by default and won't be
-mentioned on this page because they are internal methods you shouldn't touch.
-
-Do feel free to read the source code though if you so desire.
-*)
   TLLMFormHelper = record
     Model: TLazComboBox;
     PortEdit: TLazSpinEdit;
@@ -315,8 +297,5 @@ begin
 end;
 
 var
-(*
-## LLMForm variable
-Global {ref}`TLLMFormHelper` variable.
-*)
+
   LLMForm: TLLMFormHelper;

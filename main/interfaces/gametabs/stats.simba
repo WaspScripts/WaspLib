@@ -1,21 +1,9 @@
-(*
-# Stats
-Methods responsible for dealing with the stats tab.
-```{figure} ../../images/stats.png
-```
-*)
+
 {$DEFINE WL_STATS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(ESkill)=
-## Enum ESkill
-```pascal
-ESkill = enum(ATTACK, HITPOINTS, MINING, ..., CONSTRUCTION, HUNTER, TOTAL);
-```
-Enum representing all skills in game.
-*)
+
   ESkill = enum(
     ATTACK,       HITPOINTS, MINING,
     STRENGTH,     AGILITY,   SMITHING,
@@ -28,34 +16,18 @@ Enum representing all skills in game.
     TOTAL
   );
 
-(*
-(TSkillInfo)=
-## type TSkillInfo
-Helper record to read skill information when you hover them in the {ref}`Stats` gametab.
-*)
+
   TSkillInfo = record
     Level, XP, Next, Remainder: Integer;
   end;
 
-(*
-(TStats)=
-## type TStats
-Main record used to interact with the {ref}`Stats` gametab.
-*)
+
   TStats = record
     Levels, Goals: array [ESkill] of Integer;
     Skills: TBoxArray;
   end;
 
-(*
-## Stats.SetupGameTab
-```pascal
-procedure TStats.SetupGameTab();
-```
-Internal method used to setup the {ref}`TStats` coordinates and internal values.
 
-This is automatically called for you on the {ref}`Stats variable`.
-*)
 procedure TStats.SetupGameTab();
 begin
   with GameTab.Bounds do
@@ -65,77 +37,21 @@ begin
   end;
 end;
 
-(*
-## TStats.Skills
-```pascal
-Skills: TBoxArray;
-```
-`TBoxes` for each of the {ref}`Stats` skills.
 
-Example:
-```pascal
-ShowOnTarget(Stats.Skills);
-```
-```{figure} ../../images/stats_skills.png
-```
 
-You can also access each skill box with an index or, more conveniently, with a
-{ref}`ESkill`.
 
-Example:
-```pascal
-ShowOnTarget(Stats.Skills[ESkill.HERBLORE]);
-```
-```{figure} ../../images/stats_skill.png
-```
-*)
-
-(*
-## Stats.IsOpen
-```pascal
-function TStats.IsOpen(): Boolean;
-```
-Returns true/false if the stats gametab is open or not.
-
-Example:
-```pascal
-WriteLn Stats.IsOpen();
-```
-*)
 function TStats.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.STATS);
 end;
 
-(*
-## Stats.Open
-```pascal
-function TStats.Open(): Boolean;
-```
-Attempts to open the stats gametab.
 
-Example:
-```pascal
-WriteLn Stats.Open();
-```
-*)
 function TStats.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.STATS);
 end;
 
-(*
-## Stats.Hover
-```pascal
-function TStats.Hover(skill: ESkill): Boolean;
-```
-Moves the mouse over to a skill box.
 
-Example:
-```pascal
-WriteLn Stats.Hover(ESkill.CONSTRUCTION);
-```
-*)
 function TStats.Hover(skill: ESkill): Boolean;
 begin
   Result := Self.Open();
@@ -144,13 +60,7 @@ begin
 end;
 
 
-(*
-## Stats.FindSkillInfo
-```pascal
-function TStats.FindSkillInfo(skill: ESkill; out skillInfo: TSkillInfo): Boolean;
-```
-Find and return a TSkillInfo if it matches the one we are looking for.
-*)
+
 function TStats.FindSkillInfo(skill: ESkill; out skillInfo: TSkillInfo): Boolean;
 var
   tpa: TPointArray;
@@ -182,18 +92,7 @@ begin
   Result := True;
 end;
 
-(*
-## Stats.GetSkillInfo
-```pascal
-function TStats.GetSkillInfo(skill: ESkill; waitTime: Integer = 1000): TSkillInfo;
-```
-Get the skill information about a skill when you hover it.
 
-Example:
-```pascal
-WriteLn Stats.GetSkillInfo(ESkill.CONSTRUCTION);
-```
-*)
 function TStats.GetSkillInfo(skill: ESkill; time: Integer = 1000): TSkillInfo;
 begin
   if not Self.Hover(skill) then Exit;
@@ -201,22 +100,7 @@ begin
 end;
 
 
-(*
-## Stats.GetLevel
-```pascal
-function TStats.GetLevel(skill: ESkill; useCache: Boolean = True): Integer;
-```
-Get the level of the specified **skill**.
-By default uses the levels cached in the Stats.Levels array.
 
-When using the cached methods, it can be used to retrieve the level of a skill
-while the gametab is open assuming the level is already cached.
-
-Example:
-```pascal
-WriteLn Stats.GetLevel(ESkill.HITPOINTS);
-```
-*)
 function TStats.GetLevel(skill: ESkill; useCache: Boolean = True): Integer;
 var
   bounds: TBox;
@@ -245,13 +129,7 @@ begin
     Self.Levels[skill] := Result;
 end;
 
-(*
-## Stats.CacheStats
-```pascal
-procedure TStats.CacheStats();
-```
-Method to update all cached levels.
-*)
+
 procedure TStats.CacheStats();
 var
   i: Integer;
@@ -264,81 +142,23 @@ begin
   end;
 end;
 
-(*
-## Stats.IncrementCachedLevel
-```pascal
-procedure TStats.IncrementCachedLevel(skill: ESkill);
-```
-Internal method to update cached levels. This is automatically called by Chat.LeveledUp().
 
-Example:
-```pascal
-WriteLn Stats.GetCurrentLevel(ESkill.PRAYER);
-Stats.IncrementLevel(ESkill.PRAYER);
-WriteLn Stats.GetCurrentLevel(ESkill.PRAYER);
-```
-*)
 procedure TStats.IncrementCachedLevel(skill: ESkill);
 begin
   if Self.Levels[skill] > 0 then
     Self.Levels[skill] += 1;
 end;
 
-(*
-## Stats.Goals
-{ref}`Stats` has a `Goals` variable where you can configure goal levels for the
-running script.
 
-You can configure a goal level like this:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Stats.Goals[ESkill.FIREMAKING] := 50;
-end.
-```
 
-By itself, WaspLib doesn't do anything with this, but you can use the next
-functions as you please to do an action when `any` or `all` goals have been
-reached, their documentation have examples on how you could terminate the script
-when a goal has been reached.
-*)
 
-(*
-### Stats.GoalCompleted
-```pascal
-function TStats.GoalCompleted(skill: ESkill): Boolean;
-```
-Returns true when the specified `skill` has reached it's goal level.
-*)
 function TStats.GoalCompleted(skill: ESkill): Boolean;
 begin
   Result := (Self.Goals[skill] > 0) and
             (Self.GetLevel(skill) >= Self.Goals[skill]);
 end;
 
-(*
-### Stats.AnyGoalsCompleted
-```pascal
-function TStats.AnyGoalsCompleted(): Boolean;
-```
-Returns true when any skill has reached it's goal level.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Stats.Goals[ESkill.FIREMAKING] := 50;
-  Stats.Goals[ESkill.FLETCHING] := 30;
-  Stats.Goals[ESkill.CONSTRUCTION] := 20;
-  Stats.Goals[ESkill.WOODCUTTING] := 35;
-  repeat
-    Sleep(5*TICK);
-  until Stats.AnyGoalsCompleted();
-
-  WriteLn 'A skill goal has been reached!';
-end.
-```
-*)
 function TStats.AnyGoalsCompleted(): Boolean;
 var
   skill: ESkill;
@@ -348,30 +168,7 @@ begin
       Exit(True);
 end;
 
-(*
-### Stats.AllGoalsCompleted
-```pascal
-function TStats.AllGoalsCompleted(): Boolean;
-```
-Returns true when all skills have reached their goal levels.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Stats.Goals[ESkill.FIREMAKING] := 50;
-  Stats.Goals[ESkill.FLETCHING] := 30;
-  Stats.Goals[ESkill.CONSTRUCTION] := 20;
-  Stats.Goals[ESkill.WOODCUTTING] := 35;
-  while True do
-  begin
-    Sleep(5*TICK);
-    if Stats.AllGoalsCompleted() then
-      TerminateScript('A skill goal has been reached!');
-  end;
-end.
-```
-*)
 function TStats.AllGoalsCompleted(): Boolean;
 var
   skill: ESkill;
@@ -385,8 +182,5 @@ begin
 end;
 
 var
-(*
-## Stats variable
-Global {ref}`TStats` variable.
-*)
+
   Stats: TStats;
