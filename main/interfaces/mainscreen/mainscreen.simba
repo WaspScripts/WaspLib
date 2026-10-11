@@ -19,7 +19,6 @@ Main record to handle the mainscreen and methods relating to it.
     Center: TPoint;
     TopLeft, TopRight, BottomRight, BottomLeft: TPoint;
 
-    UpTextImageBuffer: TImage;
     UptextBounds, ServerMsgBounds: TBox;
     UptextOCR: TPixelOCR;
 
@@ -147,7 +146,7 @@ function TMainScreen._IsUpText(
   similarity: Single
 ): Boolean;
 var
-  str: String;
+  str, sub: String;
   i, len0, len1: Integer;
   match: Double;
 begin
@@ -169,9 +168,11 @@ begin
     end
     else
     begin
-      for i := 1 to len0 - len1 do //shift string until best match is found.
+      for i := 1 to len0 - len1 + 1 do //shift string until best match is found.
       begin
-        match := str.Similarity(Copy(upText, i, len1));
+        sub := Copy(upText, i, len1);
+        match := str.Similarity(sub);
+
         Result := match >= similarity;
         if Result then
           Break;
@@ -195,24 +196,24 @@ function TMainScreen.IsUpText(
   strings: TStringArray;
   matchCase: Boolean = True;
   similarity: Single = 0.85;
-  time: Integer = -1
+  time: Integer = 0
 ): Boolean;
 
 function TMainScreen.IsUpText(
   text: String;
   matchCase: Boolean = True;
   similarity: Single = 0.85;
-  time: Integer = -1
+  time: Integer = 0
 ): Boolean; overload;
 ```
 Compares `text` or `strings` with the {ref}`uptext` on the mainscreen.
-Returns True if the match above the threshold `similarity`.
+Returns `True` if the match is equal or above the threshold `similarity`.
 
 UpText is delayed by at least one frame, so this only returns true if the uptext
-doesn't change within 50ms. It also wait 25ms between each loop.
+doesn't change within 50ms. It also waits 25ms between each loop.
 By default it can wait anywhere from 85ms to 250ms total.
 
-If you cannot afford this delay on your script set a your own `timeout`.
+If you cannot afford this delay on your script set your own `time`.
 
 Example:
 ```pascal
@@ -228,8 +229,9 @@ function TMainScreen.IsUpText(
 ): Boolean;
 var
   timeout: TCountDown;
-  sT: TStringArray;
-  txt, str: String;
+  final: TStringArray;
+  txt: String;
+  i: Integer;
 begin
   if time <= 0 then
     timeout.Start(RandomMode(100, 85, 250))
@@ -237,18 +239,19 @@ begin
     timeout.Start(time);
 
   if matchCase then
-    sT := Copy(strings)
+    final := strings
   else
   begin
-    for str in strings do
-      sT += LowerCase(str);
+    SetLength(final, Length(strings));
+    for i := 0 to High(strings) do
+      final[i] := LowerCase(strings[i]);
   end;
 
   repeat
-    if Self._IsUpText(txt, strings, matchCase, similarity) then
+    if Self._IsUpText(txt, final, matchCase, similarity) then
     begin
       Sleep(50);
-      if Self._IsUpText(txt, strings, matchCase, similarity) then
+      if Self._IsUpText(txt, final, matchCase, similarity) then
         Exit(True);
     end;
 
@@ -336,10 +339,16 @@ end;
 
 {$R-}
 procedure TMainScreen._ConditionalMaskEx(outter, inner: TBox);
+var
+  data: PColorBGRA;
+  y, size: Integer;
 begin
-  Self.Mask.DrawColor := $0;
-  Self.Mask.DrawBoxFilled(outter);
-  Self.Mask.SetAlphas(TPointArray.CreateFromBox(outter, True), $0);
+  data := Self.Mask.Data;
+  size := outter.Width * SizeOf(TColorBGRA);
+
+  for y := outter.Y1 to outter.Y2 do
+    FillMem(data[y * Self.Mask.Width + outter.X1]^, size, 0);
+
   Self.Mask.DrawColor := $FF00FF;
   Self.Mask.DrawBoxFilled(inner);
 end;
@@ -447,7 +456,7 @@ function TMainScreen.RedClicked(): Boolean;
 var
   area: TBox;
 begin
-  area := TBox.Create(Target.MouseXY, 10, 10).Clip(Self.Bounds);
+  area := Box(Target.MouseXY, 10, 10).Clip(Self.Bounds);
   Result := Self._RedClicked(area);
 end;
 
@@ -468,13 +477,20 @@ function TMainScreen.WaitRedClick(time: Integer = 250): Boolean;
 var
   area: TBox;
 begin
-  area := TBox.Create(Target.MouseXY, 10, 10).Clip(Self.Bounds);
+  area := Box(Target.MouseXY, 10, 10).Clip(Self.Bounds);
   Result := SleepUntil(Self._RedClicked(area), 50, time);
 end;
 
 function TMainScreen._YellowClicked(const area: TBox): Boolean;
+var
+  img: TImage;
+  trgt: TTarget;
 begin
-  Result := Target.HasColor($00FFFF, 0, 1, area);
+  //create a temp target so this thread doesn't hold `Target` for multiple operations.
+  img := Target.GetImage(area);
+  trgt := new TTarget();
+  trgt.SetImage(img);
+  Result := trgt.HasColor($00FFFF, 0, 1, area);
 end;
 
 (*
@@ -494,7 +510,7 @@ function TMainScreen.YellowClicked(): Boolean;
 var
   area: TBox;
 begin
-  area := TBox.Create(Target.MouseXY, 10, 10).Clip(Self.Bounds);
+  area := Box(Target.MouseXY, 10, 10).Clip(Self.Bounds);
   Result := Self._YellowClicked(area);
 end;
 
@@ -515,7 +531,7 @@ function TMainScreen.WaitYellowClick(time: Integer = 250): Boolean;
 var
   area: TBox;
 begin
-  area := TBox.Create(Target.MouseXY, 10, 10).Clip(Self.Bounds);
+  area := Box(Target.MouseXY, 10, 10).Clip(Self.Bounds);
   Result := SleepUntil(Self._YellowClicked(area), 50, time);
 end;
 
@@ -535,11 +551,14 @@ WriteLn MainScreen.Interact('Pick-up');
 ```
 *)
 function TMainScreen.Interact(strings: TStringArray): Boolean;
+var
+  area: TBox;
 begin
   if Self.IsUpText(strings) then
   begin
     Mouse.Click(EMouseButton.LEFT);
-    if Self.RedClicked() then
+    area := Box(Target.MouseXY, 10, 10).Clip(Self.Bounds);
+    if SleepUntil(Self._RedClicked(area), 5, 30) then
       Exit(True);
   end;
 

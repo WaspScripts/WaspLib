@@ -17,26 +17,19 @@ type
 
   TAntibanTask = record
     Method: TAntibanMethod;
-    Interval: Double;
-    StdVar: Double;
+    Interval, StdVar: Double;
     Countdown: TCountDown;
   end;
 
   TBreakTask = record
-    Interval: Double;
-    Length: Double;
-    LogoutChance: Double;
-    StdVar: Double;
+    Interval, Length, LogoutChance,
+    StdVar,
     Next, Previous: Double;
   end;
 
   TSleepTask = record
-    Time: String;
-    Length: Double;
-    Randomness: String;
-    LogoutChance: Double;
-    StdVar: Double;
-    Next: Double;
+    Time, Randomness: String;
+    Length, LogoutChance, StdVar, Next: Double;
   end;
 
 (*
@@ -74,10 +67,11 @@ begin
   res := TDateTime.CreateFromISO(current.Date.ToString('YYYY-MM-DD') + 'T' + value);
 
   res -= current;
-  if res < 0 then res += 1;
+  if res < 0 then
+    res += 1;
 
-  Result := GetTimeRunning() + UInt64(Trunc(res*DAY));
-  Result += Trunc(Abs(GaussRand(0, randomness*DAY/2)));
+  Result := GetTimeRunning() + UInt64(Trunc(res*DAY)) +
+            Trunc(Abs(GaussRand(0, randomness*DAY/2)));
 end;
 
 
