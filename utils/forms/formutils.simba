@@ -1444,6 +1444,28 @@ begin
   limg.Align := ELazAlign.Client;
 end;
 
+procedure TLazCheckBox.SetChecked(value: Boolean);
+begin
+  if value then
+    Self.State := ELazCheckBoxState.Checked
+  else
+    Self.State := ELazCheckBoxState.Unchecked;
+end;
+
+
+function TLazCheckBox.IsChecked(): Boolean;
+begin
+  Result := Self.State = ELazCheckBoxState.Checked;
+end;
+
+
+procedure TLazCheckBox.Toggle();
+begin
+  case Self.State of
+    ELazCheckBoxState.Checked: Self.State := ELazCheckBoxState.Unchecked;
+    ELazCheckBoxState.Unchecked: Self.State := ELazCheckBoxState.Checked;
+  end;
+end; 
 
 function TLazStrings.Search(value: String; lo: Integer = 0): Integer;
 begin
