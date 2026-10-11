@@ -489,8 +489,7 @@ begin
 
   //rebuild the icon the way TItemSprite.ToImage holds it: the item opaque, everything else zeroed
   colors := img.GetColors(points);
-  img.Fill(0);
-  img.FillWithAlpha(0);
+  FillMem(img.Data^, img.Width * img.Height * SizeOf(TColorBGRA), 0);
   img.SetPixels(points, colors);
   img.SetAlphas(points, $FF);
 
