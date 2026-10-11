@@ -345,9 +345,12 @@ var
 begin
   data := Self.Mask.Data;
   size := outter.Width * SizeOf(TColorBGRA);
-
   for y := outter.Y1 to outter.Y2 do
     FillMem(data[y * Self.Mask.Width + outter.X1]^, size, 0);
+
+  //This above is basically:
+  //Self.Mask.SetAlphas(TPointArray.CreateFromBox(outter, True), $0);
+  //In native code which is 18+x faster.
 
   Self.Mask.DrawColor := $FF00FF;
   Self.Mask.DrawBoxFilled(inner);
