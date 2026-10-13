@@ -62,7 +62,7 @@ begin
   window := GetSimbaTargetWindow();
 
   case window.GetClassName() of
-    'SunAwtCanvas': SetupRemoteInput(window.GetPID());
+    'SunAwtCanvas', 'net-runelite-client-RuneLite': SetupRemoteInput(window.GetPID());
     {$IFDEF WINDOWS}
     'JagRenderView': SetupWaspInput(window.GetPID());
     {$ENDIF}

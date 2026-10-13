@@ -134,20 +134,6 @@ begin
 end;
 
 
-function TChatTabs._GetState(tab: EChatTab): EChatTabState;
-const
-  COLORS: array [1..5] of Integer = [65280, 65535, 255, 16776960, 16756480];
-var
-  state: EChatTabState;
-begin
-  Result := EChatTabState.NONE;
-  if tab = EChatTab.ALL then Exit;
-
-  for state := EChatTabState.ENABLED to High(EChatTabState) do
-    if Target.CountColor(COLORS[state], 0, Self.Tabs[tab].Bounds) > 0 then
-      Exit(state);
-end;
-
 (*
 ## Chat.Tabs.GetState
 ```pascal
@@ -161,8 +147,25 @@ WriteLn Chat.Tabs.GetState(EChatTab.PUBLIC_);
 ```
 *)
 function TChatTabs.GetState(tab: EChatTab): EChatTabState;
+const
+  COLORS: array [1..5] of Integer = [65280, 65535, 255, 16776960, 16756480];
+var
+  state: EChatTabState;
+  img: TImage;
+  trgt: TTarget;
 begin
-  Result := Self._GetState(tab);
+  Result := EChatTabState.NONE;
+  if tab = EChatTab.ALL then
+    Exit;
+
+  //we create a new trgt this doesn't hold `Target` in async scripts
+  img := Target.GetImage();
+  trgt := new TTarget();
+  trgt.SetImage(img);
+
+  for state := EChatTabState.ENABLED to High(EChatTabState) do
+    if trgt.CountColor(COLORS[state], 0, Self.Tabs[tab].Bounds) > 0 then
+      Exit(state);
 end;
 
 (*
@@ -180,7 +183,7 @@ WriteLn Chat.Tabs.GetState(EChatTab.PUBLIC_, EChatTabState.ENABLED);
 *)
 function TChatTabs.ChangeState(tab: EChatTab; state: EChatTabState): Boolean;
 begin
-  if Self._GetState(tab) = state then
+  if Self.GetState(tab) = state then
     Exit(True);
 
   Self.Tabs[tab].Click(EMouseButton.RIGHT);
@@ -196,5 +199,5 @@ begin
     EChatTabState.AUTOCHAT: ChooseOption.Select(['autochat']);
   end;
 
-  Result := Self._GetState(tab) = state;
+  Result := Self.GetState(tab) = state;
 end;
