@@ -1,16 +1,8 @@
-(*
-# Progress Report
-Formatted progress reports with bordered table output.
 
-Credits: TaZe
-*)
 {$DEFINE WL_PROGRESS_REPORT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
-(*
-## TProgressReport
-Progress report record for managing formatted table output with timing and print frequency control.
-*)
+
 type
   TProgressReport = record
     Headers: TStringArray;
@@ -19,15 +11,7 @@ type
     PrintTimer: TCountDown;
   end;
 
-(*
-## TProgressReport.Setup
-```pascal
-procedure TProgressReport.Setup(title: String = 'ProgressReport'; headers: TStringArray = []; valueProvider: function: TStringArray of Object = nil; printInterval: Integer = MINUTE * 5);
-```
-Sets up the progress report with title and column headers.
 
-Check the example in {ref}`TProgressReport.Print` for more information.
-*)
 procedure TProgressReport.Setup(title: String = 'ProgressReport'; headers: TStringArray = []; valueProvider: function: TStringArray of Object = nil; printInterval: Integer = MINUTE * 5);
 begin
   Self.Headers := headers;
@@ -36,13 +20,7 @@ begin
   Self.ValueProvider := @valueProvider;
 end;
 
-(*
-## TProgressReport.Generate
-```pascal
-function TProgressReport.Generate(values: TStringArray): String;
-```
-Generates a formatted report with the provided values in a bordered table format.
-*)
+
 function TProgressReport.Generate(values: TStringArray): String;
 var
   i, totalW, headersW, valuesW: Integer;
@@ -71,56 +49,7 @@ begin
   Result := header + LINE_SEP + lines + btm;
 end;
 
-(*
-## TProgressReport.Print
-```pascal
-procedure TProgressReport.Print();
-```
-Displays the current report using the `TProgressReport.ValueProvider` function
-to retrieve current values.
 
-Keep in mind that calling this won't do anything until
-`TProgressReport.PrintTimer.IsFinished` is true.
-
-Here is a short example of how to setup and print reports:
-```pascal
-{$I WaspLib/main.simba}
-
-function GetReportValues(): TStringArray;
-begin
-  Result := [
-    GetTimeStamp(TIME_SHORT),
-    Logger.TimeRunning.ElapsedFmt(TIME_SHORT),
-    Antiban.TimeRunning.ElapsedFmt(TIME_SHORT),
-    ToStr(50)
-  ];
-end;
-
-begin
-  Logger.Setup('Script Name');
-  ProgressReport.Setup(
-    'Script Name',
-    ['Full script runtime:', 'Botting runtime:', 'Time spent in antiban:', 'Boss kills:'],
-    @GetReportValues,
-    SECOND
-  );
-
-  while True do
-    ProgressReport.Print();
-end.
-```
-And the output should look something like this:
-```
-Succesfully compiled in 906.08 milliseconds.
-+ Script Name ----------------------+
-| Full script runtime:     00:00:06 |
-| Botting runtime:         00:00:01 |
-| Time spent in antiban:   00:00:00 |
-| Boss kills:              50       |
-+-----------------------------------+
-Succesfully executed in 7976.01 milliseconds.
-```
-*)
 procedure TProgressReport.Print();
 begin
   if not Self.PrintTimer.IsFinished then

@@ -1,16 +1,4 @@
-(*
-# Chat Listener
-The {ref}`Chat Listener` is a tool that allows you to listen for chat messages
-and run `OnMessage` callbacks which should be thread safe.
 
-You can debug incoming messages by adding this compiler directive before you
-include WaspLib:
-```pascal
-{$DEFINE WL_DEBUG_CHAT_LISTENER}
-```
-
-For more information on listeners and how to run them check {ref}`Listeners`.
-*)
 {$DEFINE WL_CHAT_LISTENER_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
@@ -18,11 +6,7 @@ For more information on listeners and how to run them check {ref}`Listeners`.
 {.$DEFINE WL_DEBUG_CHAT_LISTENER}
 
 type
-(*
-(TChatMessage)=
-## TChatMessage type
-Type representing a chat message.
-*)
+
   TChatMessage = record
     Ironman: EIron;
     Username, Text: String;
@@ -110,20 +94,7 @@ begin
   );
 end;
 
-(*
-## ChatListener.GetIronManType
-```pascal
-function TChatListener.GetIronManType(trgt: TTarget) : EIron;
-```
-Very similar to {ref}`Chat.GetIronManType`.
 
-Returns the account ironman type.
-
-Example:
-```pascal
-WriteLn ChatListener.GetIronManType(Target);
-```
-*)
 function TChatListener.GetIronManType(trgt: TTarget; b: TBox): EIron;
 begin
   b.X2 := b.X1 + 10;
@@ -148,21 +119,7 @@ begin
 end;
 
 
-(*
-## ChatListener.GetMessage
-```pascal
-function TChatListener.GetMessage(trgt: TTarget; line: Integer): TChatMessage;
-```
-Very similar to `Chat.GetMessage` when the chat is not transparent in how it
-works.
 
-Gets the message on the last `Chat` `line`.
-
-Example:
-```pascal
-WriteLn ChatListener.GetMessage(Target, 5);
-```
-*)
 function TChatListener.GetMessage(trgt: TTarget; line: Integer): TChatMessage;
 var
   img: TImage;
@@ -202,20 +159,7 @@ begin
   Result.Text := txt.CopyRange(i+1, Length(txt)).TrimLeft().ExtractText();
 end;
 
-(*
-## ChatListener.GetTransparentMessage
-```pascal
-function TChatListener.GetTransparentMessage(trgt: TTarget; line: Integer): TChatMessage;
-```
-Very similar to `Chat.GetMessage` for transparent messages in how it works.
 
-Gets the message on the last `Chat` `line`.
-
-Example:
-```pascal
-WriteLn ChatListener.GetTransparentMessage(Target, 5);
-```
-*)
 function TChatListener.GetTransparentMessage(trgt: TTarget; line: Integer): TChatMessage;
 var
   img: TImage;
@@ -251,18 +195,7 @@ begin
 end;
 
 
-(*
-## ChatListener.Check
-```pascal
-function TChatListener.Check(): Boolean;
-```
-Returns true if there's been new messages.
 
-Example:
-```pascal
-WriteLn ChatListener.Check();
-```
-*)
 function TChatListener.Check(): Boolean;
 var
   img: TImage;
@@ -302,10 +235,7 @@ begin
 end;
 
 var
-(*
-## ChatListener variable
-Global {ref}`TChatListener` variable.
-*)
+
 {$H-}
   ChatListener: TChatListener;
 {$H+}

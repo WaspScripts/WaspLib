@@ -1,28 +1,12 @@
-(*
-# Friends
-Methods to interact with the friends gametab.
-```{figure} ../../images/friends.png
-```
-*)
+
 {$DEFINE WL_FRIENDS_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-(EFriendsButton)=
-## EFriendsButton enum
-```pascal
-EFriendsButton = enum(ADD, DEL, FRIENDS, IGNORE);
-```
-Represents the buttons in the friends tab.
-*)
+
   EFriendsButton = enum(ADD, DEL, FRIENDS, IGNORE);
 
-(*
-(TFriend)=
-## TFriend type
-Represents a friend/ignore in the friends tab.
-*)
+
   TFriend = record
     Name: String;
     World: Integer;
@@ -31,11 +15,7 @@ Represents a friend/ignore in the friends tab.
 
   TFriendArray = array of TFriend;
 
-(*
-(TFriends)=
-## TFriends type
-Main record responsible with handling the friends gametab.
-*)
+
   TFriends = record
     Scroll: TScrollBar;
     Buttons: array [EFriendsButton] of TButton;
@@ -71,59 +51,19 @@ begin
   Self.Scroll.Setup();
 end;
 
-(*
-## Friends.IsOpen
-```pascal
-function TFriends.IsOpen(): Boolean;
-```
-Returns true if the friends tab is open.
 
-Example:
-```pascal
-WriteLn Friends.IsOpen();
-```
-*)
 function TFriends.IsOpen(): Boolean;
 begin
   Result := GameTabs.IsOpen(EGameTab.FRIENDS);
 end;
 
-(*
-## Friends.Open
-```pascal
-function TFriends.Open(): Boolean;
-```
 
-Attempts to open the friends gametab.
-
-Example:
-```pascal
-WriteLn Friends.Open();
-```
-*)
 function TFriends.Open(): Boolean;
 begin
   Result := GameTabs.Open(EGameTab.FRIENDS);
 end;
 
-(*
-## Friends.GetFriends
-```pascal
-function TFriends.GetFriends(): TFriendArray;
-```
-Returns an array of all friends/ignores currently visible in the friends tab.
 
-Example:
-```pascal
-var
-  friend: TFriend;
-  friends: TFriendArray;
-begin
-  friends := Friends.GetFriends();
-  for friend in friends do
-    WriteLn('Friend: ' + friend.Name + ' World: ' + IntToStr(friend.World));
-end;
-*)
 function TFriends.GetFriends(): TFriendArray;
 var
   tpa : TPointArray;
@@ -152,26 +92,7 @@ begin
     end;
 end;
 
-(*
-## Friends.Find
-```pascal
-function TFriends.Find(name: String): TFriend;
-```
 
-Searches for a friend/ignore by name in the friends tab.
-
-Example:
-```pascal
-var
-  friend: TFriend;
-begin
-  friend := Friends.Find('SomePlayer');
-  if friend <> Default(TFriend) then
-    WriteLn('Found friend: ' + friend.Name + ' World: ' + IntToStr(friend.World))
-  else
-    WriteLn('Friend not found.');
-end;
-*)
 function TFriends.Find(name: String): TFriend;
 var
   timeout: TCountDown;
@@ -200,19 +121,7 @@ begin
   until timeout.IsFinished;
 end;
 
-(*
-## Friends.AddFriend
-```pascal
-function TFriends.AddFriend(name: String): Boolean;
-```
 
-Attempts to add a friend to the friends list.
-
-Example:
-```pascal
-WriteLn Friends.AddFriend('SomePlayer');
-```
-*)
 function TFriends.AddFriend(name: String): Boolean;
 begin
   if not Self.Open() then
@@ -224,19 +133,7 @@ begin
   Result := Chat.AnswerQuery('Enter name of friend to add to list', name, 2000, 250);
 end;
 
-(*
-## Friends.DeleteFriend
-```pascal
-function TFriends.DeleteFriend(name: String): Boolean;
-```
 
-Attempts to delete a friend from the friends list.
-
-Example:
-```pascal
-WriteLn Friends.DeleteFriend('SomePlayer');
-```
-*)
 function TFriends.DeleteFriend(name: String): Boolean;
 var
   friend: TFriend;
@@ -265,19 +162,7 @@ begin
   end;
 end;
 
-(*
-## Friends.SendMessage
-```pascal
-function TFriends.SendMessage(name, message: String): Boolean;
-```
 
-Attempts to send a message to a friend.
-
-Example:
-```pascal
-WriteLn Friends.SendMessage('SomePlayer', 'Hello there!');
-```
-*)
 function TFriends.SendMessage(name, message: String): Boolean;
 var
   friend: TFriend;
@@ -292,19 +177,7 @@ begin
   Result := Chat.AnswerQuery('Enter message to send to ' + name, message, 2000, 250);
 end;
 
-(*
-## Friends.AddIgnore
-```pascal
-function TFriends.AddIgnore(name: String): Boolean;
-```
 
-Attempts to add a player to the ignore list.
-
-Example:
-```pascal
-WriteLn Friends.AddIgnore('SomePlayer');
-```
-*)
 function TFriends.AddIgnore(name: String): Boolean;
 begin
   if not Self.Open() then
@@ -316,19 +189,7 @@ begin
   Result := Chat.AnswerQuery('Enter name of player to add to list', name, 2000, 250);
 end;
 
-(*
-## Friends.DeleteIgnore
-```pascal
-function TFriends.DeleteIgnore(name: String): Boolean;
-```
 
-Attempts to delete a player from the ignore list.
-
-Example:
-```pascal
-WriteLn Friends.DeleteIgnore('SomePlayer');
-```
-*)
 function TFriends.DeleteIgnore(name: String): Boolean;
 var
   friend: TFriend;
@@ -356,8 +217,5 @@ begin
 end;
 
 var
-(*
-## Friends variable
-Global {ref}`TFriends` variable.
-*)
+
   Friends: TFriends;

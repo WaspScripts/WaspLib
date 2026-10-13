@@ -1,9 +1,4 @@
-(*
-# CargoHold
-Methods to interact with the cargo hold interface.
-```{figure} ../../images/cargohold_interface.png
-```
-*)
+
 
 {$DEFINE WL_CARGOHOLD_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -12,10 +7,7 @@ type
   ECargoDeposit = enum(CARGO, SALVAGE, INVENTORY);
   ECargoMode = enum(STACKED, UNSTACKED);
 
-(*
-## TCargoHold type
-Main record to interact with the {ref}`CargoHold` interface.
-*)
+
   TCargoHold = record
     Title: TInterfaceTitle;
     Bounds, ToolArea: TBox;
@@ -25,13 +17,7 @@ Main record to interact with the {ref}`CargoHold` interface.
     Scroll: TScrollBar;
   end;
 
-(*
-## CargoHold.FindCargoBoundaries
-```pascal
-function TCargoHold.FindCargoBoundaries(): TBoxArray;
-```
-Finds item boundaries and returns them as a TBoxArray.
-*)
+
 function TCargoHold.FindCargoBoundaries(): TBoxArray;
 var
   tpa, final: TPointArray;
@@ -60,13 +46,7 @@ begin
   end;
 end;
 
-(*
-## CargoHold.FindToolBoundaries
-```pascal
-function TCargoHold.FindToolBoundaries(): TBoxArray;
-```
-Finds item boundaries and returns them as a TBoxArray.
-*)
+
 function TCargoHold.FindToolBoundaries(): TBoxArray;
 var
   tpa, final: TPointArray;
@@ -95,14 +75,7 @@ begin
   end;
 end;
 
-(*
-## CargoHold.SetupInterface
-```pascal
-procedure TCargoHold.SetupInterface();
-```
-Internal method used to setup the {ref}`TCargoHold` coordinates.
-This is automatically called for you on the {ref}`CargoHold variable`.
-*)
+
 procedure TCargoHold.SetupInterface();
 begin
   case Client.Mode of
@@ -128,35 +101,13 @@ begin
   Self.ToolItems.Setup('CargoHull.ToolItems', @Self.ToolSlots, [0,0], nil);
 end;
 
-(*
-## CargoHold.IsOpen
-```pascal
-function TCargoHold.IsOpen(): Boolean;
-```
-Returns true if the CargoHold pin is open.
 
-Example:
-```pascal
-WriteLn CargoHold.IsOpen();
-```
-*)
 function TCargoHold.IsOpen(): Boolean;
 begin
   Result := Self.Title.IsTitle('Cargo Hold:');
 end;
 
-(*
-## CargoHold.WaitOpen
-```pascal
-function TCargoHold.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
-```
-Returns true if the CargoHold pin opens within `time` milliseconds..
 
-Example:
-```pascal
-WriteLn CargoHold.WaitOpen();
-```
-*)
 function TCargoHold.WaitOpen(time: Integer = 600; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -164,20 +115,7 @@ begin
 end;
 
 
-(*
-## CargoHold.Close
-```pascal
-function TCargoHold.Close(escape: Boolean): Boolean;
-function TCargoHold.Close(escapeProbability: Single = 0): Boolean; overload;
-```
-Closes the CargoHold, depending on `escape` or `escapeProbability the function
-will either click the button or press escape key.
 
-Example:
-```pascal
-WriteLn CargoHold.Close();
-```
-*)
 function TCargoHold.Close(escape: Boolean): Boolean;
 begin
   Result := Self.Title.Close(escape);
@@ -189,8 +127,5 @@ begin
 end;
 
 var
-(*
-## CargoHold variable
-Global {ref}`TCargoHold` variable.
-*)
+
   CargoHold: TCargoHold;
