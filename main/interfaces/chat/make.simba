@@ -1,38 +1,23 @@
-(*
-# Make
-The "Make" menu is the {ref}`Chat` box menu that pops up when you attempt to
-craft certain items in game.
-```{figure} ../../images/make_interface.png
-```
-*)
+
 
 {$DEFINE WL_MAKE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TMakeQuantityButton type
-Helper record used to cache make menu buttons.
-*)
+
   TMakeQuantityButton = record
     Quantity: EItemQuantity;
     Button: TButton;
     UpText: String;
   end;
 
-(*
-## TMakeItem
-Helper record used to cache make menu items.
-*)
+
   TMakeItem = record
     Item: String;
     Index, Quantity: Integer;
   end;
 
-(*
-## TMake
-Main record used to interact with the {ref}`Make` menu.
-*)
+
   TMake = record
     Items: array of TMakeItem;
     QuantityButtonBoxes: TBoxArray;
@@ -44,15 +29,7 @@ Main record used to interact with the {ref}`Make` menu.
     const BORDER_COLOR: TColorTolerance = [$080707, 5, EColorSpace.RGB, [1.000, 1.000, 1.000]];
   end;
 
-(*
-## Make.SetupInterface
-```pascal
-procedure TMake.SetupInterface();
-```
-Internal method used to setup the {ref}`TMake` coordinates.
 
-This is automatically called for you on the {ref}`Make variable`.
-*)
 procedure TMake.SetupInterface();
 begin
   with Chat.Bounds do
@@ -73,56 +50,20 @@ begin
   end;
 end;
 
-(*
-## Make.IsOpen
-```pascal
-function TMake.IsOpen(): Boolean;
-```
-Returns True/False if the {ref}`Make` if open.
 
-Example:
-```pascal
-WriteLn Make.IsOpen();
-```
-*)
 function TMake.IsOpen(): Boolean;
 begin
   Result := Target.HasColor(Self.TEXT_COLOR, 0, 500, Self._IsOpenHelper);
 end;
 
-(*
-## Make.WaitOpen
-```pascal
-function TMake.WaitOpen(time: Integer = TICK; interval: Integer = -1): Boolean;
-```
-Returns True if the {ref}`Make` opens within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn Make.WaitOpen();
-```
-*)
 function TMake.WaitOpen(time: Integer = TICK; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## Make.GetItemBoxes
-```pascal
-function TMake.GetItemBoxes(): TBoxArray;
-```
-Returns the available item buttons as a TBoxArray.
 
-Example:
-```pascal
-ShowOnTarget(Make.GetItemBoxes());
-```
-
-```{figure} ../../images/make_items.png
-```
-*)
 function TMake.GetItemBoxes(): TBoxArray;
 var
   tpa: TPointArray;
@@ -137,31 +78,7 @@ begin
   end;
 end;
 
-(*
-## Make.GetQuantityBoxes
-```pascal
-function TMake.GetQuantityBoxes(): TBoxArray;
-```
-Finds quantity button boundaries and returns them as a TBoxArray.
 
-You have 2 ways of getting the quantity boxes, a static one:
-```pascal
-ShowOnTarget(Make.QuantityButtons);
-```
-```{figure} ../../images/make_static_quantity_boxes.png
-The make static boxes.
-```
-
-And a dynamic one:
-```pascal
-ShowOnTarget(Make.GetQuantityBoxes());
-```
-```{figure} ../../images/make_quantity_boxes.png
-The make "dynamic" boxes.
-```
-
-There are use cases for both, internally, `Make.GetQuantityBoxes` is usually used.
-*)
 function TMake.GetQuantityBoxes(): TBoxArray;
 var
   tpa: TPointArray;
@@ -177,18 +94,7 @@ begin
   Result := Result.SortByX(True);
 end;
 
-(*
-## Make.GetQuantityButtons()
-```pascal
-function TMake.GetQuantityButtons(): array of TMakeQuantityButton;
-```
-Returns the visible quantity buttons as a array of TMakeQuantityButton.
 
-Example:
-```pascal
-WriteLn Make.GetQuantityButtons();
-```
-*)
 function TMake.GetQuantityButtons(): array of TMakeQuantityButton;
 var
   boxes: TBoxArray;
@@ -217,29 +123,7 @@ begin
 end;
 
 
-(*
-## Make.FindQuantityButtons
-```pascal
-function TMake.FindQuantityButtons(): array of TMakeQuantityButton;
-```
-Attempts to find and return all quantity buttons in the Make interface.
-This is a safe wrapper around `GetQuantityButtons()` that first verifies
-the Make interface is open before attempting to locate the buttons.
 
-Returns an empty array if the Make interface is not currently open.
-
-Example:
-```pascal
-var
-  buttons: array of TMakeQuantityButton;
-  i: Integer;
-begin
-  buttons := Make.FindQuantityButtons();
-  for i := 0 to High(buttons) do
-    WriteLn('Button ', i, ' bounds: ', buttons[i].Button.Bounds);
-end;
-```
-*)
 function TMake.FindQuantityButtons(): array of TMakeQuantityButton;
 begin
   if not Self.IsOpen() then
@@ -247,20 +131,7 @@ begin
   Result := Self.GetQuantityButtons();
 end;
 
-(*
-### Make.GetCurrentQuantityButton
-```pascal
-function TMake.GetCurrentQuantityButton(): Integer;
-```
-Get the current active make quantity button.
 
-Example:
-```pascal
-current := Make.GetCurrentQuantityButton();
-WritLn current;
-ShowOnTarget(current.Button.Bounds);
-```
-*)
 function TMake.GetCurrentQuantityButton(): TMakeQuantityButton;
 var
   btns: array of TMakeQuantityButton;
@@ -275,21 +146,7 @@ begin
       Exit(btns[i]);
 end;
 
-(*
-### Make.GetCurrentQuantity
-```pascal
-function TMake.GetCurrentQuantity(): Integer;
-```
-Get the current active make quantity as an integer.
-If All button is current then returns -1.
 
-Example:
-```pascal
-current := Make.GetCurrentQuantityButton();
-WritLn current;
-ShowOnTarget(current.Button.Bounds);
-```
-*)
 function TMake.GetCurrentQuantity(): Integer;
 var
   current: TMakeQuantityButton;
@@ -308,57 +165,20 @@ begin
 end;
 
 
-(*
-## Make.HasHint
-```pascal
-function TMake.HasHint(): Boolean;
-```
-Returns true if a hint tooltip is visible.
 
-Example:
-```pascal
-if Make.HasHint() then
-  ShowOnTarget(Make.GetHintBox());
-```
-*)
 function TMake.HasHint(): Boolean;
 begin
   Result := Target.HasColor($A0FFFF, 0, 1, Chat.Bounds);
 end;
 
-(*
-## Make.WaitHint
-```pascal
-function TMake.WaitHint(time: Integer = TICK; interval: Integer = -1): Boolean;
-```
-Returns true if a hint tooltip is visible within `time` milliseconds.
 
-Example:
-```pascal
-if Make.WaitHint() then
-  ShowOnTarget(Make.GetHintBox());
-```
-*)
 function TMake.WaitHint(time: Integer = TICK; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.HasHint(), interval, time);
 end;
 
-(*
-## Make.GetHintBox
-```pascal
-function TMake.GetHintBox(): TBox;
-```
-Returns the hint tooltip bounds.
 
-Example:
-```pascal
-ShowOnTarget(Make.GetHintBox());
-```
-```{figure} ../../images/make_hint.png
-```
-*)
 function TMake.GetHintBox(): TBox;
 var
   tpa: TPointArray;
@@ -368,35 +188,13 @@ begin
     Result := tpa.Bounds();
 end;
 
-(*
-## Make.ReadHint
-```pascal
-function TMake.ReadHint(): String;
-```
-Returns the hint tooltip text.
 
-Example:
-```pascal
-WriteLn Make.ReadHint();
-```
-*)
 function TMake.ReadHint(): String;
 begin
   Result := OCR.Recognize(Self.GetHintBox(), Fonts.PLAIN_12, [$0], 0);
 end;
 
-(*
-## Make.CloseHint
-```pascal
-function TMake.CloseHint(): Boolean;
-```
-Attempts to close a hint tooltip.
 
-Example:
-```pascal
-WriteLn Make.CloseHint();
-```
-*)
 function TMake.CloseHint(): Boolean;
 var
   tpa: TPointArray;
@@ -414,50 +212,9 @@ begin
   Result := SleepUntil(not Self.HasHint(), RandomMode(100, 50, 1500), 600);
 end;
 
-(*
-## Make.QuantityButtons
-The quantity buttons are dynamic there can be anywhere from 1 to 6 available.
 
-You have their coordinates available at anytime through the
-`TMake.QuantityButtons` variable:
-```pascal
-ShowOnTarget(Make.QuantityButtons);
-```
 
-```{figure} ../../images/make_quantities.png
-The make interface quantity buttons.
-```
 
-Despite them being always available you should only interact with the ones that
-are visible which you can do easily through the next methods.
-*)
-
-(*
-### Make.FindQuantityButton
-```pascal
-function TMake.FindQuantityButton(amount: Integer): TMakeQuantityButton;
-```
-Finds and returns the TMakeQuantityButton matching the specified `amount`.
-
-For standard quantities (1, 5, 10, All), returns the corresponding button directly.
-For custom amounts, prioritizes a button already set to that value, otherwise
-returns the "Other" (X) button which will prompt for manual entry.
-
-Returns an empty record if no matching button is found or the Make interface is not open.
-
-Note: Automatically closes any tooltip that may be covering the quantity buttons.
-
-Example:
-```pascal
-var
-  btn: TMakeQuantityButton;
-begin
-  btn := Make.FindQuantityButton(5);
-  if btn <> [] then
-    WriteLn('Found button: ', btn);
-end;
-```
-*)
 function TMake.FindQuantityButton(amount: Integer): TMakeQuantityButton;
 var
   idx: Integer;
@@ -488,35 +245,13 @@ begin
  Result := [];
 end;
 
-(*
-### Make.IsQuantitySelected
-```pascal
-function TMake.IsQuantitySelected(idx: Integer): Boolean;
-```
-Checks if the specified `idx` quantity button is currently selected.
 
-Example:
-```pascal
-WriteLn Make.IsQuantitySelected(Make.QUANTITY_ALL);
-```
-*)
 function TMake.IsQuantitySelected(idx: Integer): Boolean;
 begin
   Result := Target.HasColor(TFonts.WHITE, 0, 1, Self.QuantityButtonBoxes[idx]);
 end;
 
-(*
-### Make.SetQuantity
-```pascal
-function TMake.SetQuantity(amount: Integer): Boolean;
-```
-Attempts to set a quantity.
 
-Example:
-```pascal
-WriteLn Make.SetQuantity(Make.QUANTITY_ALL);
-```
-*)
 function TMake.SetQuantity(amount: Integer): Boolean;
 var
   quantityButton: TMakeQuantityButton;
@@ -541,14 +276,7 @@ begin
 end;
 
 
-(*
-## Make._SelectHelper
-```pascal
-function TMake._SelectHelper(index: Integer; boxes: TBoxArray; keyboardProbability: Single): Boolean;
-```
-Internal helper method that handles selecting an item with or without the keyboard.
-You probably will never need to use this directly.
-*)
+
 function TMake._SelectHelper(index: Integer; boxes: TBoxArray; keyboardProbability: Single): Boolean;
 begin
   if High(boxes) < index then Exit;
@@ -573,20 +301,7 @@ begin
   Result := SleepUntil(not Self.IsOpen(), RandomMode(100, 50, 1500), 2000);
 end;
 
-(*
-## Make.Select
-```pascal
-function TMake.Select(index, quantity: Integer; keyboardProbability: Single = -1): Boolean;
-function TMake.Select(item: String; quantity: Integer; keyboardProbability: Single = -1): Boolean; overload;
-```
-Select a `index` or an `item` of the available item buttons available.
-If you are selecting an `item` you need to use the tooltip text.
 
-Example:
-```pascal
-WriteLn Make.Select('Maple longbow', QUANTITY_ALL);
-```
-*)
 function TMake.Select(index, quantity: Integer; keyboardProbability: Single = -1): Boolean;
 var
   boxes: TBoxArray;
@@ -635,8 +350,5 @@ begin
 end;
 
 var
-(*
-## Make variable
-Global {ref}`TMake` variable.
-*)
+
   Make: TMake;
