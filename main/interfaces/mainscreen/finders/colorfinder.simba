@@ -282,13 +282,13 @@ Main record used to find and interact with complex color objects.
     Transformer: TColorFinderTransformer;
   end;
 
-function TColorFinder._FindHelper(area: TBox): TPointArray;
+function TColorFinder._FindHelper(trgt: TTarget; area: TBox): TPointArray;
 var
   i: Integer;
   primary, secondary: TPointArray;
 begin
   for i := 0 to High(Self.Colors) do //Find TColorFinder.Colors
-    Result += Target.FindColor(Self.Colors[i], area);
+    Result += trgt.FindColor(Self.Colors[i], area);
 
   for i := 0 to High(Self.ColorClusters) do //Find TColorFinder.ColorClusters
   begin
@@ -298,15 +298,15 @@ begin
       Continue;
     end;
 
-    primary := Target.FindColor(Self.ColorClusters[i].Primary, area);
+    primary := trgt.FindColor(Self.ColorClusters[i].Primary, area);
     if primary.IsEmpty then
       Continue;
 
-    secondary := Target.FindColor(Self.ColorClusters[i].Secondary, area);
+    secondary := trgt.FindColor(Self.ColorClusters[i].Secondary, area);
     if secondary.IsEmpty then
       Continue;
 
-    Result += primary.PointsNearby(secondary, 0, MainScreen.NormalizeDistance(Self.ColorClusters[i].Distance));
+    Result += primary.PointsNearby(secondary, 0, TMainScreen.NormalizeDistance(Self.ColorClusters[i].Distance));
   end;
 end;
 
@@ -326,13 +326,16 @@ what was found are returned through `atpa`.
 function TColorFinder.Find(out atpa: T2DPointArray; areas: TBoxArray): Boolean;
 var
   transformer: TColorFinderTransformer;
+  trgt: TTarget;
   area: TBox;
   tpa: TPointArray;
 begin
   transformer := Self.Transformer.Normalize();
+  trgt := new TTarget();
+  trgt.SetImage(Target.GetImage());
 
   for area in areas do
-    tpa += Self._FindHelper(area);
+    tpa += Self._FindHelper(trgt, area);
 
   atpa := transformer.Process(tpa);
   Result := atpa <> [];
@@ -341,32 +344,38 @@ end;
 function TColorFinder.Find(out atpa: T2DPointArray; areas: T2DPointArray; polygon: Boolean): Boolean; overload;
 var
   transformer: TColorFinderTransformer;
+  trgt: TTarget;
   area: TPointArray;
   tpa, tmp: TPointArray;
 begin
   transformer := Self.Transformer.Normalize();
+  trgt := new TTarget();
+  trgt.SetImage(Target.GetImage());
 
   if polygon then
   begin
     for area in areas do
     begin
-      tmp := Self._FindHelper(area.Bounds());
+      tmp := Self._FindHelper(trgt, area.Bounds());
       if tmp.IsEmpty then
         Continue;
+
       tpa += tmp.ExtractPolygon(area);
       tmp := [];
     end;
-  end
-  else
+
+    atpa := transformer.Process(tpa);
+    Exit(atpa <> []);
+  end;
+
+  for area in areas do
   begin
-    for area in areas do
-    begin
-      tmp := Self._FindHelper(area.Bounds());
-      if tmp.IsEmpty then
-        Continue;
-      tpa += tmp.Intersection(area);
-      tmp := [];
-    end;
+    tmp := Self._FindHelper(trgt, area.Bounds());
+    if tmp.IsEmpty then
+      Continue;
+
+    tpa += tmp.Intersection(area);
+    tmp := [];
   end;
 
   atpa := transformer.Process(tpa);
@@ -377,18 +386,24 @@ end;
 function TColorFinder.FindEx(out atpa: T2DPointArray; out found: TBooleanArray; areas: TBoxArray): Boolean;
 var
   transformer: TColorFinderTransformer;
+  trgt: TTarget;
   i: Integer;
   tpa: TPointArray;
 begin
   transformer := Self.Transformer.Normalize();
-
+  trgt := new TTarget();
+  trgt.SetImage(Target.GetImage());
   SetLength(found, Length(areas));
+
   for i := 0 to High(areas) do
   begin
-    tpa := Self._FindHelper(areas[i]);
-    if tpa = [] then Continue;
+    tpa := Self._FindHelper(trgt, areas[i]);
+    if tpa.IsEmpty then
+      Continue;
+
     tpa := transformer.Process(tpa).Merge();
-    if tpa = [] then Continue;
+    if tpa.IsEmpty then
+      Continue;
 
     found[i] := True;
     atpa += tpa;
@@ -401,23 +416,27 @@ end;
 function TColorFinder.FindEx(out atpa: T2DPointArray; out found: TBooleanArray; areas: T2DPointArray; polygon: Boolean): Boolean; overload;
 var
   transformer: TColorFinderTransformer;
+  trgt: TTarget;
   i: Integer;
   tpa: TPointArray;
 begin
   transformer := Self.Transformer.Normalize();
-
+  trgt := new TTarget();
+  trgt.SetImage(Target.GetImage());
   SetLength(found, Length(areas));
 
   if polygon then
   begin
     for i := 0 to High(areas) do
     begin
-      tpa := Self._FindHelper(areas[i].Bounds());
-      if tpa = [] then Continue;
+      tpa := Self._FindHelper(trgt, areas[i].Bounds());
+      if tpa.IsEmpty then
+        Continue;
 
       tpa := tpa.ExtractPolygon(areas[i]);
       tpa := transformer.Process(tpa).Merge();
-      if tpa = [] then Continue;
+      if tpa.IsEmpty then
+        Continue;
 
       found[i] := True;
       atpa += tpa;
@@ -429,11 +448,14 @@ begin
 
   for i := 0 to High(areas) do
   begin
-    tpa := Self._FindHelper(areas[i].Bounds());
-    if tpa = [] then Continue;
+    tpa := Self._FindHelper(trgt, areas[i].Bounds());
+    if tpa.IsEmpty then
+      Continue;
+
     tpa := tpa.Intersection(areas[i]);
     tpa := transformer.Process(tpa).Merge();
-    if tpa = [] then Continue;
+    if tpa.IsEmpty then
+      Continue;
 
     found[i] := True;
     atpa += tpa;

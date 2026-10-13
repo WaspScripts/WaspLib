@@ -766,7 +766,7 @@ end;
 (*
 ### MainScreen.NormalizeDistance
 ```pascal
-function TMainScreen.NormalizeDistance(dist: Integer): Integer;
+function TMainScreen.NormalizeDistance(dist: Integer): Integer; static;
 ```
 Converts a distance acquired from the **fixed client* and **default zoom** to the
 current mainscreen with help of {ref}`MM2MS`.
@@ -783,7 +783,7 @@ begin
   while True do
   begin
     Options.GetZoomLevel(False);
-    dist := MainScreen.NormalizeDistance(50);
+    dist := TMainScreen.NormalizeDistance(50);
     b := TBox.Create(MainScreen.Center, dist, dist);
     ShowOnTarget(b);
   end;
@@ -794,7 +794,7 @@ It will look something like this:
 ```{figure} ../../images/normalizedist.gif
 ```
 *)
-function TMainScreen.NormalizeDistance(dist: Integer): Integer;
+function TMainScreen.NormalizeDistance(dist: Integer): Integer; static;
 var
   arr: TVector2Array;
 begin
