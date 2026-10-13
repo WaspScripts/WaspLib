@@ -39,28 +39,29 @@ Compares two images and returns True if similarity threshold is met.
 function TImageCompareUtils.Compare(image, template: TImage; out similarity: Single): Boolean;
 var
   match: Single;
-  tmp: TImage;
+  img, tmp: TImage;
 begin
-  tmp := image.Copy();
+  img := image.Copy();
+  tmp := template.Copy();
 
   if @Self.Align <> nil then
-    if not Self.Align(tmp, template) then Exit;
+    if not Self.Align(img, tmp) then Exit;
 
-  if (template.Width < tmp.Width) or (template.Height < tmp.Height) then
+  if (tmp.Width < img.Width) or (tmp.Height < img.Height) then
   begin
     similarity := 0;
     Exit;
   end;
 
-  template.SetSize(tmp.Width, tmp.Height);
+  tmp.SetSize(img.Width, img.Height);
 
-  if @Self.Clean <> nil then Self.Clean(tmp, template);
-  if @Self.Filter <> nil then Self.Filter(tmp, template);
+  if @Self.Clean <> nil then Self.Clean(img, tmp);
+  if @Self.Filter <> nil then Self.Filter(img, tmp);
 
   if similarity = 1 then
-    Exit(tmp.Equals(template));
+    Exit(img.Equals(tmp));
 
-  match := tmp.Compare(template);
+  match := img.Compare(tmp);
   Result := match >= similarity;
   similarity := match;
 end;
