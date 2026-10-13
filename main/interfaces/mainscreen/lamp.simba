@@ -1,19 +1,10 @@
-(*
-# Lamp
-The `Lamp` interface is the interface that opens when you click an XP Lamp:
-```{figure} ../../images/lamp.png
-```
-In these you can select a skill to gain a small amount of experience.
-*)
+
 
 {$DEFINE WL_LAMP_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TLamp
-Main record to interact with the {ref}`Lamp` interface.
-*)
+
   TLamp = record
     Title: TInterfaceTitle;
     Bounds, ConfirmBounds: TBox;
@@ -22,17 +13,7 @@ Main record to interact with the {ref}`Lamp` interface.
 
 function TLamp.IsOpen(): Boolean; forward;
 
-(*
-## Lamp.SetupInterface
-```pascal
-procedure TLamp.SetupInterface();
-```
-Initializes Lamp variables.
 
-```{note}
-This is automatically called on the **Lamp** variable.
-```
-*)
 procedure TLamp.SetupInterface();
 const
   SKILL_ORDER: array [0..23] of ESkill = [
@@ -81,57 +62,21 @@ begin
   Self.ConfirmBounds.Y2 := Self.Bounds.Y2 - 13;
 end;
 
-(*
-## Lamp.IsOpen
-```pascal
-function TLamp.IsOpen(): Boolean;
-```
-Returns true if the {ref}`Lamp` interface is open.
 
-Example:
-```pascal
-WriteLn Lamp.IsOpen();
-```
-*)
 function TLamp.IsOpen(): Boolean;
 begin
   Result := Self.Title._IsOpen() and
             Target.HasColor($999999, 0, 819, Self.Title.Bounds);
 end;
 
-(*
-## Lamp.WaitOpen
-```pascal
-function TLamp.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
-```
-Returns true if the {ref}`Lamp` is open within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn Lamp.WaitOpen();
-```
-*)
 function TLamp.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
 begin
   Result := Self.Title.WaitOpen(time, interval);
 end;
 
 
-(*
-## Lamp.Open
-```pascal
-function TLamp.Open(item: TItem = 'Lamp'): Boolean;
-```
-Attempts to open the {ref}`Lamp` interface.
 
-By default it attempts to open the interface on the "Lamp" item, if you want a
-different one, e.g. "Antique lamp", you need to specify that.
-
-Example:
-```pascal
-WriteLn Lamp.Open();
-```
-*)
 function TLamp.Open(item: TItem = 'Lamp'): Boolean;
 begin
   if Self.IsOpen() then
@@ -142,20 +87,7 @@ begin
 end;
 
 
-(*
-## Lamp.Close
-```pascal
-function TLamp.Close(escape: Boolean): Boolean;
-function TLamp.Close(escapeProbability: Single = 0): Boolean; overload;
-```
-Closes the Lamp interface. Depending on `escape` or `escapeProbability the function
-will either click the button or press escape key.
 
-Example:
-```pascal
-WriteLn Lamp.Close();
-```
-*)
 function TLamp.Close(escape: Boolean): Boolean;
 begin
   Result := Self.Title.Close(escape);
@@ -167,29 +99,7 @@ begin
 end;
 
 
-(*
-## Lamp.GetSelected
-```pascal
-function TLamp.GetSelected(): ESkill;
-```
-Returns the selected skill if there's any.
 
-`ESkill.TOTAL` is returned if no skill is selected.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  selected: ESkill;
-begin
-  selected := Lamp.GetSelected();
-  WriteLn selected;
-  ShowOnTarget(Lamp.Slots[selected]);
-end.
-```
-```{figure} ../../images/lamp_selected.png
-```
-*)
 function TLamp.GetSelected(): ESkill;
 begin
   for Result := Low(ESkill) to High(ESkill)-1 do
@@ -198,45 +108,13 @@ begin
   Result := ESkill.TOTAL;
 end;
 
-(*
-## Lamp.Enable
-```pascal
-function TLamp.Enable(skill: ESkill): Boolean;
-```
-Enabled a skill in the lamp interface.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Lamp.Enable(ESkill.HERBLORE);
-end.
-```
-```{figure} ../../images/lamp_enable.gif
-```
-*)
 function TLamp.Enable(skill: ESkill): Boolean;
 begin
   Result := Self.Slots[skill].Enabled[True];
 end;
 
-(*
-## Lamp.Confirm
-```pascal
-function TLamp.Confirm(): Boolean;
-```
-Clicks the confirm button in the lamp interface.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Lamp.Select(ESkill.HERBLORE);
-end.
-```
-```{figure} ../../images/lamp_select.gif
-```
-*)
 function TLamp.Confirm(): Boolean;
 begin
   if not Self.IsOpen() then
@@ -245,23 +123,7 @@ begin
   Result := SleepUntil(not Self.IsOpen(), 50, 600);
 end;
 
-(*
-## Lamp.Select
-```pascal
-function TLamp.Select(skill: ESkill): Boolean;
-```
-Selects a skill in the lamp interface and clicks confirm.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Lamp.Select(ESkill.HERBLORE);
-end.
-```
-```{figure} ../../images/lamp_select.gif
-```
-*)
 function TLamp.Select(skill: ESkill): Boolean;
 begin
   if not Self.Open() then
@@ -270,8 +132,5 @@ begin
 end;
 
 var
-(*
-## Lamp variable
-Global {ref}`TLamp` variable.
-*)
+
   Lamp: TLamp;

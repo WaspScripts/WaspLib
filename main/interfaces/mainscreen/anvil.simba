@@ -1,18 +1,10 @@
-(*
-# Anvil
-Anvil interface.
-```{figure} ../../images/anvil_interface.png
-```
-*)
+
 
 {$DEFINE WL_ANVIL_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TAnvil
-Main record to interact with the {ref}`Anvil` interface.
-*)
+
   TAnvil = record
     Title: TInterfaceTitle;
     Slots: TSlotInterface;
@@ -26,17 +18,7 @@ Main record to interact with the {ref}`Anvil` interface.
 
 function TAnvil.GetSlotBoxes(): TBoxArray; forward;
 
-(*
-## Anvil.SetupInterface
-```pascal
-procedure TAnvil.SetupInterface;
-```
-Initializes {ref}`Anvil` variables.
 
-```{note}
-This is automatically called for you on the {ref}`Anvil variable`.
-```
-*)
 procedure TAnvil.SetupInterface();
 var
   i: Integer;
@@ -69,44 +51,7 @@ begin
   );
 end;
 
-(*
-## Anvil.GetSlotBoxes
-```pascal
-function TAnvil.GetSlotBoxes(): TBoxArray;
-```
-Returns `Anvil.SlotBoxes` that have "smithable" items.
 
-To see `Anvil.SlotBoxes` you can run this:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(Anvil.SlotBoxes);
-end.
-```
-And it should look something like this:
-```{figure} ../../images/anvil_slotboxes.png
-```
-
-`Anvil.GetSlotBoxes` filters out the slots that are unavailable:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(Anvil.GetSlotBoxes());
-end.
-```
-```{figure} ../../images/anvil_getslotboxes.png
-```
-
-One thing you might notice from the rune 2h sword, is that our slot boxes are
-smaller than the actual click boxes of the slot.
-
-This is on purpose and there's 2 reasons for it:
-- Simplifies code because the slot sizes are not always equal, the size used is
-the smallest one anvil slots can have (limbs and bolts).
-- From previous click accuracy tests, we concluded humans tend to focus the
-click towards the center of what they are trying to click, close to a gaussian
-distribution, so using the whole click box is a little bit pointless.
-*)
 function TAnvil.GetSlotBoxes(): TBoxArray;
 var
   i: Integer;
@@ -116,58 +61,21 @@ begin
       Result += Self.SlotBoxes[i];
 end;
 
-(*
-## Anvil.IsOpen
-```pascal
-function TAnvil.IsOpen(): Boolean;
-```
-Returns true if the {ref}`Anvil` is open.
 
-Example:
-```pascal
-WriteLn Anvil.IsOpen();
-```
-*)
 function TAnvil.IsOpen(): Boolean;
 begin
   Result := MSInterface.IsOpen(EInterfaceType.CLASSIC) and
             Target.HasColor($00FF00, 0, 300, Self.SlotsArea);
 end;
 
-(*
-## Anvil.WaitOpen
-```pascal
-function TAnvil.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
-```
-Returns true if the {ref}`Anvil` is open within `time` milliseconds.
 
-Example:
-```pascal
-WriteLn Anvil.WaitOpen();
-```
-*)
 function TAnvil.WaitOpen(time: Integer; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
   Result := SleepUntil(Self.IsOpen(), interval, time);
 end;
 
-(*
-## Anvil.SetQuantity
-```pascal
-function TAnvil.SetQuantity(value: Integer): Boolean;
-```
-Attempts to enable the quantity button for the given `value`.
 
-This is probably more complex than most people would think it is because buttons
-are not always visible depending on the amount of metal bars your have in your
-{ref}`Inventory`.
-
-Example:
-```pascal
-WriteLn Anvil.SetQuantity(QUANTITY_ALL);
-```
-*)
 function TAnvil.SetQuantity(value: Integer): Boolean;
 var
   i: Integer;
@@ -218,18 +126,7 @@ begin
 end;
 
 
-(*
-## Anvil.CanSmith
-```pascal
-function TAnvil.CanSmith(item: TItem): Boolean;
-```
-Checks if the specified `item` is currently available to smith.
 
-Example:
-```pascal
-WriteLn Anvil.CanSmith('Rune 2h sword');
-```
-*)
 function TAnvil.CanSmith(item: TItem): Boolean;
 var
   slot: Integer;
@@ -241,18 +138,7 @@ begin
 end;
 
 
-(*
-## Anvil.Smith
-```pascal
-function TAnvil.Smith(item: TItem; quantity: Integer = QUANTITY_ALL; keyboardProbability: Single = -1): Boolean;
-```
-Attempts to smith the specified `item` with the specified `quantity`.
 
-Example:
-```pascal
-WriteLn Anvil.Smith('Rune 2h sword');
-```
-*)
 function TAnvil.Smith(item: TItem; quantity: Integer = QUANTITY_ALL; keyboardProbability: Single = -1): Boolean;
 var
   slot, count: Integer;
@@ -280,22 +166,7 @@ begin
 end;
 
 
-(*
-## Anvil.Hover
-```pascal
-function TAnvil.Hover(walk: Boolean = True): Boolean;
-```
-Hovers the closest anvil that WaspLib is aware of.
 
-This assumes that {ref}`Map` is being used and setup.
-It's possible to use this with other systems but you need to configure it all
-manually.
-
-It will always hover the closest anvil {ref}`TObject` on your loaded map.
-
-If you are too far, it will attempt to walk closer to it by default unless you
-set the `walk` parameter to `False`.
-*)
 function TAnvil.Hover(walk: Boolean = True): Boolean;
 var
   obj: TObject;
@@ -309,35 +180,7 @@ begin
   Result := obj.Hover();
 end;
 
-(*
-## Anvil.Open
-```pascal
-function TAnvil.Open(constref obj: TObject; walk: Boolean = True): Boolean;
-function TAnvil.Open(walk: Boolean = True): Boolean;
-```
-Opens the anvil for you.
-This assumes that {ref}`Map` is being used and is set up.
 
-It's possible to use this with other systems but you need to configure it all
-manually.
-
-It will always use the closest anvil {ref}`RSObject` WaspLib is aware of on your
-loaded map.
-
-If you are too far, it will attempt to walk closer to it by default unless you
-set the `walk` parameter to `False`.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Map.Setup([EChunk.VARROCK]);
-  Anvil.Open();
-end.
-```
-```{figure} ../../images/anvilopen.gif
-```
-*)
 function TAnvil.Open(constref obj: TObject; walk: Boolean = True): Boolean;
 begin
   if walk then
@@ -371,8 +214,5 @@ begin
 end;
 
 var
-(*
-## Anvil variable
-Global {ref}`TAnvil` variable.
-*)
+
   Anvil: TAnvil;
