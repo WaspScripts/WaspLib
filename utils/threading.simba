@@ -1,70 +1,24 @@
-(*
-# Threading
-Threading library for managing concurrent and scheduled tasks.
-Includes a thread pool for executing asynchronous operations and a scheduler for
-recurring tasks with priority queuing and built-in error handling.
 
-Credits: Developed by TazE
-*)
 
 {$DEFINE WL_THREADING_INCLUDED}
 
 type
-(*
-## type PThreadTask
-A pointer to a TThreadTask record.
-*)
+
   PThreadTask = ^TThreadTask;
-(*
-## type PThreadWorker
-A pointer to a TThreadWorker record.
-*)
+
   PThreadWorker = ^TThreadWorker;
-(*
-## type PThreadPool
-A pointer to a TThreadPool record.
-*)
+
   PThreadPool = ^TThreadPool;
 
-(*
-## type EDebugLevel
-An enumeration defining the verbosity level for logging.
-- `EDebugLevel.NONE`: No logs are printed.
-- `EDebugLevel.INFO`: Informational messages are printed.
-- `EDebugLevel.VERBOSE`: Detailed, verbose messages are printed.
-*)
+
   EDebugLevel = enum(NONE, INFO, VERBOSE);
 
-(*
-## type TOnException
-A callback method that is triggered when a task execution throws an exception.
 
-Parameters:
-- `TaskName`: The ID of the task that failed.
-- `Error`: The exception message.
-*)
   TOnException = procedure(const TaskName, Error: String) of object;
-(*
-## type TOnComplete
-A callback method that is triggered when a task finishes execution.
 
-Parameters:
-- `TaskName`: The ID of the completed task.
-- `Success`: A boolean indicating if the task completed without errors.
-*)
   TOnComplete = procedure(const TaskName: String; Success: Boolean) of object;
 
-(*
-## type TThreadTask
-Represents a single unit of work to be executed by a worker thread.
-- `ID`: A unique identifier for the task.
-- `Method`: The method to be executed (if IsMethod is True).
-- `Proc`: The procedure to be executed (if IsMethod is False).
-- `IsMethod`: Flag indicating whether this task uses a method or procedure.
-- `Priority`: The task's priority; higher values are processed first.
-- `Created`: The timestamp when the task was created.
-- `Next`: A pointer to the next task in the queue.
-*)
+
   TThreadTask = record
     ID: String;
     Method: procedure() of object;
@@ -75,20 +29,7 @@ Represents a single unit of work to be executed by a worker thread.
     Next: PThreadTask;
   end;
 
-(*
-## type TThreadWorker
-Represents a single worker thread within a thread pool.
-- `ID`: A unique integer identifier for the worker.
-- `Name`: The name of the worker thread.
-- `Thread`: The underlying TThread object.
-- `Pool`: A pointer to the parent thread pool.
-- `Active`: Indicates if the worker thread is running.
-- `Busy`: Indicates if the worker is currently processing a task.
-- `Processed`: The total number of tasks processed by this worker.
-- `WaitTimeMS`: The current sleep time when no tasks are available.
-- `MaxWaitTimeMS`: The maximum sleep time for the worker.
-- `LastActive`: The timestamp of the last processed task.
-*)
+
   TThreadWorker = record
     ID: Integer;
     Name: String;
@@ -102,14 +43,7 @@ Represents a single worker thread within a thread pool.
     LastActive: Int64;
   end;
 
-(*
-## type TTaskQueue
-A thread-safe, priority-based queue for managing tasks.
-- `Head`: A pointer to the first task in the queue (highest priority).
-- `Tail`: A pointer to the last task in the queue.
-- `Count`: The number of tasks currently in the queue.
-- `Lock`: A TLock for ensuring thread safety.
-*)
+
   TTaskQueue = record
     Head: PThreadTask;
     Tail: PThreadTask;
@@ -117,21 +51,7 @@ A thread-safe, priority-based queue for managing tasks.
     Lock: TLock;
   end;
 
-(*
-## type TThreadPool
-Manages a collection of worker threads to execute tasks concurrently.
-- `Name`: The name of the thread pool.
-- `Workers`: An array of `TThreadWorker` records.
-- `Queue`: The `TTaskQueue` holding tasks to be processed.
-- `LogLock`: A TLock for thread-safe logging.
-- `Running`, `Terminating`, `ShuttingDown`: State flags for the pool.
-- `DebugLevel`: The current logging verbosity.
-- `TasksQueued`, `TasksProcessed`, `TasksFailed`: Counters for statistics.
-- `StartTime`: The timestamp when the pool was started.
-- `MinWorkerCount`, `MaxWorkerCount`: The minimum and maximum number of allowed workers.
-- `DefaultWorkerWaitMS`, `DefaultWorkerMaxWaitMS`: Default timing properties for workers.
-- `OnException`, `OnComplete`: Event handlers for task exceptions and completions.
-*)
+
   TThreadPool = record
     Name: String;
     Workers: array of TThreadWorker;
@@ -153,17 +73,7 @@ Manages a collection of worker threads to execute tasks concurrently.
     OnComplete: TOnComplete;
   end;
 
-(*
-## type TScheduledTask
-Represents a task that is scheduled to run at regular intervals.
-- `ID`: A unique identifier for the scheduled task.
-- `Method`: The method to execute (if IsMethod is True).
-- `Proc`: The procedure to execute (if IsMethod is False).
-- `IsMethod`: Flag indicating whether this task uses a method or procedure.
-- `Interval`: The time in milliseconds between executions.
-- `LastRun`: The timestamp of the last execution.
-- `Active`: A flag to pause or resume the task.
-*)
+
   TScheduledTask = record
     ID: String;
     Method: procedure() of object;
@@ -175,15 +85,7 @@ Represents a task that is scheduled to run at regular intervals.
   end;
   TScheduledTaskArray = array of TScheduledTask;
 
-(*
-## type TThreadScheduler
-Manages and runs scheduled tasks using a dedicated thread pool.
-- `Pool`: The `TThreadPool` used to execute scheduled tasks.
-- `Tasks`: An array of `TScheduledTask` records.
-- `Thread`: The scheduler's main management thread.
-- `Running`: A flag indicating if the scheduler loop is active.
-- `SleepIntervalMS`: The sleep interval for the scheduler's check loop.
-*)
+
   TThreadScheduler = record
     Pool: TThreadPool;
     Tasks: TScheduledTaskArray;
@@ -192,16 +94,7 @@ Manages and runs scheduled tasks using a dedicated thread pool.
     SleepIntervalMS: Integer;
   end;
 
-(*
-## type TThreadManager
-A high-level manager providing a simple interface to both a general-purpose thread pool and a task scheduler.
-- `Pool`: The primary thread pool for one-off tasks.
-- `Scheduler`: The task scheduler for recurring tasks.
-- `IsSetup`: A flag indicating if the manager has been initialized.
-- `DebugLevel`: The global debug level for all underlying components.
-- `ThreadCount`: The number of threads for the main pool.
-- `ExceptionHandler`, `CompletionHandler`: Global event handlers.
-*)
+
   TThreadManager = record
     Pool: TThreadPool;
     Scheduler: TThreadScheduler;
@@ -212,14 +105,7 @@ A high-level manager providing a simple interface to both a general-purpose thre
     CompletionHandler: TOnComplete;
   end;
 
-(*
-## TTaskQueue.Init
-```pascal
-procedure TTaskQueue.Init();
-```
-Initializes a new `TTaskQueue`, setting its head and tail to nil and creating its lock.
-This must be called before using any other queue operations.
-*)
+
 procedure TTaskQueue.Init();
 begin
   Self.Head := nil;
@@ -228,14 +114,7 @@ begin
   Self.Lock := TLock.Create();
 end;
 
-(*
-## TTaskQueue.Free
-```pascal
-procedure TTaskQueue.Free();
-```
-Frees the resources used by the queue, including clearing all tasks and freeing the lock.
-Always call this when you're done with a queue to prevent memory leaks.
-*)
+
 procedure TTaskQueue.Free();
 begin
   Self.Clear();
@@ -246,16 +125,7 @@ begin
   end;
 end;
 
-(*
-## TTaskQueue.Add
-```pascal
-procedure TTaskQueue.Add(Task: PThreadTask);
-```
-Adds a `TThreadTask` to the queue, inserting it based on its `Priority`. Higher priority tasks are placed closer to the head of the queue. This operation is thread-safe.
 
-Parameters:
-- `Task`: Pointer to the task to add. Must not be nil.
-*)
 procedure TTaskQueue.Add(Task: PThreadTask);
 var
   Current, Previous: PThreadTask;
@@ -297,16 +167,7 @@ begin
   end;
 end;
 
-(*
-## TTaskQueue.Get
-```pascal
-function TTaskQueue.Get(): PThreadTask;
-```
-Retrieves and removes the highest-priority task (the head) from the queue. Returns `nil` if the queue is empty. This operation is thread-safe.
 
-Returns:
-- `PThreadTask`: Pointer to the highest priority task, or `nil` if queue is empty.
-*)
 function TTaskQueue.Get(): PThreadTask;
 begin
   Result := nil;
@@ -328,16 +189,7 @@ begin
   end;
 end;
 
-(*
-## TTaskQueue.IsEmpty
-```pascal
-function TTaskQueue.IsEmpty(): Boolean;
-```
-Returns `True` if the queue contains no tasks, otherwise `False`. This operation is thread-safe.
 
-Returns:
-- `Boolean`: `True` if queue is empty, `False` otherwise.
-*)
 function TTaskQueue.IsEmpty(): Boolean;
 begin
   Self.Lock.Enter();
@@ -348,13 +200,7 @@ begin
   end;
 end;
 
-(*
-## TTaskQueue.Clear
-```pascal
-procedure TTaskQueue.Clear();
-```
-Removes and disposes of all tasks currently in the queue, resetting it to an empty state. This operation is thread-safe.
-*)
+
 procedure TTaskQueue.Clear();
 var
   Task: PThreadTask;
@@ -375,15 +221,7 @@ begin
   end;
 end;
 
-(*
-## TThreadWorker.Execute
-```pascal
-procedure TThreadWorker.Execute();
-```
-The main execution loop for a worker thread. It continuously fetches tasks from the pool's queue and processes them. If no tasks are available, it sleeps with an exponential backoff strategy to reduce CPU usage.
 
-This method is automatically called when the worker thread starts and should not be called manually.
-*)
 procedure TThreadWorker.Execute();
 var
   Task: PThreadTask;
@@ -419,17 +257,7 @@ begin
   Self.Active := False;
 end;
 
-(*
-## TThreadPool.Log
-```pascal
-procedure TThreadPool.Log(Level: EDebugLevel; const Msg: String);
-```
-Logs a message to the console if the given `Level` is at or below the pool's `DebugLevel`. This operation is thread-safe.
 
-Parameters:
-- `Level`: The debug level of this message.
-- `Msg`: The message to log.
-*)
 procedure TThreadPool.Log(Level: EDebugLevel; const Msg: String);
 begin
   if Self.DebugLevel >= Level then
@@ -443,16 +271,7 @@ begin
   end;
 end;
 
-(*
-## TThreadPool.GetDefaultThreadCount
-```pascal
-function TThreadPool.GetDefaultThreadCount(): Integer;
-```
-Determines the optimal number of threads for the pool based on the system's CPU information, clamped between `MinWorkerCount` and `MaxWorkerCount`.
 
-Returns:
-- `Integer`: The recommended number of worker threads for this system.
-*)
 function TThreadPool.GetDefaultThreadCount(): Integer;
 begin
   Result := CPUInfo.ThreadCount;
@@ -462,24 +281,7 @@ begin
     Result := Self.MaxWorkerCount;
 end;
 
-(*
-## TThreadPool.Init
-```pascal
-procedure TThreadPool.Init(const PoolName: String; ThreadCount: Integer = 0; DebugLevel: EDebugLevel = EDebugLevel.NONE);
-```
-Initializes the thread pool, creating and starting the specified number of worker threads.
 
-Parameters:
-- `PoolName`: A name for the thread pool, used in logging.
-- `ThreadCount`: The number of worker threads to create. If 0, a default value is determined automatically.
-- `DebugLevel`: The verbosity level for logging.
-
-Example:
-```pascal
-var Pool: TThreadPool;
-Pool.Init('MyPool', 4, EDebugLevel.INFO);
-```
-*)
 procedure TThreadPool.Init(const PoolName: String; ThreadCount: Integer = 0; DebugLevel: EDebugLevel = EDebugLevel.NONE);
 var
   i: Integer;
@@ -532,16 +334,7 @@ begin
   end;
 end;
 
-(*
-## TThreadPool.Shutdown
-```pascal
-procedure TThreadPool.Shutdown(TimeoutMS: Integer = 30000);
-```
-Gracefully shuts down the thread pool. It waits for busy workers to finish their current tasks up to a specified timeout before terminating all threads.
 
-Parameters:
-- `TimeoutMS`: Maximum time to wait for workers to finish, in milliseconds. Default is 30 seconds.
-*)
 procedure TThreadPool.Shutdown(TimeoutMS: Integer = 30000);
 var
   StartTime: Int64;
@@ -575,14 +368,7 @@ begin
   Self.Log(EDebugLevel.INFO, 'All workers terminated');
 end;
 
-(*
-## TThreadPool.Free
-```pascal
-procedure TThreadPool.Free();
-```
-Frees all resources associated with the thread pool. It ensures a proper shutdown before deallocating memory.
-Always call this when you're done with a thread pool to prevent memory leaks.
-*)
+
 procedure TThreadPool.Free();
 begin
   if not Self.Terminating then
@@ -601,20 +387,7 @@ begin
   end;
 end;
 
-(*
-## TThreadPool.ValidateTask
-```pascal
-function TThreadPool.ValidateTask(const TaskID: String; Method: procedure() of object): String;
-```
-Checks if a task is valid for submission. Returns an empty string on success or an error message on failure.
 
-Parameters:
-- `TaskID`: The task identifier to validate.
-- `Method`: The method to validate.
-
-Returns:
-- `String`: Empty string if valid, or error message if invalid.
-*)
 function TThreadPool.ValidateTask(const TaskID: String; Method: procedure() of object): String;
 begin
   Result := '';
@@ -624,20 +397,7 @@ begin
     Result := 'Method not assigned';
 end;
 
-(*
-## TThreadPool.ValidateTask (overload)
-```pascal
-function TThreadPool.ValidateTask(const TaskID: String; Proc: procedure): String; overload;
-```
-Checks if a task is valid for submission. Returns an empty string on success or an error message on failure.
 
-Parameters:
-- `TaskID`: The task identifier to validate.
-- `Proc`: The procedure to validate.
-
-Returns:
-- `String`: Empty string if valid, or error message if invalid.
-*)
 function TThreadPool.ValidateTask(const TaskID: String; Proc: procedure): String; overload;
 begin
   Result := '';
@@ -647,19 +407,7 @@ begin
     Result := 'Procedure not assigned';
 end;
 
-(*
-## TThreadPool.HasPendingTask
-```pascal
-function TThreadPool.HasPendingTask(const TaskID: String): Boolean;
-```
-Checks if a task with the given ID is already in the queue.
 
-Parameters:
-- `TaskID`: The task identifier to check for.
-
-Returns:
-- `Boolean`: `True` if a task with this ID exists in the queue, `False` otherwise.
-*)
 function TThreadPool.HasPendingTask(const TaskID: String): Boolean;
 var
   Current: PThreadTask;
@@ -682,28 +430,7 @@ begin
   end;
 end;
 
-(*
-## TThreadPool.Submit
-```pascal
-function TThreadPool.Submit(const TaskID: String; Method: procedure() of object; Priority: Integer = 0; AllowDuplicates: Boolean = False): Boolean;
-```
-Submits a task to the pool's queue for execution. By default, prevents duplicate task IDs. Returns `True` on successful submission.
 
-Parameters:
-- `TaskID`: A unique identifier for the task.
-- `Method`: The procedure to be executed.
-- `Priority`: The task's priority (higher values execute sooner). Default is 0.
-- `AllowDuplicates`: Whether to allow duplicate task IDs. Default is False.
-
-Returns:
-- `Boolean`: `True` if task was successfully submitted, `False` otherwise.
-
-Example:
-```pascal
-if Pool.Submit('MyTask', @MyProcedure, 5) then
-  WriteLn('Task submitted successfully');
-```
-*)
 function TThreadPool.Submit(const TaskID: String; Method: procedure() of object; Priority: Integer = 0; AllowDuplicates: Boolean = False): Boolean;
 var
   NewTask: PThreadTask;
@@ -747,28 +474,7 @@ begin
   Self.Log(EDebugLevel.INFO, Format('Task "%s" submitted with priority %d', [TaskID, Priority]));
 end;
 
-(*
-## TThreadPool.Submit (overload)
-```pascal
-function TThreadPool.Submit(const TaskID: String; Proc: procedure; Priority: Integer = 0; AllowDuplicates: Boolean = False): Boolean; overload;
-```
-Submits a task to the pool's queue for execution. By default, prevents duplicate task IDs. Returns `True` on successful submission.
 
-Parameters:
-- `TaskID`: A unique identifier for the task.
-- `Proc`: The procedure to be executed.
-- `Priority`: The task's priority (higher values execute sooner). Default is 0.
-- `AllowDuplicates`: Whether to allow duplicate task IDs. Default is False.
-
-Returns:
-- `Boolean`: `True` if task was successfully submitted, `False` otherwise.
-
-Example:
-```pascal
-if Pool.Submit('MyTask', @MyProcedure, 5) then
-  WriteLn('Task submitted successfully');
-```
-*)
 function TThreadPool.Submit(const TaskID: String; Proc: procedure; Priority: Integer = 0; AllowDuplicates: Boolean = False): Boolean; overload;
 var
   NewTask: PThreadTask;
@@ -812,34 +518,13 @@ begin
   Self.Log(EDebugLevel.INFO, Format('Task "%s" submitted with priority %d', [TaskID, Priority]));
 end;
 
-(*
-## TThreadPool.GetTask
-```pascal
-function TThreadPool.GetTask(): PThreadTask;
-```
-Internal function used by workers to retrieve the next task from the queue.
-This should not be called directly by user code.
 
-Returns:
-- `PThreadTask`: Pointer to the next task, or `nil` if queue is empty.
-*)
 function TThreadPool.GetTask(): PThreadTask;
 begin
   Result := Self.Queue.Get();
 end;
 
-(*
-## TThreadPool.ProcessTask
-```pascal
-procedure TThreadPool.ProcessTask(Task: PThreadTask; WorkerID: Integer);
-```
-Internal function that executes a task's method, handles exceptions, and triggers completion/exception callbacks.
-This should not be called directly by user code.
 
-Parameters:
-- `Task`: Pointer to the task to process.
-- `WorkerID`: ID of the worker executing this task.
-*)
 procedure TThreadPool.ProcessTask(Task: PThreadTask; WorkerID: Integer);
 var
   Success: Boolean;
@@ -896,31 +581,13 @@ begin
   Dispose(Task);
 end;
 
-(*
-## TThreadPool.QueueSize
-```pascal
-function TThreadPool.QueueSize(): Integer;
-```
-Returns the current number of tasks waiting in the queue.
 
-Returns:
-- `Integer`: Number of tasks currently in the queue.
-*)
 function TThreadPool.QueueSize(): Integer;
 begin
   Result := Self.Queue.Count;
 end;
 
-(*
-## TThreadPool.ActiveWorkers
-```pascal
-function TThreadPool.ActiveWorkers(): Integer;
-```
-Returns the number of worker threads that are currently running.
 
-Returns:
-- `Integer`: Number of active worker threads.
-*)
 function TThreadPool.ActiveWorkers(): Integer;
 var
   i: Integer;
@@ -931,16 +598,7 @@ begin
       Inc(Result);
 end;
 
-(*
-## TThreadPool.BusyWorkers
-```pascal
-function TThreadPool.BusyWorkers(): Integer;
-```
-Returns the number of worker threads that are currently executing a task.
 
-Returns:
-- `Integer`: Number of busy worker threads.
-*)
 function TThreadPool.BusyWorkers(): Integer;
 var
   i: Integer;
@@ -951,16 +609,7 @@ begin
       Inc(Result);
 end;
 
-(*
-## TThreadPool.Await
-```pascal
-procedure TThreadPool.Await(TimeoutMS: Integer = 30000);
-```
-Waits until the task queue is empty and all workers are idle, or until the timeout is reached.
 
-Parameters:
-- `TimeoutMS`: Maximum time to wait in milliseconds. Default is 30 seconds.
-*)
 procedure TThreadPool.Await(TimeoutMS: Integer = 30000);
 var
   StartTime: Int64;
@@ -977,16 +626,7 @@ begin
     Self.Log(EDebugLevel.INFO, 'All tasks completed');
 end;
 
-(*
-## TThreadPool.GetStats
-```pascal
-function TThreadPool.GetStats(): String;
-```
-Returns a formatted string containing performance statistics for the thread pool.
 
-Returns:
-- `String`: Detailed statistics including worker counts, task metrics, and runtime.
-*)
 function TThreadPool.GetStats(): String;
 var
   Runtime: Int64;
@@ -1004,14 +644,7 @@ begin
                     Self.TasksProcessed, Self.TasksFailed, SuccessRate, Self.QueueSize(), Runtime]);
 end;
 
-(*
-## TThreadPool.ResetStats
-```pascal
-procedure TThreadPool.ResetStats();
-```
-Resets the performance counters of the thread pool.
-This clears all task counts and resets the start time.
-*)
+
 procedure TThreadPool.ResetStats();
 begin
   Self.TasksProcessed := 0;
@@ -1020,14 +653,7 @@ begin
   Self.StartTime := Time();
 end;
 
-(*
-## TThreadScheduler.Loop
-```pascal
-procedure TThreadScheduler.Loop();
-```
-The main loop for the scheduler. It periodically checks all scheduled tasks and submits them to its thread pool for execution if their interval has elapsed.
-This method runs in a separate thread and should not be called manually.
-*)
+
 procedure TThreadScheduler.Loop();
 var
   i: Integer;
@@ -1063,18 +689,7 @@ begin
   end;
 end;
 
-(*
-## TThreadScheduler.Init
-```pascal
-procedure TThreadScheduler.Init(const Name: String; ThreadCount: Integer = 0; DebugLevel: EDebugLevel = EDebugLevel.NONE);
-```
-Initializes the scheduler, its internal thread pool, and starts the scheduling loop.
 
-Parameters:
-- `Name`: A name for the scheduler, used in logging and thread naming.
-- `ThreadCount`: Number of worker threads for the scheduler's pool. If 0, uses default.
-- `DebugLevel`: The verbosity level for logging.
-*)
 procedure TThreadScheduler.Init(const Name: String; ThreadCount: Integer = 0; DebugLevel: EDebugLevel = EDebugLevel.NONE);
 begin
   Self.Pool.Init(Name + '-Pool', ThreadCount, DebugLevel);
@@ -1085,14 +700,7 @@ begin
   Self.Thread.Name := Name + '-Scheduler';
 end;
 
-(*
-## TThreadScheduler.Free
-```pascal
-procedure TThreadScheduler.Free();
-```
-Frees all resources used by the scheduler, including its thread pool and management thread.
-Always call this when you're done with a scheduler to prevent memory leaks.
-*)
+
 procedure TThreadScheduler.Free();
 begin
   Self.Running := False;
@@ -1108,21 +716,7 @@ begin
   SetLength(Self.Tasks, 0);
 end;
 
-(*
-## TThreadScheduler.Schedule
-```pascal
-function TThreadScheduler.Schedule(const TaskID: String; Method: procedure() of object; IntervalMS: Integer = 100): Boolean;
-```
-Schedules a new recurring task.
 
-Parameters:
-- `TaskID`: A unique identifier for the task.
-- `Method`: The procedure to execute.
-- `IntervalMS`: The interval in milliseconds at which to run the task. Default is 100ms.
-
-Returns:
-- `Boolean`: `True` if task was successfully scheduled, `False` otherwise.
-*)
 function TThreadScheduler.Schedule(const TaskID: String; Method: procedure() of object; IntervalMS: Integer = 100): Boolean;
 var
   Index: Integer;
@@ -1145,21 +739,7 @@ begin
   Self.Pool.Log(EDebugLevel.INFO, Format('Task "%s" scheduled to run every %dms', [TaskID, IntervalMS]));
 end;
 
-(*
-## TThreadScheduler.Schedule (overload)
-```pascal
-function TThreadScheduler.Schedule(const TaskID: String; Proc: procedure; IntervalMS: Integer = 100): Boolean; overload;
-```
-Schedules a new recurring task.
 
-Parameters:
-- `TaskID`: A unique identifier for the task.
-- `Proc`: The procedure to execute.
-- `IntervalMS`: The interval in milliseconds at which to run the task. Default is 100ms.
-
-Returns:
-- `Boolean`: `True` if task was successfully scheduled, `False` otherwise.
-*)
 function TThreadScheduler.Schedule(const TaskID: String; Proc: procedure; IntervalMS: Integer = 100): Boolean; overload;
 var
   Index: Integer;
@@ -1182,19 +762,7 @@ begin
   Self.Pool.Log(EDebugLevel.INFO, Format('Task "%s" scheduled to run every %dms', [TaskID, IntervalMS]));
 end;
 
-(*
-## TThreadScheduler.Pause
-```pascal
-function TThreadScheduler.Pause(const TaskID: String): Boolean;
-```
-Pauses a recurring task, preventing it from being scheduled for execution. Returns `True` if the task was found and paused.
 
-Parameters:
-- `TaskID`: The ID of the task to pause.
-
-Returns:
-- `Boolean`: `True` if task was found and paused, `False` otherwise.
-*)
 function TThreadScheduler.Pause(const TaskID: String): Boolean;
 var
   i: Integer;
@@ -1210,13 +778,7 @@ begin
     end;
 end;
 
-(*
-## TThreadScheduler.PauseAll
-```pascal
-procedure TThreadScheduler.PauseAll();
-```
-Pauses all currently active scheduled tasks.
-*)
+
 procedure TThreadScheduler.PauseAll();
 var
   i: Integer;
@@ -1225,19 +787,7 @@ begin
     Self.Tasks[i].Active := False;
 end;
 
-(*
-## TThreadScheduler.Unschedule
-```pascal
-function TThreadScheduler.Unschedule(const TaskID: String): Boolean;
-```
-Permanently removes a recurring task from the scheduler. Returns `True` if the task was found and removed.
 
-Parameters:
-- `TaskID`: The ID of the task to remove.
-
-Returns:
-- `Boolean`: `True` if task was found and removed, `False` otherwise.
-*)
 function TThreadScheduler.Unschedule(const TaskID: String): Boolean;
 var
   i, j: Integer;
@@ -1270,19 +820,7 @@ begin
   end;
 end;
 
-(*
-## TThreadScheduler.Resume
-```pascal
-function TThreadScheduler.Resume(const TaskID: String): Boolean;
-```
-Resumes a paused recurring task. Returns `True` if the task was found and resumed.
 
-Parameters:
-- `TaskID`: The ID of the task to resume.
-
-Returns:
-- `Boolean`: `True` if task was found and resumed, `False` otherwise.
-*)
 function TThreadScheduler.Resume(const TaskID: String): Boolean;
 var
   i: Integer;
@@ -1299,16 +837,7 @@ begin
     end;
 end;
 
-(*
-## TThreadScheduler.GetTasks
-```pascal
-function TThreadScheduler.GetTasks(): TStringArray;
-```
-Returns a string array of the IDs of all currently active scheduled tasks.
 
-Returns:
-- `TStringArray`: Array containing the IDs of all active scheduled tasks.
-*)
 function TThreadScheduler.GetTasks(): TStringArray;
 var
   i, Count: Integer;
@@ -1330,23 +859,7 @@ begin
     end;
 end;
 
-(*
-## TThreadManager.Init
-```pascal
-procedure TThreadManager.Init(ThreadCount: Integer = 0; DebugLevel: EDebugLevel = EDebugLevel.NONE);
-```
-Initializes the thread manager, which in turn sets up the main thread pool and the scheduler. This is the main entry point for using the library.
 
-Parameters:
-- `ThreadCount`: Number of worker threads for the main pool. If 0, uses system default.
-- `DebugLevel`: The verbosity level for logging.
-
-Example:
-```pascal
-var Manager: TThreadManager;
-Manager.Init(8, EDebugLevel.INFO);
-```
-*)
 procedure TThreadManager.Init(ThreadCount: Integer = 0; DebugLevel: EDebugLevel = EDebugLevel.NONE);
 begin
   if Self.IsSetup then
@@ -1375,14 +888,7 @@ begin
   Self.IsSetup := True;
 end;
 
-(*
-## TThreadManager.Free
-```pascal
-procedure TThreadManager.Free();
-```
-Frees all resources used by the thread manager, including its thread pool and scheduler.
-Always call this when you're done with the thread manager to prevent memory leaks.
-*)
+
 procedure TThreadManager.Free();
 begin
   if not Self.IsSetup then
@@ -1393,22 +899,7 @@ begin
   Self.IsSetup := False;
 end;
 
-(*
-## TThreadManager.Submit
-```pascal
-function TThreadManager.Submit(const TaskID: String; Method: procedure() of object; Priority: Integer = 0; AllowDuplicates: Boolean = False): Boolean;
-```
-Submits a one-off task for asynchronous execution. By default, prevents duplicate task IDs.
 
-Parameters:
-- `TaskID`: A unique identifier for the task.
-- `Method`: The procedure to execute.
-- `Priority`: Task priority (higher values execute sooner). Default is 0.
-- `AllowDuplicates`: Whether to allow duplicate task IDs. Default is False.
-
-Returns:
-- `Boolean`: `True` if task was successfully submitted, `False` otherwise.
-*)
 function TThreadManager.Submit(const TaskID: String; Method: procedure() of object; Priority: Integer = 0; AllowDuplicates: Boolean = False): Boolean;
 begin
   if not Self.IsSetup then
@@ -1417,22 +908,7 @@ begin
   Result := Self.Pool.Submit(TaskID, @Method, Priority, AllowDuplicates);
 end;
 
-(*
-## TThreadManager.Submit (overload)
-```pascal
-function TThreadManager.Submit(const TaskID: String; Proc: procedure; Priority: Integer = 0; AllowDuplicates: Boolean = False): Boolean; overload;
-```
-Submits a one-off task for asynchronous execution. By default, prevents duplicate task IDs.
 
-Parameters:
-- `TaskID`: A unique identifier for the task.
-- `Proc`: The procedure to execute.
-- `Priority`: Task priority (higher values execute sooner). Default is 0.
-- `AllowDuplicates`: Whether to allow duplicate task IDs. Default is False.
-
-Returns:
-- `Boolean`: `True` if task was successfully submitted, `False` otherwise.
-*)
 function TThreadManager.Submit(const TaskID: String; Proc: procedure; Priority: Integer = 0; AllowDuplicates: Boolean = False): Boolean; overload;
 begin
   if not Self.IsSetup then
@@ -1445,21 +921,7 @@ end;
 
 
 
-(*
-## TThreadManager.Schedule
-```pascal
-function TThreadManager.Schedule(const TaskID: String; Method: procedure() of object; IntervalMS: Integer): Boolean;
-```
-Schedules a recurring task to be executed at a fixed interval.
 
-Parameters:
-- `TaskID`: A unique identifier for the task.
-- `Method`: The procedure to execute.
-- `IntervalMS`: The interval in milliseconds between executions.
-
-Returns:
-- `Boolean`: `True` if task was successfully scheduled, `False` otherwise.
-*)
 function TThreadManager.Schedule(const TaskID: String; Method: procedure() of object; IntervalMS: Integer): Boolean;
 begin
   if not Self.IsSetup then
@@ -1468,21 +930,7 @@ begin
   Result := Self.Scheduler.Schedule(TaskID, @Method, IntervalMS);
 end;
 
-(*
-## TThreadManager.Schedule (overload)
-```pascal
-function TThreadManager.Schedule(const TaskID: String; Proc: procedure; IntervalMS: Integer): Boolean; overload;
-```
-Schedules a recurring task to be executed at a fixed interval.
 
-Parameters:
-- `TaskID`: A unique identifier for the task.
-- `Proc`: The procedure to execute.
-- `IntervalMS`: The interval in milliseconds between executions.
-
-Returns:
-- `Boolean`: `True` if task was successfully scheduled, `False` otherwise.
-*)
 function TThreadManager.Schedule(const TaskID: String; Proc: procedure; IntervalMS: Integer): Boolean; overload;
 begin
   if not Self.IsSetup then
@@ -1491,19 +939,7 @@ begin
   Result := Self.Scheduler.Schedule(TaskID, @Proc, IntervalMS);
 end;
 
-(*
-## TThreadManager.PauseTask
-```pascal
-function TThreadManager.PauseTask(const TaskID: String): Boolean;
-```
-Pauses a scheduled task.
 
-Parameters:
-- `TaskID`: The ID of the task to pause.
-
-Returns:
-- `Boolean`: `True` if task was found and paused, `False` otherwise.
-*)
 function TThreadManager.PauseTask(const TaskID: String): Boolean;
 begin
   if not Self.IsSetup then
@@ -1511,19 +947,7 @@ begin
   Result := Self.Scheduler.Pause(TaskID);
 end;
 
-(*
-## TThreadManager.ResumeTask
-```pascal
-function TThreadManager.ResumeTask(const TaskID: String): Boolean;
-```
-Resumes a previously paused scheduled task.
 
-Parameters:
-- `TaskID`: The ID of the task to resume.
-
-Returns:
-- `Boolean`: `True` if task was found and resumed, `False` otherwise.
-*)
 function TThreadManager.ResumeTask(const TaskID: String): Boolean;
 begin
   if not Self.IsSetup then
@@ -1531,19 +955,7 @@ begin
   Result := Self.Scheduler.Resume(TaskID);
 end;
 
-(*
-## TThreadManager.CancelTask
-```pascal
-function TThreadManager.CancelTask(const TaskID: String): Boolean;
-```
-Permanently removes a scheduled task.
 
-Parameters:
-- `TaskID`: The ID of the task to cancel.
-
-Returns:
-- `Boolean`: `True` if task was found and canceled, `False` otherwise.
-*)
 function TThreadManager.CancelTask(const TaskID: String): Boolean;
 begin
   if not Self.IsSetup then
@@ -1551,20 +963,7 @@ begin
   Result := Self.Scheduler.Unschedule(TaskID);
 end;
 
-(*
-## TThreadManager.SubmitBatch
-```pascal
-function TThreadManager.SubmitBatch(const TaskIDs: TStringArray; Methods: array of procedure() of object): Boolean;
-```
-Submits a batch of one-off tasks for execution.
 
-Parameters:
-- `TaskIDs`: Array of unique identifiers for the tasks.
-- `Methods`: Array of procedures to execute (must match TaskIDs length).
-
-Returns:
-- `Boolean`: `True` if all tasks were successfully submitted, `False` if any failed.
-*)
 function TThreadManager.SubmitBatch(const TaskIDs: TStringArray; Methods: array of procedure() of object): Boolean;
 var
   i: Integer;
@@ -1581,20 +980,7 @@ begin
       Result := False;
 end;
 
-(*
-## TThreadManager.SubmitBatch (overload)
-```pascal
-function TThreadManager.SubmitBatch(const TaskIDs: TStringArray; Procs: array of procedure): Boolean; overload;
-```
-Submits a batch of one-off tasks for execution.
 
-Parameters:
-- `TaskIDs`: Array of unique identifiers for the tasks.
-- `Procs`: Array of procedures to execute (must match TaskIDs length).
-
-Returns:
-- `Boolean`: `True` if all tasks were successfully submitted, `False` if any failed.
-*)
 function TThreadManager.SubmitBatch(const TaskIDs: TStringArray; Procs: array of procedure): Boolean; overload;
 var
   i: Integer;
@@ -1611,32 +997,14 @@ begin
       Result := False;
 end;
 
-(*
-## TThreadManager.Await
-```pascal
-procedure TThreadManager.Await(TimeoutMS: Integer = 30000);
-```
-Waits for all submitted one-off tasks to complete.
 
-Parameters:
-- `TimeoutMS`: Maximum time to wait in milliseconds. Default is 30 seconds.
-*)
 procedure TThreadManager.Await(TimeoutMS: Integer = 30000);
 begin
   if Self.IsSetup then
     Self.Pool.Await(TimeoutMS);
 end;
 
-(*
-## TThreadManager.Stats
-```pascal
-function TThreadManager.Stats(): String;
-```
-Returns a string containing performance statistics for both the main pool and the scheduler.
 
-Returns:
-- `String`: Detailed statistics including pool metrics and scheduled task count.
-*)
 function TThreadManager.Stats(): String;
 begin
   if not Self.IsSetup then
@@ -1646,16 +1014,7 @@ begin
             Format('Scheduled: %d', [Length(Self.Scheduler.GetTasks())]);
 end;
 
-(*
-## TThreadManager.SetExceptionHandler
-```pascal
-procedure TThreadManager.SetExceptionHandler(Handler: TOnException);
-```
-Sets a global callback to handle exceptions from any task in the manager.
 
-Parameters:
-- `Handler`: The exception handler callback procedure.
-*)
 procedure TThreadManager.SetExceptionHandler(Handler: TOnException);
 begin
   Self.ExceptionHandler := @Handler;
@@ -1667,16 +1026,7 @@ begin
   end;
 end;
 
-(*
-## TThreadManager.SetCompletionHandler
-```pascal
-procedure TThreadManager.SetCompletionHandler(Handler: TOnComplete);
-```
-Sets a global callback to handle the completion of any task in the manager.
 
-Parameters:
-- `Handler`: The completion handler callback procedure.
-*)
 procedure TThreadManager.SetCompletionHandler(Handler: TOnComplete);
 begin
   Self.CompletionHandler := @Handler;
@@ -1687,16 +1037,7 @@ begin
   end;
 end;
 
-(*
-## TThreadManager.SetDebugLevel
-```pascal
-procedure TThreadManager.SetDebugLevel(Level: EDebugLevel);
-```
-Sets the logging verbosity level for the entire thread manager and its components.
 
-Parameters:
-- `Level`: The debug level to set (EDebugLevel.NONE, EDebugLevel.INFO, or EDebugLevel.VERBOSE).
-*)
 procedure TThreadManager.SetDebugLevel(Level: EDebugLevel);
 begin
   Self.DebugLevel := Level;

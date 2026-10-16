@@ -1,47 +1,23 @@
-(*
-# Client
-Methods relating to targeting the game client and detecting client states.
-*)
+
 
 {$DEFINE WL_CLIENT_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EClient
-```pascal
-EClient = enum(UNKNOWN, LEGACY, RUNELITE, OFFICIAL);
-```
-Enum that represent the client type.
-*)
+
   EClient = enum(UNKNOWN, LEGACY, RUNELITE, OFFICIAL);
 
-(*
-## EMode
-```pascal
-EMode = enum(UNKNOWN, FIXED, RESIZABLE_CLASSIC, RESIZABLE_MODERN);
-```
-Enum that represent the client mode.
-*)
+
   EMode = enum(UNKNOWN, FIXED, RESIZABLE, MODERN_COMPACT, MODERN_WIDE);
 
 const
   RESIZABLE_MODES: set of EMode = [EMode.RESIZABLE..EMode.MODERN_WIDE];
 
 type
-(*
-## EPopoutPanel
-```pascal
-EPopoutPanel = enum(UNKNOWN, DISABLED, ENABLED);
-```
-Enum that represent the state of the popout panel on the official client.
-*)
+
   EPopoutPanel = enum(DISABLED, CLOSED, OPEN);
 
-(*
-## TClient
-Record representing the RuneScape client ({ref}`Client`.
-*)
+
   PClient = ^TClient;
 
   TClient = record
@@ -51,18 +27,7 @@ Record representing the RuneScape client ({ref}`Client`.
     OnLogin: array of procedure (sender: PClient; mode: EMode) of object;
   end;
 
-(*
-## Client.GetClient
-```pascal
-function TClient.GetClient(): EClient;
-```
-Returns the client type being used.
 
-Example:
-```pascal
-WriteLn Client.GetClient();
-```
-*)
 function TClient.GetClient(): EClient;
 var
   window: TWindowHandle;
@@ -93,22 +58,7 @@ begin
 end;
 
 
-(*
-## Client._Bounds
-```pascal
-function TClient._Bounds(img: TImage): TBox;
-function TClient._Bounds(): TBox; overload;
-```
-Internal helper methods to figure out the client bounds when we are on the
-`EClient.OFFICIAL` client.
 
-You should never have to use this directly.
-
-Example:
-```pascal
-ShowOnTarget(Client._Bounds());
-```
-*)
 function TClient._Bounds(img: TImage): TBox;
 var
   x1, x2, y2: Integer;
@@ -152,22 +102,7 @@ begin
   Result := Self._Bounds(Target.GetImage());
 end;
 
-(*
-## Client.GetPopoutPanelState
-```pascal
-function TClient.GetPopoutPanelState(img: TImage): EPopoutPanel;
-function TClient.GetPopoutPanelState(): EPopoutPanel; overload;
-```
-Internal helper methods to figure out if the "Popout" panel is open or not
-when we are on the `EClient.OFFICIAL` client.
 
-You should never have to use this directly.
-
-Example:
-```pascal
-WriteLn Client.GetPopoutPanelState();
-```
-*)
 function TClient.GetPopoutPanelState(img: TImage): EPopoutPanel;
 var
   x: Integer;
@@ -198,18 +133,7 @@ begin
 end;
 
 
-(*
-## Client.Bounds
-```pascal
-property TClient.Bounds: TBox;
-```
-Dynamic client bounds to handle different client quirks.
 
-Example:
-```pascal
-ShowOnTarget(Client.Bounds);
-```
-*)
 property TClient.Bounds: TBox;
 var
   img: TImage;
@@ -230,18 +154,7 @@ begin
   end;
 end;
 
-(*
-## Client.GetMode
-```pascal
-function TClient.GetMode(): EMode;
-```
-Returns the client mode.
 
-Example:
-```pascal
-WriteLn Client.GetMode();
-```
-*)
 function TClient.GetMode(): EMode;
 var
   bounds: TBox;
@@ -266,13 +179,7 @@ begin
   end;
 end;
 
-(*
-## Client.ModeChanged
-```pascal
-function TClient.ModeChanged(): Boolean;
-```
-Returns true if the client mode changed.
-*)
+
 function TClient.ModeChanged(): Boolean;
 var
   current: EMode;
@@ -281,13 +188,7 @@ begin
   Result := (current <> Self.Mode) and (current <> EMode.UNKNOWN);
 end;
 
-(*
-## Client.WaitModeChange
-```pascal
-function TClient.WaitModeChange(time: Integer = 600; interval: Integer = -1): Boolean;
-```
-Waits `time` milliseconds for the client mode to change
-*)
+
 function TClient.WaitModeChange(time: Integer = 1200; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -296,18 +197,7 @@ end;
 
 
 
-(*
-## Client.IsLoggedIn
-```pascal
-function TClient.IsLoggedIn(): Boolean;
-```
-Returns true/false whether there's a player logged in or not.
 
-Example:
-```pascal
-WriteLn Client.IsLoggedIn();
-```
-*)
 function TClient.IsLoggedIn(): Boolean;
 var
   i: Integer;
@@ -322,18 +212,7 @@ begin
     Self.OnLogin[i](@Self, mode);
 end;
 
-(*
-## Client.WaitLoggedIn
-```pascal
-function TClient.WaitLoggedIn(time: Integer = 2000; interval: Integer = -1): Boolean;
-```
-Waits `time` milliseconds for the players to be logged in.
 
-Example:
-```pascal
-WriteLn Client.WaitLoggedIn();
-```
-*)
 function TClient.WaitLoggedIn(time: Integer = 2000; interval: Integer = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -378,18 +257,7 @@ begin
   Result := bounds;
 end;
 
-(*
-## Client.ReadTooltip
-```pascal
-function TClient.ReadTooltip(): String;
-```
-Attempts to read the client tooltip if it's present.
 
-Example:
-```pascal
-WriteLn Client.ReadTooltip();
-```
-*)
 function TClient.ReadTooltip(): String;
 var
   bounds: TBox;
@@ -409,9 +277,6 @@ begin
 end;
 
 var
-(*
-## Client variable
-Global {ref}`TClient` variable.
-*)
+
   Client: TClient;
 

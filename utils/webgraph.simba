@@ -1,13 +1,4 @@
-(*
-# WebGraph
-Responsible for handling webwalking or any other graph logic you may need.
 
-It's partially based on the original webgraph logic by [slacky](https://slacky.one/)
-but it was written from scratch by Torwent.
-
-It's important to note that most types and methods are for internal usage and
-you shouldn't really have to interact with it.
-*)
 
 {$DEFINE WL_WEBGRAPH_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
@@ -21,12 +12,7 @@ end;
 {$ENDIF}
 
 type
-(*
-(TWebGraph)=
-## type TWebGraph
-Type representing a webgraph, for more information on what a graph is in this
-context visit this [wikipedia page](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics))
-*)
+
   TWebGraph = record
     Nodes: TPointArray;
     Paths: T2DIntegerArray;
@@ -38,15 +24,7 @@ context visit this [wikipedia page](https://en.wikipedia.org/wiki/Graph_(discret
 
   PWebGraph = ^TWebGraph;
 
-(*
-## TWebGraph.CRC
-```pascal
-property TWebGraph.CRC: UInt32;
-```
-Returns a CRC signature of the `TWebGraph.Nodes` and `TWebGraph.WalkableClusters`.
-Nothing else is used for the CRC signature, this is just used so we know if we should generate as KDTree for this graph
-or load at an already cached one instead.
-*)
+
 property TWebGraph.CRC: UInt32;
 var
   hash: UInt32;
@@ -68,14 +46,7 @@ begin
   Result := CrcData(@hash, SizeOf(UInt32));
 end;
 
-(*
-## TWebGraph.GetKDItems
-```pascal
-function TWebGraph.GetKDItems(offset: Itneger = 0): TKDItems;
-```
-Returns `TKDItems` to be used on a {ref}`TKDTree` which can be used to compare
-distances between nodes very fast.
-*)
+
 function TWebGraph.GetKDItems(offset: Integer = 0): TKDItems;
 var
   i, j: Integer;
@@ -117,14 +88,7 @@ begin
   end;
 end;
 
-(*
-## TWebGraph.Setup
-```pascal
-procedure TWebGraph.Setup(const kditems: TKDItems = []);
-```
-It sets up `TWebGraph.Tree`, a {ref}`TKDTree` used to compare distances between
-nodes very fast.
-*)
+
 procedure TWebGraph.Setup(const kditems: TKDItems = []);
 begin
   if kditems = [] then
@@ -134,15 +98,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.Copy
-```pascal
-function TWebGraph.Copy(): TWebGraph;
-```
-Performs a unique copy of the `TWebGraph` which you can modify without modifying the original.
-Useful for debugging graphs when you need to keep the original unchanged, e.g.
-with the {ref}`Map Debugger`.
-*)
+
 function TWebGraph.Copy(): TWebGraph;
 begin
   Result.Nodes := System.Copy(Self.Nodes);
@@ -153,21 +109,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.BlockArea
-```pascal
-procedure TWebGraph.BlockArea(area: TBox; inside: Boolean = True);
-```
-Blocks an area of the `TWebGraph` so no nodes in the specified `area` are returned
-when finding paths.
 
-For example, this is how you could block the space where wintertodt is so
-you don't get paths through the chasm:
-```pascal
-Map.Setup([EChunk.WINTERTODT]);
-Map.Loader.Graph.BlockArea([6478, 34358, 6565, 34445]);
-```
-*)
 procedure TWebGraph.BlockArea(area: TBox; inside: Boolean = True);
 var
   i, c: Integer;
@@ -197,16 +139,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.NearNodesIndices
-```pascal
-function TWebGraph.NearNodesIndices(pt: TPoint; amount: Integer): TIntegerArray;
-```
-Returns the indices of the `amount` of nearest nodes to `pt` on the webgraph
-that can be walked to to and from `pt`.
 
-The result returned is sorted by shortest distance to `pt`.
-*)
 function TWebGraph.NearNodesIndices(item: TKDItem; amount: Integer): TIntegerArray;
 var
   i, ref: Integer;
@@ -259,18 +192,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.FindPath
-```pascal
-function TWebGraph.FindPath(start, finish: Integer; rnd: Double = 0): TIntegerArray;
-```
-Finds a path between `start` and `finish` with the ability to introduce some
-randomness through `rnd`.
 
-This is basically a weighted BFS algorithm.
-
-For more information on the algorithm read the [wikipedia page on breadth-first search](https://en.wikipedia.org/wiki/Breadth-first_search).
-*)
 function TWebGraph.FindPath(start, finish: Integer; rnd: Double = 0): TIntegerArray;
 type
   TStep = record Node, Parent: Integer; Score: Double; end;
@@ -421,16 +343,7 @@ begin
   end;
 end;
 
-(*
-## TWebGraph.PathBetween
-```pascal
-function TWebGraph.PathBetween(a, b: TPoint; rnd: Double = 0; attempts: Integer = 3): TPointArray;
-```
-Returns a path between `a` and `b` with the ability to introduce some randomness
-through `rnd`.
 
-The returned path comes in the form of a `TPointArray`.
-*)
 function TWebGraph.PathBetween(a, b: TPoint; rnd: Double = 0; attempts: Integer = 3): TPointArray;
 var
   items: TKDItems;
@@ -467,14 +380,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.NearestPathable
-```pascal
-function TWebGraph.NearestPathable(me: TPoint; destinations: TPointArray): TPoint;
-```
-Returns the nearest point in `destinations` to `me` that has a valid path in
-between.
-*)
+
 function TWebGraph.NearestPathable(me: TPoint; destinations: TPointArray): TPoint;
 var
   path: TPointArray;
@@ -528,15 +434,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.AddNode
-```pascal
-function TWebGraph.AddNode(pt: TPoint; fromNode: Integer): Boolean;
-```
-Adds a new node to the `TWebGraph` with a connection to `fromNode`.
 
-You can specify it's coordinate through `pt`.
-*)
 function TWebGraph.AddNode(pt: TPoint; fromNode: Integer): Boolean;
 var
   i: Integer;
@@ -555,21 +453,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.ConnectNodes
-```pascal
-procedure TWebGraph.ConnectNodes(a,b: Integer);
-procedure TWebGraph.ConnectNodes(a,b: TPoint); overload;
-procedure TWebGraph.ConnectNodes(a: Integer; b: TPoint); overload;
-```
-Connects nodes `a` and `b`.
 
-If either `a` or `b` are `TPoints`, they must match exactly the coordinates of a
-node in the graph.
-
-Using indices is always better for performance but overtime they may change if
-the shape of the graph changes.
-*)
 procedure TWebGraph.ConnectNodes(a,b: Integer);
 begin
   if not Self.Paths[a].Contains(b) then
@@ -609,19 +493,7 @@ begin
   Self.ConnectNodes(a, i);
 end;
 
-(*
-## TWebGraph.ConnectNodesEx
-```pascal
-procedure TWebGraph.ConnectNodesEx(a,b: TPoint; notEqual: Boolean = False);
-```
-Connects the closest node to `a` to the closest node to `b`.
 
-This is similar to {ref}`TWebGraph.ConnectNodes` when using `TPoints` but unlike
-it, your points don't have to be the exact same as the nodes in the graph.
-
-Overall, this is the most flexible and easiest method to use but it might not
-connect exactly the nodes you want at times.
-*)
 procedure TWebGraph.ConnectNodesEx(a,b: TPoint; notEqual: Boolean = False);
 var
   item: TKDItem;
@@ -642,13 +514,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.DeleteNode
-```pascal
-function TWebGraph.DeleteNode(node: Integer): Integer;
-```
-Deletes a `Node` from a `TWebGraph` along with all the connections to it.
-*)
+
 function TWebGraph.DeleteNode(node: Integer): Integer;
 var
   i,j,n,curr: Integer;
@@ -681,22 +547,7 @@ begin
   until Length(marked) = 0;
 end;
 
-(*
-## TWebGraph.DeleteNodes
-```pascal
-procedure TWebGraph.DeleteNodes(b: TBox);
-```
-It's very similar to {ref}`TWebGraph.BlockNodes` but unlike it, what this does
-is permanent. Blocking nodes could be used to selectively toggle nodes on/off,
-this permanently removes them.
 
-For example, this is how you could block the space where wintertodt is so
-you don't get paths through the chasm:
-```pascal
-Map.Setup([EChunk.WINTERTODT]);
-Map.Loader.Graph.DeleteNodes([6478, 34358, 6565, 34445]);
-```
-*)
 procedure TWebGraph.DeleteNodes(b: TBox);
 var
   i: Integer;
@@ -707,13 +558,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.Merge
-```pascal
-procedure TWebGraph.Merge(constref graph: TWebGraph);
-```
-Merges `graph` into the current `TWebGraph`.
-*)
+
 procedure TWebGraph.Merge(constref graph: TWebGraph);
 var
   i, n, len: Integer;
@@ -732,13 +577,7 @@ begin
   Self.ObjectClusters   += graph.ObjectClusters;
 end;
 
-(*
-## TWebGraph.Offset
-```pascal
-function TWebGraph.Offset(pt: TPoint): TWebGraph;
-```
-Returns an offset `TWebGraph` by the specified `pt`.
-*)
+
 function TWebGraph.Offset(pt: TPoint): TWebGraph;
 begin
   Result.Nodes := Self.Nodes.Offset(pt);
@@ -749,17 +588,7 @@ begin
 end;
 
 
-(*
-## TWebGraph.MaxEdgeLength
-```pascal
-function TWebGraph.MaxEdgeLength(): Integer;
-```
-Returns the length of the longest connection in the graph, measured as the
-largest of its horizontal and vertical spans.
 
-{ref}`TWebGraph.Draw` needs this to know how far outside of the region it's drawing
-a node can sit and still have a connection reaching into it.
-*)
 function TWebGraph.MaxEdgeLength(): Integer;
 var
   i, j, dist: Integer;
@@ -778,20 +607,7 @@ begin
   end;
 end;
 
-(*
-## TWebGraph.Draw
-```pascal
-procedure TWebGraph.Draw(img: TImage);
-procedure TWebGraph.Draw(canvas: TImageBoxCanvas); overload;
-procedure TWebGraph.Draw(canvas: TImageBoxCanvas; view: TBox; margin: Integer); overload;
-```
-Used for `TWebGraph` debugging.
 
-The overload taking a `view` only draws what's inside it, which is how the
-{ref}`Map Debugger` keeps repaints cheap on large maps. `margin` must be at
-least {ref}`TWebGraph.MaxEdgeLength` or connections reaching into `view` from
-off screen nodes will be missing.
-*)
 procedure TWebGraph.Draw(img: TImage);
 var
   i,j: Integer;

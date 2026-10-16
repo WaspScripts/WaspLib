@@ -1,35 +1,4 @@
-(*
-# SlotInterface
-Methods to interact slotted interfaces.
 
-"Slotted interfaces" in WaspLib refers to any interface that is an item
-container.
-
-In other words, if an interface has holds items, it's both a
-{ref}`SlotInterface` and {ref}`ItemInterface`.
-
-Examples of "item containers" are:
-- {ref}`Inventory`
-- {ref}`Equipment`
-- {ref}`Bank`
-- {ref}`DepositBox`
-- {ref}`CollectBox`
-
-Just because an interface is an "item container", does not mean it uses
-{ref}`SlotInterface`, but all the examples above do and you can access it
-through their `Slots` variable, for example:
-```pascal
-Inventory.Slots;
-Equipment.Slots;
-Bank.Slots;
-```
-
-```{note}
-Throughout this page examples, {ref}`Inventory` will be used in most of them
-but any interface that has a {ref}`TSlotInterface` variable can used
-instead.
-```
-*)
 
 {$DEFINE WL_SLOT_INTERFACE_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -38,15 +7,7 @@ type
   TSlotsFunction = function (): TBoxArray of object;
   TInterfacePreConditionFunction = function (): Boolean of object;
 
-(*
-## TSlotInterface
-Main record to handle a {ref}`SlotInterface`.
 
-```{note}
-Throughout this page `Slots` will always refer to a `TSlotInterface` variable
-unless specified otherwise.
-```
-*)
   TSlotInterface = record
     Name: String;
     Slots: TBoxArray;
@@ -54,41 +15,7 @@ unless specified otherwise.
     PreConditionFunction: TInterfacePreConditionFunction;
   end;
 
-(*
-## Slots.Setup
-```pascal
-procedure TSlotInterface.Setup(name: String; slots: TBoxArray; slotsFunction: function (): TBoxArray of object = nil);
-```
-Setup method of the {ref}`SlotInterface`.
 
-All interfaces included in WaspLib that use a {ref}`SlotInterface` already call
-this automatically for you.
-
-Unless you create your own, you don't need to use it.
-
-You have 3 parameters:
-- `name`, simply used for debugging if something goes wrong, it will tell you which {ref}`SlotInterface` raised an exception.
-- `slots` which should be a static `TBoxArray`.
-- `slotsFunction` which should be a function that returns a `TBoxArray` useful for dynamic slot boxes.
-
-Whatever boxes are passed to `slots` are only ever used if you `slotsFunction`
-is `nil`.
-In other words, if you set a `slotsFunction` that will always be the prefered
-way that `TSlotInterface` will use internally.
-
-So if you are going to setup a function, you can leave `slots` as an emtpy array
-if you want.
-For example, here is how the {ref}`TBank` `TSlotInterface` could be setup:
-```pascal
-Bank.Slots.Setup('Bank.Slots', [], @Bank.FindItemBoundaries);
-```
-In reality it's setup like this:
-```pascal
-Bank.Slots.Setup('Bank.Slots', Bank.SlotBoxes, @Bank.FindItemBoundaries);
-```
-Just in case people would like to access the bank's static slots through it's
-`Slots` variable.
-*)
 procedure TSlotInterface.Setup(
   name: String; slots: TBoxArray;
   slotsFunc: TSlotsFunction = nil;
@@ -101,34 +28,7 @@ begin
   Self.PreConditionFunction := @preConditionFunc;
 end;
 
-(*
-## Slots.Boxes
-```pascal
-function TSlotInterface.Boxes(): TBoxArray;
-function TSlotInterface.Boxes(slots: TIntegerArray): TBoxArray; overload;
-```
-Functions to return the slot boxes of the {ref}`SlotInterface`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(Inventory.Slots.Boxes());
-end.
-```
-```{figure} ../../images/slotboxes.png
-```
-
-You can optionally return only some of the boxes as well:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(Inventory.Slots.Boxes([2,3,4,12,13,15,16]));
-end.
-```
-```{figure} ../../images/slotboxes2.png
-```
-*)
 function TSlotInterface.Boxes(): TBoxArray;
 begin
   if @Self.SlotsFunction <> nil then
@@ -151,23 +51,7 @@ begin
     Result[i] := tmp[slots[i]];
 end;
 
-(*
-## Slots.Box
-```pascal
-function TSlotInterface.Box(slot: Integer): TBox;
-```
-Return the box of the specified slot on the {ref}`SlotInterface`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  ShowOnTarget(Inventory.Slots.Box(6));
-end.
-```
-```{figure} ../../images/slotbox.png
-```
-*)
 function TSlotInterface.Box(slot: Integer): TBox;
 begin
   Result := Self.Boxes()[slot];
@@ -215,27 +99,7 @@ begin
   Result := Result.Sorted(weights, True);
 end;
 
-(*
-## Slots.Near
-```pascal
-function TSlotInterface.Near(slot: Integer; slots: TIntegerArray; maxDist: Single = 60): TIntegerArray;
-```
-From the `slots` array which should be an array of indices for `Slots.Boxes`,
-return the indices that are "near" `slot` based on the `maxDist` value.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  indices: TIntegerArray;
-begin
-  indices := Inventory.Slots.Near(15, [0..27]);
-  ShowOnTarget(Inventory.Slots.Boxes(indices));
-end.
-```
-```{figure} ../../images/slotsnear.png
-```
-*)
 function TSlotInterface.Near(slot: Integer; slots: TIntegerArray; maxDist: Single = 60; removeSlot: Boolean = True): TIntegerArray;
 var
   weights: TDoubleArray;
@@ -243,37 +107,7 @@ begin
   Result := Self._Near(slot, slots, weights, maxDist, removeSlot);
 end;
 
-(*
-## Slots.RandomNear
-```pascal
-function TSlotInterface.RandomNear(
-  slot: Integer;
-  slots: TIntegerArray;
-  maxDist: Single = 800;
-  removeSlot: Boolean = True;
-  distribution: ERandomDistribution = ERandomDistribution.GAUSS
-): Integer;
-```
-From the `slots` array which should be an array of indices for `Slots.Boxes`,
-return a random index that is "near" `slot` based on the `maxDist` value.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  idx: Integer;
-begin
-  while True do
-  begin
-    idx := Inventory.Slots.RandomNear(13, [0..27]);
-    ShowOnTarget(Inventory.Slots.Boxes([13, idx]));
-    Sleep(100);
-  end;
-end.
-```
-```{figure} ../../images/slotsrandomnear.gif
-```
-*)
 function TSlotInterface.RandomNear(
   slot: Integer;
   slots: TIntegerArray;
@@ -311,21 +145,7 @@ begin
 end;
 
 
-(*
-## Slots.GetUnder
-```pascal
-function TSlotInterface.GetUnder(pt: TPoint): Integer;
-```
-Returns the index of the box that is under `pt`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.GetUnder(Mouse.Position);
-end.
-```
-*)
 function TSlotInterface.GetUnder(pt: TPoint): Integer;
 var
   i: Integer;
@@ -339,26 +159,7 @@ begin
 end;
 
 
-(*
-## Slots.GetUsed
-```pascal
-function TSlotInterface.GetUsed(): TIntegerArray;
-```
-Returns the indices of the slots that contain an item.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  indices: TIntegerArray;
-begin
-  indices := Inventory.Slots.GetUsed();
-  ShowOnTarget(Inventory.Slots.Boxes(indices));
-end.
-```
-```{figure} ../../images/slotsgetused.png
-```
-*)
 function TSlotInterface.GetUsed(): TIntegerArray;
 var
   slots: TBoxArray;
@@ -373,26 +174,7 @@ begin
       Result += i;
 end;
 
-(*
-## Slots.GetEmpty
-```pascal
-function TSlotInterface.GetEmpty(): TIntegerArray;
-```
-Returns the indices of the slots that don't have an item.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  indices: TIntegerArray;
-begin
-  indices := Inventory.Slots.GetEmpty();
-  ShowOnTarget(Inventory.Slots.Boxes(indices));
-end.
-```
-```{figure} ../../images/slotsgetempty.png
-```
-*)
 function TSlotInterface.GetEmpty(): TIntegerArray;
 var
   slots: TBoxArray;
@@ -408,22 +190,7 @@ begin
 end;
 
 
-(*
-## Slots.IsUsed
-```pascal
-function TSlotInterface.IsUsed(slot: TBox): Boolean;
-function TSlotInterface.IsUsed(slot: Integer): Boolean; overload;
-```
-Returns True/False if the specified `slot` contains an item.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.IsUsed(5);
-end.
-```
-*)
 function TSlotInterface.IsUsed(slot: TBox): Boolean;
 begin
   if (@Self.PreConditionFunction <> nil) and not Self.PreConditionFunction() then
@@ -436,22 +203,7 @@ begin
   Result := Self.IsUsed(Self.Box(slot));
 end;
 
-(*
-## Slots.IsEmpty
-```pascal
-function TSlotInterface.IsEmpty(slot: TBox): Boolean;
-function TSlotInterface.IsEmpty(slot: Integer): Boolean; overload;
-```
-Returns True/False if the specified `slot` doesn't have an item.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.IsEmpty(5);
-end.
-```
-*)
 function TSlotInterface.IsEmpty(slot: TBox): Boolean;
 begin
   if (@Self.PreConditionFunction <> nil) and not Self.PreConditionFunction() then
@@ -465,23 +217,7 @@ begin
 end;
 
 
-(*
-## Slots.IsFaded
-```pascal
-function TSlotInterface.IsFaded(slot: TBox): Boolean;
-function TSlotInterface.IsFaded(slot: Integer): Boolean; overload;
-```
-Returns True/False if the specified `slot` has an item and is faded.
-An item is usually faded for a few frames when you click it or when you drag it.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.IsFaded(5);
-end.
-```
-*)
 function TSlotInterface.IsFaded(slot: TBox): Boolean;
 begin
   if (@Self.PreConditionFunction <> nil) and not Self.PreConditionFunction() then
@@ -497,22 +233,7 @@ begin
 end;
 
 
-(*
-## Slots.WaitFade
-```pascal
-function TSlotInterface.WaitFade(slot: TBox; time: Integer = 200): Boolean;
-function TSlotInterface.WaitFade(slot: Integer; time: Integer = 200): Boolean; overload;
-```
-Waits `time` milliseconds for {ref}`Slots.IsFaded` to return False for the specified `slot`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.WaitFade(5);
-end.
-```
-*)
 function TSlotInterface.WaitFade(slot: TBox; time: Integer = 200): Boolean;
 begin
   if not Self.IsFaded(slot) then
@@ -526,62 +247,20 @@ begin
 end;
 
 
-(*
-## Slots.Count
-```pascal
-function TSlotInterface.Count(): Integer;
-```
-Returns the amount of slots that contain items.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.Count();
-end.
-```
-*)
 function TSlotInterface.Count(): Integer;
 begin
   Result := Length(Self.GetUsed());
 end;
 
-(*
-## Slots.CountEmpty
-```pascal
-function TSlotInterface.CountEmpty(): Integer;
-```
-Returns the amount of slots that do not contain items.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.CountEmpty();
-end.
-```
-*)
 function TSlotInterface.CountEmpty(): Integer;
 begin
   Result := Length(Self.GetEmpty());
 end;
 
 
-(*
-## Slots.WaitCount
-```pascal
-function TSlotInterface.WaitCount(count: Int32; time: Int32 = 600; interval: Int32 = -1): Boolean;
-```
-Waits for `time` milliseconds for {ref}`Slots.Count` to return `count`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.WaitCount(2);
-end.
-```
-*)
 function TSlotInterface.WaitCount(count: Int32; time: Int32 = 600; interval: Int32 = -1): Boolean;
 begin
   if interval < 0 then interval := RandomMode(100, 50, 1500);
@@ -589,29 +268,7 @@ begin
 end;
 
 
-(*
-## Slots.ReadStack
-```pascal
-function TSlotInterface.ReadStack(slot: TBox): Integer;
-function TSlotInterface.ReadStack(slot: Integer): Integer; overload;
-```
-Reads the stack amount of a slot.
 
-If the slot has no item in it `-1` is returned.
-If `0` is returned it means the slot has an item but has no stack number.
-
-This is important to keep in mind because in most interfaces, even if an item
-is stackable, if there's only a quantity of 1 available, it won't have a stack
-number.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Inventory.Slots.ReadStack(0);
-end.
-```
-*)
 function TSlotInterface.ReadStack(slot: TBox): Integer;
 begin
   if (@Self.PreConditionFunction <> nil) and not Self.PreConditionFunction() then
@@ -625,42 +282,14 @@ begin
 end;
 
 
-(*
-## Slots.Hover
-```pascal
-procedure TSlotInterface.Hover(slot: Integer);
-```
-Hover the specified `slot` with the mouse.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Inventory.Slots.Hover(0);
-end.
-```
-*)
 procedure TSlotInterface.Hover(slot: Integer);
 begin
   Mouse.Move(Self.Box(slot));
 end;
 
 
-(*
-## Slots.Click
-```pascal
-procedure TSlotInterface.Click(slot: Integer; button: EMouseButton = EMouseButton.LEFT);
-```
-Clicks the specified `slot` with the specified `button`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Inventory.Slots.Click(0);
-end.
-```
-*)
 procedure TSlotInterface.Click(slot: Integer; button: EMouseButton = EMouseButton.LEFT);
 begin
   if (@Self.PreConditionFunction <> nil) and not Self.PreConditionFunction() then
@@ -670,21 +299,7 @@ begin
 end;
 
 
-(*
-## Slots.Move
-```pascal
-function TSlotInterface.Move(slot, destination: Integer): Boolean;
-```
-If `slot` has an item, move it to slot `destination`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Inventory.Slots.Move(0, 6);
-end.
-```
-*)
 function TSlotInterface.Move(slot, destination: Integer): Boolean;
 var
   slots: TBoxArray;
@@ -709,24 +324,7 @@ begin
 end;
 
 
-(*
-## Slots.Interact
-```pascal
-function TSlotInterface.Interact(slot: Integer; option: String = ''): Boolean;
-```
-Interacts with `slot` if it has an item, with the specified `option`.
 
-If `option` is empty or if `option` is the default {ref}`UpText` for the item
-this will simply left click it.
-
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  Inventory.Slots.Interact(0, 'Drink');
-end.
-```
-*)
 function TSlotInterface.Interact(slot: Integer; option: String = ''): Boolean;
 begin
   if (@Self.PreConditionFunction <> nil) and not Self.PreConditionFunction() then

@@ -1,15 +1,4 @@
-(*
-# Find Client
-Prints every open game client, one per line, tab separated:
-```
-<handle>	<client>	<pid>	<title>
-```
-Pass the handle to Simba to run a script headless against that client:
-```
-Simba --target=<handle> --run script.simba
-```
-This doesn't include WaspLib so it runs instantly.
-*)
+
 var
   window: TWindowHandle;
   client, title: String;
