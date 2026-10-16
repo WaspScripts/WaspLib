@@ -254,7 +254,7 @@ begin
       if itemsA[iA].Ref = itemsB[iB].Ref then
         Exit([itemsA[iA], itemsB[iB]]);
 
-  if Result = [] then
+  if Result.IsEmpty then
     raise GetDebugLn('WebGraph', 'There''s no nodes near [' + ToStr(a.X) + ',' + ToStr(a.Y) + '] and [' + ToStr(b.X) + ',' + ToStr(b.Y) + '] on the same cluster.');
 end;
 

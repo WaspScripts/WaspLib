@@ -1,6 +1,6 @@
 [submodule "wasplib-docs"]
 	path = wasplib-docs
-	url = https://github.com/Torwent/wasplib-docs
+	url = https://github.com/WaspScripts/wasp-docs
 [submodule "utils/cache-reader"]
 	path = utils/cache-reader
 	url = https://github.com/WaspScripts/cache-reader.git
