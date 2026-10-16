@@ -6,7 +6,7 @@ The library layout is heavily inspired in
 [SRL-T](https://github.com/Torwent/SRL-T) and the original
 [WaspLib](https://github.com/Torwent/WaspLib).
 
-Documentation can be found here: <https://docs.waspscripts.dev/>
+Documentation can be found here: <https://docs.waspscripts.com/>
 
 To clone the repo you should also clone the submodules:
 ```
