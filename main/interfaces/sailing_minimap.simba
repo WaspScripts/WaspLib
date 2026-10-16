@@ -1,21 +1,10 @@
-(*
-# Sailing Minimap
-Methods to interact with the minimap interface while sailing:
-```{figure} ../../images/sailing_minimap.png
-```
-*)
+
 
 {$DEFINE WL_SAILING_MINIMAP_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## EBoat enum
-```pascal
-EBoat = enum(RAFT, SKIFF, SLOOP);
-```
-Enum representing the types of boat the player can own and use.
-*)
+
   EBoat = enum(RAFT, SKIFF, SLOOP);
 
 function TMinimap._GetBoat(out black, brown: TPointArray): TPointArray;
@@ -54,24 +43,7 @@ begin
     end;
 end;
 
-(*
-## Minimap.GetBoat
-```pascal
-function TMinimap.GetBoat(): TPointArray;
-```
-Returns a `TPointArray` of the player's boat.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  while True do
-    ShowOnTarget(Minimap.GetBoat());
-end.
-```
-```{figure} ../../images/getboat.png
-```
-*)
 function TMinimap.GetBoat(): TPointArray;
 var
   black, brown: TPointArray;
@@ -79,21 +51,7 @@ begin
   Result := Self._GetBoat(black, brown);
 end;
 
-(*
-## Minimap.BoatRadians
-```pascal
-property TMinimap.BoatRadians: Single;
-```
-Returns a the boat angle as radians.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Minimap.BoatRadians;
-end.
-```
-*)
 property TMinimap.BoatRadians: Single;
 var
   boat, black, brown, tpa: TPointArray;
@@ -120,41 +78,13 @@ begin
   Result := Modulo(ArcTan2(Minimap.Center.Y-tip.Y, Minimap.Center.X-tip.X) - HALF_PI, TAU);
 end;
 
-(*
-## Minimap.BoatDegrees
-```pascal
-property TMinimap.BoatDegrees: Single;
-```
-Returns a the boat angle as degrees.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Minimap.BoatDegrees;
-end.
-```
-*)
 property TMinimap.BoatDegrees: Single;
 begin
   Result := RadToDeg(Self.BoatRadians);
 end;
 
-(*
-## Minimap.BoatType
-```pascal
-property TMinimap.BoatType: EBoat;
-```
-Returns a the boat {ref}`EBoat` type.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-begin
-  WriteLn Minimap.BoatType;
-end.
-```
-*)
 property TMinimap.BoatType: EBoat;
 var
   tpa: TPointArray;

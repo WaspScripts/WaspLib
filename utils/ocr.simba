@@ -1,42 +1,11 @@
-(*
-# OCR
-This page is about WaspLib's OCR.
-*)
+
 
 {$DEFINE WL_OCR_INCLUDED}
 {$INCLUDE_ONCE WaspLib/utils.simba}
 
-(*
-## TPixelFont
-`TPixelFont` is the built-in Simba record that holds a font data.
-It might be worth checking Simba documentation or source code for more
-information on them but all you need to know as far as WaspLib is concerned is
-that they "hold" you a font.
 
-WaspLib extends `TPixelFont` to make make handling glyphs that are equal but
-represent different characters easier, for example, `O` and `0` or `l` and `I`.
 
-Characters like these often share the same glyphs in some fonts so the following
-methods try to give you tools to handle those scenarios.
-*)
 
-(*
-### TPixelFont.SameGlyph
-```pascal
-function TPixelFont.SameGlyph(const a, b: Char): Boolean;
-```
-Compares `a` to `b` on the current `TPixelFont` and returns whether they share
-the same glyph or not.
-
-Example:
-```
-{$I WaspLib/main.simba}
-begin
-  WriteLn Fonts.PLAIN_11.SameGlyph('O', '0');
-  WriteLn Fonts.QUILL.SameGlyph('O', '0');
-end.
-```
-*)
 function TPixelFont.SameGlyph(const a, b: Char): Boolean;
 var
   aN, bN: Integer;
@@ -53,23 +22,7 @@ begin
   Result := Self.GlyphSimilarities[aN, bN] = $FF;
 end;
 
-(*
-### TPixelFont.SameText
-```pascal
-function TPixelFont.SameText(const s1, s2: String): Boolean;
-```
-Compares `s1` to `s2` on the current `TPixelFont` and returns whether their
-glyphs look the same.
 
-Example:
-```
-{$I WaspLib/main.simba}
-begin
-  WriteLn Fonts.PLAIN_11.SameText('I AM lOCO', 'l AM I0C0');
-  WriteLn Fonts.QUILL.SameText('I AM lOCO', 'l AM I0C0');
-end.
-```
-*)
 function TPixelFont.SameText(const s1, s2: String): Boolean;
 var
   i: Integer;
@@ -82,37 +35,7 @@ begin
   Result := True;
 end;
 
-(*
-### TPixelFont.ReplaceAlignedGlyphs
-```pascal
-function TPixelFont.ReplaceAlignedGlyphs(const s1, s2: String): String;
-```
-This will return a string with each character on `s1` replaced with the
-corresponding character of `s2` if the glyphs match.
 
-You can see this as a way to correct a string that may be read wrong if you
-know in advance what it should be.
-
-Example:
-```
-{$I WaspLib/main.simba}
-var
-  str: String;
-begin
-  str := 'l AM I0C0';
-  WriteLn Fonts.PLAIN_11.ReplaceAlignedGlyphs(str, 'I AM lOCO');
-  WriteLn Fonts.QUILL.ReplaceAlignedGlyphs(str, 'I AM lOCO');
-end.
-```
-This should give you this result:
-```
-Succesfully compiled in 822.91 milliseconds.
-[00:00:01:0262]:[Client]: Client was resized, updating coordinates.
-I AM lOCO
-l AM I0C0
-Succesfully executed in 537.23 milliseconds.
-```
-*)
 function TPixelFont.ReplaceAlignedGlyphs(const s1, s2: String): String;
 var
   i: Integer;
@@ -130,38 +53,7 @@ begin
   end;
 end;
 
-(*
-### TPixelFont.NormalizeGlyphs
-```pascal
-function TPixelFont.NormalizeGlyphs(const str, normalized: String): String;
-```
-This will replace each character on `str` with the first character that has a
-matching glyph on `normalized`.
 
-You can see this as a way to correct a string that may be read wrong if you
-don't know exactly what it should be.
-
-For example, here is a way you could use to correct numbers:
-```
-{$I WaspLib/main.simba}
-var
-  str: String;
-begin
-  str := '10O0-OOO0-9O092';
-  //2nd param has all the valid characters for numbers
-  WriteLn Fonts.PLAIN_11.NormalizeGlyphs(str, '0123456789');
-  WriteLn Fonts.QUILL.NormalizeGlyphs(str, '0123456789');
-end.
-```
-This should give you this result:
-```
-Succesfully compiled in 815.96 milliseconds.
-[00:00:01:0262]:[Client]: Client was resized, updating coordinates.
-1000-0000-90092
-10O0-OOO0-9O092
-Succesfully executed in 525.14 milliseconds.
-```
-*)
 function TPixelFont.NormalizeGlyphs(const str, normalized: String): String;
 var
   i, j: Integer;
@@ -184,21 +76,12 @@ var
   TEXT_SHADOW: TColor = $000000;
 
 type
-(*
-## TOCR
-Record wrapping TPixelOCR with convenience methods for text recognition.
-*)
+
   TOCR = record
     Engine: TPixelOCR;
   end;
 
-(*
-### OCR.RecognizeStatic
-```pascal
-function TOCR.RecognizeStatic(bounds: TBox; constref font: TPixelFont; colors: TColorArray; tolerance: Single): String;
-```
-Recognizes static text (non-moving) within bounds using specified font and colors.
-*)
+
 function TOCR.RecognizeStatic(bounds: TBox; constref font: TPixelFont; colors: TColorArray; tolerance: Single): String;
 var
   img: TImage;
@@ -208,13 +91,7 @@ begin
   Result := Self.Engine.Recognize(img, font, [0,0]);
 end;
 
-(*
-### OCR.RecognizeStaticInvert
-```pascal
-function TOCR.RecognizeStaticInvert(bounds: TBox; constref font: TPixelFont; colors: TColorArray): String;
-```
-Recognizes static text with inverted colors (background becomes text).
-*)
+
 function TOCR.RecognizeStaticInvert(bounds: TBox; constref font: TPixelFont; colors: TColorArray): String;
 var
   img: TImage;
@@ -224,13 +101,7 @@ begin
   Result := Self.Engine.Recognize(img, font, [0,0]);
 end;
 
-(*
-### OCR.Recognize
-```pascal
-function TOCR.Recognize(bounds: TBox; constref font: TPixelFont; colors: TColorArray; tolerance: Single): String;
-```
-Recognizes text within bounds using specified font and colors.
-*)
+
 function TOCR.Recognize(bounds: TBox; constref font: TPixelFont; colors: TColorArray; tolerance: Single): String;
 var
   img: TImage;
@@ -240,13 +111,7 @@ begin
   Result := Self.Engine.Recognize(img, font);
 end;
 
-(*
-### OCR.RecognizeLines
-```pascal
-function TOCR.RecognizeLines(bounds: TBox; constref font: TPixelFont; colors: TColorArray; tolerance: Single): TStringArray;
-```
-Recognizes multiple lines of text, returning each line as a separate string.
-*)
+
 function TOCR.RecognizeLines(bounds: TBox; constref font: TPixelFont; colors: TColorArray; tolerance: Single): TStringArray;
 var
   img: TImage;
@@ -256,13 +121,7 @@ begin
   Result := Self.Engine.RecognizeLines(img, font);
 end;
 
-(*
-### OCR.RecognizeShadow
-```pascal
-function TOCR.RecognizeShadow(bounds: TBox; constref font: TPixelFont; tolerance: Single): String;
-```
-Recognizes text by detecting shadow pixels and finding adjacent text colors.
-*)
+
 function TOCR.RecognizeShadow(bounds: TBox; constref font: TPixelFont; tolerance: Single): String;
 var
   img: TImage;
@@ -279,13 +138,7 @@ begin
   Result := Self.Engine.Recognize(img, font);
 end;
 
-(*
-### OCR.RecognizeNumber
-```pascal
-function TOCR.RecognizeNumber(bounds: TBox; constref font: TPixelFont; colors: TColorArray; tolerance: Single): Integer;
-```
-Recognizes and extracts an integer from text within bounds.
-*)
+
 function TOCR.RecognizeNumber(bounds: TBox; constref font: TPixelFont; colors: TColorArray; tolerance: Single): Integer;
 begin
   Result := Self.Recognize(bounds, font, colors, tolerance).ExtractInteger();
@@ -311,17 +164,11 @@ end;
 
 
 var
-(*
-## OCR variable
-Global {ref}`TOCR` variable.
-*)
+
   OCR: TOCR;
 
 type
-(*
-## TFonts
-Record containing pre-loaded game fonts and common text colors.
-*)
+
   TFonts = record
     PLAIN_11, PLAIN_12,
     BOLD, BOLD_SHADOW,
@@ -362,8 +209,5 @@ begin
 end;
 
 var
-(*
-## Fonts variable
-Global {ref}`TFonts` variable.
-*)
+
   Fonts: TFonts;

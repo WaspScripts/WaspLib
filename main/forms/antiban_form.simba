@@ -1,27 +1,9 @@
-(*
-# Antiban Form
-This page is about {ref}`Antiban` dedicated `TLazForm` utilities.
 
-This is meant to be used with {ref}`TScriptForm` with
-{ref}`TScriptForm.CreateAntibanTab` and will setup a a `TLazTabSheet` on it
-with several controls to configure {ref}`Antiban`:
-```{figure} ../../images/antibanform.png
-```
-*)
 {$DEFINE WL_ANTIBAN_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## TAntibanFormHelper
-The `TAntibanFormHelper` type is, as it's name implies a helper type for the
-`Antiban Form`.
 
-It has a lot of methods and callbacks that are hidden by default and won't be
-mentioned on this page because they are internal methods you shouldn't touch.
-
-Do feel free to read the source code though if you so desire.
-*)
   TAntibanFormHelper = record
     TaskCheckbox, BreaksCheckbox, SleepCheckbox, WalkCheckbox, WalkAdjustmentsCheckbox: TLazCheckBox;
     TaskList, BreakList, WalkList: TLazListBox;
@@ -1452,33 +1434,10 @@ end;
 
 
 var
-(*
-## AntibanForm variable
-Global {ref}`TAntibanFormHelper` variable.
-*)
+
   AntibanForm: TAntibanFormHelper;
 
-(*
-## ScriptForm.CreateAntibanTab
-```pascal
-function TScriptForm.CreateAntibanTab(): TLazTabSheet;
-```
-Sets up a `TLazTabSheet` on your `TScriptForm` to configure your {ref}`Antiban`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  form: TScriptForm;
-begin
-  form.Setup();
-  form.CreateAntibanTab();
-  form.Run();
-end.
-```
-```{figure} ../../images/antibanform.gif
-```
-*)
 function TScriptForm.CreateAntibanTab(): TLazTabSheet;
 var
   tab: TLazTabSheet;
