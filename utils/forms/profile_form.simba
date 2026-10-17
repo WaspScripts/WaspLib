@@ -1045,7 +1045,7 @@ begin
 
   locY += checkboxHeight + 3;
   Self.JapanCheckbox := TLazCheckBox.CreateEx(
-    Self.LocationPanel, 'USA', '', 10, locY, 100, checkboxHeight
+    Self.LocationPanel, 'Japan', '', 10, locY, 100, checkboxHeight
   );
   Self.JapanCheckbox.Checked := True;
 end;
