@@ -73,8 +73,7 @@ EWorldLocation = enum(GERMANY, UNITED_KINGDOM, UNITED_STATES, AUSTRALIA, BRAZIL)
 ```
 An enumeration representing the geographical location of world servers.
 *)
-  EWorldLocation = enum(GERMANY, UNITED_KINGDOM, UNITED_STATES, AUSTRALIA, BRAZIL);
-
+EWorldLocation = enum(GERMANY, UNITED_KINGDOM, UNITED_STATES, AUSTRALIA, BRAZIL, SOUTH_AFRICA, SINGAPORE, JAPAN);
 (*
 ## type EWorldSort
 ```pascal
@@ -177,11 +176,12 @@ begin
   end;
 
   case LocationStr of
-    'GERMANY': Result := EWorldLocation.GERMANY;
-    'UNITED KINGDOM': Result := EWorldLocation.UNITED_KINGDOM;
     'UNITED STATES': Result := EWorldLocation.UNITED_STATES;
     'AUSTRALIA': Result := EWorldLocation.AUSTRALIA;
     'BRAZIL': Result := EWorldLocation.BRAZIL;
+    'SOUTH AFRICA': Result := EWorldLocation.SOUTH_AFRICA;
+    'SINGAPORE': Result := EWorldLocation.SINGAPORE;
+    'JAPAN': Result := EWorldLocation.JAPAN; 
   else
     begin
       Result := EWorldLocation(Random(0, Ord(High(EWorldLocation))));
