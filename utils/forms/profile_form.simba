@@ -30,8 +30,7 @@ The account management system that handles profile storage, validation, and UI.
 
     F2PCheckbox, MembersCheckbox: TLazCheckBox;
 
-    GermanyCheckbox, UKCheckbox, USCheckbox, AustraliaCheckbox , BrazilCheckbox: TLazCheckBox;
-
+    GermanyCheckbox, UKCheckbox, USCheckbox, AustraliaCheckbox , BrazilCheckbox, SouthAfricaCheckbox, SingaporeCheckbox, JapanCheckbox: TLazCheckBox;
     NormalCheckbox, DangerousCheckbox, RestrictedCheckbox, SkillTotalCheckbox: TLazCheckBox;
 
     SelectAllActivitiesCheckbox: TLazCheckBox;
@@ -469,6 +468,12 @@ begin
     Result.ExcludeLocations += [EWorldLocation.AUSTRALIA];
   if not Self.BrazilCheckbox.Checked then
     Result.ExcludeLocations += [EWorldLocation.BRAZIL];
+  if not Self.SouthAfricaCheckbox.Checked then
+    Result.ExcludeLocations += [EWorldLocation.SOUTH_AFRICA];
+  if not Self.SingaporeCheckbox.Checked then
+    Result.ExcludeLocations += [EWorldLocation.SINGAPORE];
+  if not Self.JapanCheckbox.Checked then
+    Result.ExcludeLocations += [EWorldLocation.JAPAN]; 
 
   if not Self.NormalCheckbox.Checked then
     Result.ExcludeActivities += [EWorldActivity.NORMAL];
@@ -560,8 +565,8 @@ Converts a world location enum to its display string.
 function TProfileForm.GetLocationString(loc: EWorldLocation): String;
 const
   NAMES: array [EWorldLocation] of String = [
-    'Germany', 'UK', 'USA', 'Australia', 'Brazil'
-  ];
+'Germany', 'UK', 'USA', 'Australia', 'Brazil', 'South Africa', 'Singapore', 'Japan'
+];
 begin
   Result := NAMES[loc];
 end;
@@ -706,6 +711,9 @@ begin
       EWorldLocation.UNITED_STATES: if not Self.USCheckbox.Checked then Continue;
       EWorldLocation.AUSTRALIA: if not Self.AustraliaCheckbox.Checked then Continue;
       EWorldLocation.BRAZIL: if not Self.BrazilCheckbox.Checked then Continue;
+      EWorldLocation.SOUTH_AFRICA: if not Self.SouthAfricaCheckbox.Checked then Continue;
+      EWorldLocation.SINGAPORE: if not Self.SingaporeCheckbox.Checked then Continue;
+      EWorldLocation.JAPAN: if not Self.JapanCheckbox.Checked then Continue;
     end;
     tempWorlds[j] := tempWorlds[i];
     Inc(j);
@@ -1020,9 +1028,26 @@ begin
   locY += checkboxHeight + 3;
   Self.BrazilCheckbox := TLazCheckBox.CreateEx(
     Self.LocationPanel, 'Brazil', '', 10, locY, 100, checkboxHeight
-
   );
   Self.BrazilCheckbox.Checked := True;
+
+  locY += checkboxHeight + 3;
+  Self.SouthAfricaCheckbox := TLazCheckBox.CreateEx(
+    Self.LocationPanel, 'South Africa', '', 10, locY, 100, checkboxHeight
+  );
+  Self.SouthAfricaCheckbox.Checked := True;
+
+  locY += checkboxHeight + 3;
+  Self.SingaporeCheckbox := TLazCheckBox.CreateEx(
+    Self.LocationPanel, 'Singapore', '', 10, locY, 100, checkboxHeight
+  );
+  Self.SingaporeCheckbox.Checked := True;
+
+  locY += checkboxHeight + 3;
+  Self.JapanCheckbox := TLazCheckBox.CreateEx(
+    Self.LocationPanel, 'Japan', '', 10, locY, 100, checkboxHeight
+  );
+  Self.JapanCheckbox.Checked := True;
 end;
 
 (*
