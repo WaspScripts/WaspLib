@@ -1,24 +1,4 @@
-(*
-# Probe
-Prelude for short scripts that inspect a running client headless, without
-opening Simba. It's meant for external tools such as LLM agents.
 
-Probes include WaspLib with `WL_READ_ONLY`, so they never send input to the
-client and can run while a script is botting on it.
-
-Write the snippet to `Agents/probes/<name>.simba`:
-```pascal
-{$I WaspLib/tools/agents/probe.simba}
-begin
-  WriteLn Inventory.Slots.Count();
-  TAgent.Save(Target.GetImage(), 'client');
-end.
-```
-Then run it against the client handle printed by `tools/agents/find_client.simba`:
-```
-Simba --target=<handle> --run Agents/probes/<name>.simba
-```
-*)
 {$DEFINE WL_READ_ONLY}
 {$I WaspLib/main.simba}
 {$I WaspLib/tools/agents/agent.simba}

@@ -1,9 +1,4 @@
-(*
-# XPBar Menu
-Methods to interact with the XPBar Menu interface.
-```{figure} ../../images/xpbar_menu_interface.png
-```
-*)
+
 
 {$DEFINE WL_XPBAR_MENU_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
@@ -14,11 +9,7 @@ type
     COUNTER, PROGRESS_BAR, COLOUR, GROUP, FAKE_DROPS
   );
 
-(*
-(TXPBarMenu)=
-## TXPBarMenu type
-Main record to interact with the {ref}`XPBar Menu` interface.
-*)
+
   TXPBarMenu = record
     Title: TInterfaceTitle;
     Bounds, Headers: TBox;
@@ -80,18 +71,7 @@ begin
 end;
 
 
-(*
-## XPBarMenu.IsOpen
-```pascal
-function TXPBarMenu.IsOpen(): Boolean;
-```
-Returns true if the xpbar menu is open.
 
-Example:
-```pascal
-WriteLn XPBarMenu.IsOpen();
-```
-*)
 function TXPBarMenu.IsOpen(): Boolean;
 begin
   Result := InRange(
@@ -99,20 +79,7 @@ begin
   );
 end;
 
-(*
-## XPBarMenu.WaitOpen
-```pascal
-function TXPBarMenu.WaitOpen(
-  time: Integer = TICK; interval: Integer = -1
-): Boolean;
-```
-Returns true if the xpbar menu opens within `time` milliseconds..
 
-Example:
-```pascal
-WriteLn XPBarMenu.WaitOpen();
-```
-*)
 function TXPBarMenu.WaitOpen(
   time: Integer = TICK; interval: Integer = -1
 ): Boolean;
@@ -122,18 +89,7 @@ begin
 end;
 
 
-(*
-## XPBarMenu.Open
-```pascal
-function TXPBarMenu.Open(): Boolean;
-```
-Attempts to open the XPBar menu and returns true on success.
 
-Example:
-```pascal
-WriteLn XPBarMenu.Open();
-```
-*)
 function TXPBarMenu.Open(): Boolean;
 begin
   if Self.IsOpen() then
@@ -144,20 +100,7 @@ begin
 end;
 
 
-(*
-## XPBarMenu.Close
-```pascal
-function TXPBarMenu.Close(escape: Boolean): Boolean;
-function TXPBarMenu.Close(escapeProbability: Single = 0): Boolean; overload;
-```
-Closes the XPBar menu, depending on `escape` or `escapeProbability the function
-will either click the button or press escape key.
 
-Example:
-```pascal
-WriteLn XPBarMenu.Close();
-```
-*)
 function TXPBarMenu.Close(escape: Boolean): Boolean;
 begin
   Result := Self.Title.Close(escape);
@@ -169,18 +112,7 @@ begin
 end;
 
 
-(*
-## XPBarMenu.Fix
-```pascal
-function TXPBarMenu.Fix(attempts: Integer = 3): Boolean;
-```
-Attempts to fix the XPBar menu with the expected settings.
 
-Example:
-```pascal
-WriteLn XPBarMenu.Fix();
-```
-*)
 function TXPBarMenu.Fix(attempts: Integer = 3): Boolean;
 begin
   Result := Self.Open() and
@@ -198,8 +130,5 @@ begin
 end;
 
 var
-(*
-## XPBarMenu variable
-Global {ref}`TXPBarMenu` variable.
-*)
+
   XPBarMenu: TXPBarMenu;
