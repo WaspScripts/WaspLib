@@ -1,28 +1,10 @@
-(*
-# House Form
-This page is about {ref}`THouse` dedicated `TLazForm` utilities.
 
-This is meant to be used with {ref}`TScriptForm` with
-{ref}`TScriptForm.CreateHouseTab` and will setup a a `TLazTabSheet` on it with
-several controls to configure your {ref}`THouse`:
-```{figure} ../../images/houseform.png
-```
-*)
 
 {$DEFINE WL_HOUSE_FORM_INCLUDED}
 {$INCLUDE_ONCE WaspLib/main.simba}
 
 type
-(*
-## THouseFormHelper
-The `THouseFormHelper` type is, as it's name implies a helper type for the
-`House Form`.
 
-It has a lot of methods and callbacks that are hidden by default and won't be mentioned on
-this page because they are internal methods you shouldn't touch.
-
-Do feel free to read the source code though if you so desire.
-*)
   THouseFormHelper = record
     {%codetools on}
     MatrixIdx, SelectedIdx: TPoint;
@@ -699,33 +681,10 @@ end;
 
 
 var
-(*
-## HouseForm variable
-Global {ref}`THouseFormHelper` variable.
-*)
+
   HouseForm: THouseFormHelper;
 
-(*
-## ScriptForm CreateHouseTab
-```pascal
-function TScriptForm.CreateHouseTab(): TLazTabSheet;
-```
-Sets up a `TLazTabSheet` on your `TScriptForm` to configure your `THouse`.
 
-Example:
-```pascal
-{$I WaspLib/main.simba}
-var
-  form: TScriptForm;
-begin
-  form.Setup();
-  form.CreateHouseTab();
-  form.Run();
-end.
-```
-```{figure} ../../images/houseform.gif
-```
-*)
 function TScriptForm.CreateHouseTab(): TLazTabSheet;
 var
   panel: TLazPanel;

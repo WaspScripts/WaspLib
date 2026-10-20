@@ -1,31 +1,15 @@
-(*
-# Random
-Random number generation utilities and weighted random point functions.
-*)
+
 
 {$DEFINE WL_RANDOM_INCLUDED}
 
 type
-(*
-## ERandomDir
-Direction bias for random number generation (LEFT, MEAN, RIGHT).
-*)
+
   ERandomDir = enum(LEFT, MEAN, RIGHT);
 
-(*
-## ERandomDistribution
-Distribution type for random generation (RANDOM or GAUSS).
-*)
+
   ERandomDistribution = enum(RANDOM, GAUSS);
 
-(*
-## RandomBoolean
-```pascal
-function RandomBoolean(): Boolean;
-function RandomBoolean(probability: Double): Boolean; overload;
-```
-Returns a random boolean. Optionally weighted by probability (0.0-1.0).
-*)
+
 function RandomBoolean(): Boolean;
 begin
   Result := Boolean(Random(0,1));
@@ -36,13 +20,7 @@ begin
   Result := Random() <= probability;
 end;
 
-(*
-## Sleep (overload)
-```pascal
-procedure Sleep(min, max: UInt32; dir: ERandomDir = ERandomDir.LEFT); overload;
-```
-Sleeps for a random duration between min and max, biased by direction.
-*)
+
 procedure Sleep(min, max: UInt32; dir: ERandomDir = ERandomDir.LEFT); overload;
 begin
   case dir of
@@ -52,13 +30,7 @@ begin
   end;
 end;
 
-(*
-## TPoint.RandomBetween
-```pascal
-function TPoint.RandomBetween(other: TPoint): TPoint;
-```
-Returns a random point on the line between Self and other.
-*)
+
 function TPoint.RandomBetween(other: TPoint): TPoint;
 var
   r: Double;
@@ -68,13 +40,7 @@ begin
   Result.Y := Self.Y + Round(r * (other.Y - Self.Y));
 end;
 
-(*
-## TPointArray.RandomMean
-```pascal
-function TPointArray.RandomMean(): TPoint;
-```
-Returns a random point from the array, weighted towards the mean.
-*)
+
 function TPointArray.RandomMean(): TPoint;
 begin
   if Self.IsEmpty then
@@ -82,13 +48,7 @@ begin
   Result := Self.SortFrom(Self.Mean())[RandomLeft(0, High(Self))];
 end;
 
-(*
-## TCircle.RandomSkewedPoint
-```pascal
-function TCircle.RandomSkewedPoint(from: TPoint; force: Double = 0.35): TPoint;
-```
-Generates a random point within the circle, skewed towards `from`.
-*)
+
 function TCircle.RandomSkewedPoint(from: TPoint; force: Double = 0.35): TPoint;
 var
   skewed, rand: TPoint;
@@ -120,15 +80,7 @@ begin
   RandCutoff := cutoff;
 end;
 
-(*
-## TCircle.RandomWeightedPoint
-```pascal
-function TCircle.RandomWeightedPoint(from: TPoint; weight: Single = 10.0; bias: Single = 1): TPoint;
-```
-Generates a random point within the circle, weighted towards `from`.
 
-Credits: [slacky](https://slacky.one/)
-*)
 function TCircle.RandomWeightedPoint(from: TPoint; weight: Single = 10.0; bias: Single = 1): TPoint;
 var
   angle, dist, r1, r2, sum, u, t: Single;
@@ -159,13 +111,7 @@ begin
   Result.Y := Round(u * randY + t * from.Y);
 end;
 
-(*
-## TTriangle.RandomSkewedPoint
-```pascal
-function TTriangle.RandomSkewedPoint(from: TPoint; force: Double = 0.35): TPoint;
-```
-Generates a random point within the triangle, skewed towards `from`.
-*)
+
 function TTriangle.RandomSkewedPoint(from: TPoint; force: Double = 0.35): TPoint;
 var
   c, skewed: TPoint;
@@ -191,27 +137,7 @@ begin
 end;
 
 
-(*
-## RandomWeightedPoint
-```pascal
-function TTriangle.RandomWeightedPoint(from: TPoint; weight: Single = 10.0; bias: Single=1): TPoint;
-function TPolygon.RandomWeightedPoint(from: TPoint; weight: Single = 10.0; bias: Single=1): TPoint;
-function TQuad.RandomWeightedPoint(from: TPoint; weight: Single = 10.0; bias: Single=1): TPoint;
-function TBox.RandomWeightedPoint(from: TPoint; weight: Single = 10.0; bias: Single=1): TPoint;
-```
-Generates a random point within the TTriangle, drawn towards a `from` point.
 
-Parameters:
-- from: The point towards which the distribution is drawn.
-- weight: Controls the strength of attraction towards the `from` (higher values = stronger attraction).
-  - weight = 0 gives a uniform distribution.
-- bias: Introduces a Gaussian spread around the `from` (higher values = wider spread).
-  - bias = 0 gives a purely weighted distribution towards the `from`.
-
-Should expose weight and bias to the user if used as mouse distribution method.
-
-Credits: [slacky](https://slacky.one/)
-*)
 function TTriangle.RandomWeightedPoint(from: TPoint; weight: Single = 10.0; bias: Single = 1): TPoint;
 var
   r1, r2, r3, u, v, w, t, sum: Single;
@@ -253,15 +179,7 @@ begin
   end;
 end;
 
-(*
-## TPolygon.RandomPoint
-```pascal
-function TPolygon.RandomPoint(): TPoint;
-```
-Generates a uniformly distributed random point within the polygon.
 
-Credits: torwent
-*)
 function TPolygon.RandomPoint(): TPoint;
 var
   tris: TTriangleArray;
@@ -289,15 +207,7 @@ begin
   end;
 end;
 
-(*
-## TPolygon.RandomPointCenter
-```pascal
-function TPolygon.RandomPointCenter(): TPoint;
-```
-Generates a random point within the polygon, weighted towards the center.
 
-Credits: bootie
-*)
 function TPolygon.RandomPointCenter(): TPoint;
 var
   mean: TPoint;
@@ -312,13 +222,7 @@ begin
   until Self.Contains(Result);
 end;
 
-(*
-## TPolygon.RandomSkewedPoint
-```pascal
-function TPolygon.RandomSkewedPoint(from: TPoint): TPoint;
-```
-Generates a random point within the polygon, skewed towards `from`.
-*)
+
 function TPolygon.RandomSkewedPoint(from: TPoint): TPoint;
 begin
   Result := Self.RandomWeightedPoint(from);
@@ -361,18 +265,7 @@ begin
 end;
 
 
-(*
-## TQuad.RandomSkewedPoint
-```pascal
-function TQuad.RandomSkewedPoint(from: TPoint; force: Double = 0.35): TPoint;
-```
-Generates a random point within the bounds of the TQuad, the point generated is skewed towards towards the `from`-point.
-The last parameter `force` defines how much the generated point is to be skewed towards or away from `from` - Expects value in the range 0..2
 
-- force = 0: Result weighs heavily towards the edge closest to `From`
-- force = 1: Result in the middle of box is most common
-- force = 2: Result weighs heavily towards the edge furthest away from `From`
-*)
 function TQuad.RandomSkewedPoint(from: TPoint; force: Double = 0.35): TPoint;
 var
   c, skewed: TPoint;
@@ -403,18 +296,7 @@ begin
 end;
 
 
-(*
-## TBox.RandomSkewedPoint
-```pascal
-function TBox.RandomSkewedPoint(from: TPoint; force: Double = 0.35): TPoint;
-```
-Generates a random point within the bounds of the TBox, the point generated is skewed towards the `from`-point.
-The last parameter `force` defines how much the generated point is to be skewed towards or away from `from` - Expects value in the range 0..2
 
-- force = 0: Result weighs heavily towards the edge closest to `From`
-- force = 1: Result in the middle of box is most common
-- force = 2: Result weighs heavily towards the edge furthest away from `From`
-*)
 function TBox.RandomSkewedPoint(from: TPoint; force: Double = 0.35): TPoint;
 var
   c: TPoint;
